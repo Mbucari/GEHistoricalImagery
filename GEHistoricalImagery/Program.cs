@@ -16,7 +16,7 @@ internal class Program
 {
 	private static void ConfigureParser(ParserSettings settings)
 	{
-		settings.AutoVersion = false;
+		settings.AutoVersion = true;
 		settings.AutoHelp = true;
 		settings.HelpWriter = Console.Error;
 	}

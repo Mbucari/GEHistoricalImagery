@@ -72,16 +72,17 @@ internal class Download : OptionsBase
 		int numTiles = aoi.GetTileCount(ZoomLevel);
 		ParallelProcessor<TileDataset> processor = new(ConcurrentDownload);
 
-		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(downloadTile))) using (tds)
-			{
-				if (tds.Dataset is not null)
-					image.AddTile(tds.Tile, tds.Dataset);
+		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(downloadTile)))
+			using (tds)
+		{
+			if (tds.Dataset is not null)
+				image.AddTile(tds.Tile, tds.Dataset);
 
-				if (tds.Message is not null)
-					Console.Error.WriteLine($"\r\n{tds.Message}");
+			if (tds.Message is not null)
+				Console.Error.WriteLine($"\r\n{tds.Message}");
 
-				ReportProgress(++count / (double)numTiles);
-			}
+			ReportProgress(++count / (double)numTiles);
+		}
 
 		ReplaceProgress("Done!\r\n");
 		Console.Write("Saving Image: ");

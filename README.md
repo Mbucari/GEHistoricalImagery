@@ -8,6 +8,14 @@ GEHistoricalImagery is a utility for downloading historical aerial imagery from 
 - Outputs a georeferenced GeoTiff
 - Supports warping to new coordinate systems
 - Fast! Parallel downloading and local caching
+
+**Commands**
+|Command|Description|
+|-|-|
+|[info](#info)|Get imagery info at a specified location.|
+|[availability](#availability)|Get imagery date availability in a specified region.|
+|[download](#download)|Download historical imagery.|
+
 ## Info
 _Get imagery info at a specified location._
 
@@ -21,20 +29,29 @@ This command prints out all arial imagery dates at a specified location.
 ### Example
 1. Get imagery dates at 39.6305750,-104.8412990 for zoom level 21.
 
-```Console
-GEHistoricalImagery info --location 39.630575,-104.841299 --zoom 21
-Dated Imagery at 39.6305750,-104.8412990
-  Level = 21, Path = 0301232010121332030111
-    date = 2017/05/14, version = 233
-    date = 2019/10/03, version = 276
-    date = 2020/10/03, version = 276
-```
+   **Command:**
+   ```Console
+   GEHistoricalImagery info --location 39.630575,-104.841299 --zoom 21
+   ```
+   **Output:**
+   ```Console
+   Dated Imagery at 39.6305750,-104.8412990
+     Level = 21, Path = 0301232010121332030111
+       date = 2017/05/14, version = 233
+       date = 2019/10/03, version = 276
+       date = 2020/10/03, version = 276
+   ```
 2. Get imagery dates at 39.6305750,-104.8412990 for all zoom levels.
+
+   **Command:**       
+   ```Console
+   GEHistoricalImagery info --location 39.630575,-104.841299     
+   ```   
+   **Output:**
    <details>
-     <summary>Expand to see command and full output</summary>
-            
+     <summary>Expand to see the full command output</summary>
+
      ```Console
-     GEHistoricalImagery info --location 39.630575,-104.841299
      Dated Imagery at 39.6305750,-104.8412990
      Level = 0, Path = 0
        date = 1934/10/08, version = 124
@@ -1045,8 +1062,12 @@ Tiles that are available from a specific date are shaded, and unavailable tiles 
 ### Example
 Gets the availability diagram for the rectangular region defined by the lower-left (southwest) corner 39.619819,-104.856121 and upper-right (northeast) corner 39.638393,-104.824990.
 
+**Command:**
 ```console
 GEHistoricalImagery availability --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20
+```
+**Output:**
+```Console
 Loading Quad Tree Packets: Done!
 [0]  2023/05/28  [1]  2023/04/29  [2]  2022/09/26  [3]  2021/08/17  [4]  2021/06/15
 [5]  2021/06/11  [6]  2020/10/03  [7]  2020/09/30  [8]  2020/06/07  [9]  2019/10/03
@@ -1059,6 +1080,7 @@ From here you can select different dates to display the imagery availability.
 
 <details>
   <summary>Expand to see imagery availability for 2023/04/29</summary>
+  This diagram is shown by pressing '1' in the console.
   
   ```console
   Tile availability on 2023/04/29
@@ -1096,7 +1118,8 @@ From here you can select different dates to display the imagery availability.
 </details>
 <details>
   <summary>Expand to see imagery availability for 2021/08/17</summary>
-  
+  This diagram is shown by pressing '3' in the console.
+
   ```console
   Tile availability on 2021/08/17
   ===============================
@@ -1135,7 +1158,7 @@ From here you can select different dates to display the imagery availability.
 ## Download
 _Download historical imagery._
 
-This command will download historical imagery from within a region on a specified date and save it as a single GeoTiff file. You may optionally provide specify a n output spatial reference to warp the image.
+This command will download historical imagery from within a region on a specified date and save it as a single GeoTiff file. You may optionally specify an output spatial reference to warp the image.
 If imagery is not available for the specified date, the downloader will use the image from the next nearest date.
 
 ### Usage
@@ -1160,15 +1183,21 @@ Download historical imagery at zoom level 20 from within the region defined by t
 
 _NOTE: Example images are not actual output files. Actual files from this region at this zoom level are ~150MB._
 1. Get imagery from 2023/04/29
+
+   **Command:**
    ```Console
    GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2023/04/29 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek.tif"
    ```
+   **Output:**
    ![Cherry_Creek_1](https://github.com/Mbucari/GEHistoricalImagery/assets/37587114/ed978e2b-ea28-4983-9080-e9e0f7b458bb)
 
 2. Get imagery from 2021/08/17
+
+   **Command:**
    ```Console
    GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2021/08/17 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek.tif"
    ```
+   **Output:**
    ![Cherry_Creek_2](https://github.com/Mbucari/GEHistoricalImagery/assets/37587114/c1b767cb-b0e4-442f-bf16-a072d42a29f3)
 
 

@@ -19,7 +19,7 @@ internal class Download : OptionsBase
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "10/23/2023", Required = true)]
 	public DateOnly? Date { get; set; }
 
-	[Option('p', "parallel", HelpText = "Number of concurrent downloads", MetaValue = "N", Default = 10)]
+	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
 	public int ConcurrentDownload { get; set; }
 
 	[Option("target-sr", HelpText = "Warp image to Spatial Reference", MetaValue = "https://epsg.io/1234.wkt", Default = null)]
@@ -60,6 +60,9 @@ internal class Download : OptionsBase
 			hasError = true;
 		}
 
+		if (ConcurrentDownload <= 0)
+			ConcurrentDownload = Environment.ProcessorCount;
+
 		if (hasError) return;
 
 		//Try to create the output file so any problems will cause early failure
@@ -73,13 +76,13 @@ internal class Download : OptionsBase
 
 		var root = await DbRoot.CreateAsync();
 		var desiredDate = Date!.Value.ToJpegCommentDate();
-		using var image = new EarthImage(aoi, ZoomLevel);
+		using EarthImage image = new(aoi, ZoomLevel);
 
 		int count = 0, numDl = 0;
 		int numTiles = aoi.GetTileCount(ZoomLevel);
 		ParallelProcessor<TileDataset> processor = new(ConcurrentDownload);
 
-		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(downloadTile))) 
+		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(t => Task.Run(() => downloadTile(t)))))
 			using (tds)
 			{
 				if (tds.Dataset is not null)
@@ -107,11 +110,12 @@ internal class Download : OptionsBase
 		Console.Write("Saving Image: ");
 		Progress = 0;
 
-		image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress);
+		image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload);
 		ReplaceProgress("Done!\r\n");
 
 		async Task<TileDataset> downloadTile(Tile tile)
 		{
+			const GDAL_OF_ openOptions = GDAL_OF_.GDAL_OF_RASTER | GDAL_OF_.GDAL_OF_INTERNAL | GDAL_OF_.GDAL_OF_READONLY;
 			const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
 			var node = await root.GetNodeAsync(tile.QtPath);
 
@@ -130,7 +134,7 @@ internal class Download : OptionsBase
 					return new()
 					{
 						Tile = tile,
-						Dataset = Gdal.Open(tempFilename, Access.GA_ReadOnly),
+						Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, new string[] { "" }),
 						FileName = tempFilename,
 						Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date.ToDate()} for tile at {tile.LowerLeft}"
 					};

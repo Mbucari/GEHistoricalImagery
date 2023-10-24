@@ -18,7 +18,7 @@ internal class EarthImage : IDisposable
 	static EarthImage()
 	{
 		GdalConfiguration2.ConfigureGdal();
-		Gdal.SetCacheMax(1024 * 1024 * 50);
+		Gdal.SetCacheMax(1024 * 1024 * 100);
 	}
 
 	public EarthImage(Rectangle rectangle, int level)
@@ -63,7 +63,7 @@ internal class EarthImage : IDisposable
 		dataset.WriteRaster(x, y, TILE_SZ, TILE_SZ, buff2, TILE_SZ, TILE_SZ, bandCount, bandMap, bandCount, TILE_SZ * bandCount, 1);
 	}
 
-	public void Save(string path, string? outSR, Action<double> progress)
+	public void Save(string path, string? outSR, Action<double> progress, int cpuCount)
 	{
 		dataset?.FlushCache();
 		if (outSR != null)
@@ -71,7 +71,11 @@ internal class EarthImage : IDisposable
 			using var options = new GDALWarpAppOptions(
 				new string[]
 				{
+					"-multi",
+					"-wo", $"NUM_THREADS={cpuCount}",
 					"-of", "GTiff",
+					"-ot", "Byte",
+					"-wo", "OPTIMIZE_SIZE=TRUE",
 					"-co", "COMPRESS=JPEG",
 					"-co", "PHOTOMETRIC=YCBCR",
 					"-r", "bilinear",
@@ -83,7 +87,14 @@ internal class EarthImage : IDisposable
 		else
 		{
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			using var _ = tifDriver.CreateCopy(path, dataset, 1, new string[] { "COMPRESS=JPEG", "PHOTOMETRIC=YCBCR" }, reportProgress, null);
+			using var _ = tifDriver.CreateCopy(path, dataset, 1,
+				new string[]
+				{
+					"COMPRESS=JPEG",
+					"PHOTOMETRIC=YCBCR",
+					$"NUM_THREADS={cpuCount}"
+				},
+				reportProgress, null);
 		}
 
 		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
@@ -98,4 +109,21 @@ internal class EarthImage : IDisposable
 		dataset?.FlushCache();
 		dataset?.Dispose();
 	}
+}
+
+[Flags]
+public enum GDAL_OF_ : uint
+{
+	GDAL_OF_READONLY = 0,
+	GDAL_OF_ALL = 0,
+	GDAL_OF_UPDATE = 1,
+	GDAL_OF_RASTER = 2,
+	GDAL_OF_VECTOR = 4,
+	GDAL_OF_GNM = 8,
+	GDAL_OF_MULTIDIM_RASTER = 0x10,
+	GDAL_OF_SHARED = 0x20,
+	GDAL_OF_VERBOSE_ERROR = 0x40,
+	GDAL_OF_INTERNAL = 0x80,
+	GDAL_OF_ARRAY_BLOCK_ACCESS = 0x100,
+	GDAL_OF_HASHSET_BLOCK_ACCESS = 0x100
 }

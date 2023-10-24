@@ -76,42 +76,51 @@ internal class Download : OptionsBase
 
 		var root = await DbRoot.CreateAsync();
 		var desiredDate = Date!.Value.ToJpegCommentDate();
-		using EarthImage image = new(aoi, ZoomLevel);
+		var tempFile = Path.GetTempFileName();
+		try
+		{
+			using EarthImage image = new(aoi, ZoomLevel, tempFile);
 
-		int count = 0, numDl = 0;
-		int numTiles = aoi.GetTileCount(ZoomLevel);
-		ParallelProcessor<TileDataset> processor = new(ConcurrentDownload);
+			int count = 0, numDl = 0;
+			int numTiles = aoi.GetTileCount(ZoomLevel);
+			ParallelProcessor<TileDataset> processor = new(ConcurrentDownload);
 
-		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(t => Task.Run(() => downloadTile(t)))))
-			using (tds)
-			{
-				if (tds.Dataset is not null)
+			await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(t => Task.Run(() => downloadTile(t)))))
+				using (tds)
 				{
-					image.AddTile(tds.Tile, tds.Dataset);
-					numDl++;
+					if (tds.Dataset is not null)
+					{
+						image.AddTile(tds.Tile, tds.Dataset);
+						numDl++;
+					}
+
+					if (tds.Message is not null)
+						Console.Error.WriteLine($"\r\n{tds.Message}");
+
+					ReportProgress(++count / (double)numTiles);
 				}
 
-				if (tds.Message is not null)
-					Console.Error.WriteLine($"\r\n{tds.Message}");
+			ReplaceProgress("Done!\r\n");
+			Console.WriteLine($"{numDl} out of {numTiles} downloaded");
 
-				ReportProgress(++count / (double)numTiles);
+			if (numDl == 0)
+			{
+				if (saveFile.Exists)
+					saveFile.Delete();
+				return;
 			}
 
-		ReplaceProgress("Done!\r\n");
-		Console.WriteLine($"{numDl} out of {numTiles} downloaded");
+			Console.Write("Saving Image: ");
+			Progress = 0;
 
-		if (numDl == 0)
-		{
-			if (saveFile.Exists)
-				saveFile.Delete();
-			return;
+			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload);
+			ReplaceProgress("Done!\r\n");
 		}
-
-		Console.Write("Saving Image: ");
-		Progress = 0;
-
-		image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload);
-		ReplaceProgress("Done!\r\n");
+		finally
+		{
+			if (File.Exists(tempFile))
+				File.Delete(tempFile);
+		}
 
 		async Task<TileDataset> downloadTile(Tile tile)
 		{

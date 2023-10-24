@@ -21,7 +21,7 @@ internal class EarthImage : IDisposable
 		Gdal.SetCacheMax(1024 * 1024 * 100);
 	}
 
-	public EarthImage(Rectangle rectangle, int level)
+	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)
 	{
 		var ll = rectangle.LowerLeft.GetTile(level);
 		var ur = rectangle.UpperRight.GetTile(level);
@@ -34,9 +34,8 @@ internal class EarthImage : IDisposable
 		UpperLeft = new Tile(ur.Row, ll.Column, level);
 
 		using var wgs = new SpatialReference(WGS_1984_WKT);
-		using var tifDriver = Gdal.GetDriverByName("MEM");
 
-		dataset = tifDriver.Create("", Width, Height, 3, DataType.GDT_Byte, null);
+		dataset = CreateEmptyDataset(Width, Height, cacheFile);
 		dataset.SetSpatialRef(wgs);
 		dataset.SetGeoTransform(new double[]
 		{
@@ -47,6 +46,20 @@ internal class EarthImage : IDisposable
 			0,
 			-360d / (1 << level) / TILE_SZ
 		});
+	}
+
+	private static Dataset CreateEmptyDataset(int width, int height, string? fileName)
+	{
+		if (fileName is null)
+		{
+			using var tifDriver = Gdal.GetDriverByName("MEM");
+			return tifDriver.Create("", width, height, 3, DataType.GDT_Byte, null);
+		}
+		else
+		{
+			using var tifDriver = Gdal.GetDriverByName("GTiff");
+			return tifDriver.Create(fileName, width, height, 3, DataType.GDT_Byte, null);
+		}
 	}
 
 	public void AddTile(Tile tile, Dataset image)

@@ -30,61 +30,80 @@ internal class Download : OptionsBase
 
 	public override async Task Run()
 	{
+		bool hasError = false;
 		if (LowerLeft is null || UpperRight is null)
 		{
 			Console.Error.WriteLine("Invalid coordinate(s).\r\n Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305");
-			return;
+			hasError = true;
 		}
 
-		if (ZoomLevel < 0 || ZoomLevel > 24)
+		if (ZoomLevel > 24)
 		{
-			Console.Error.WriteLine("Invalid zoom level");
-			return;
+			Console.Error.WriteLine($"Zoom level: {ZoomLevel} is too large. Max zoom is 24");
+			hasError = true;
+		}
+		else if (ZoomLevel < 0)
+		{
+			Console.Error.WriteLine($"Zoom level: {ZoomLevel} is too small. Min zoom is 0");
+			hasError = true;
 		}
 
 		if (Date is null)
 		{
 			Console.Error.WriteLine("Invalid imagery date");
-			return;
+			hasError = true;
 		}
 
 		if (string.IsNullOrWhiteSpace(SavePath))
 		{
 			Console.Error.WriteLine("Invalid output file");
-			return;
+			hasError = true;
 		}
 
-		//Try to create the output file so any problems will cause early failure
-		var saveFile = new FileInfo(SavePath);
-		saveFile.Create().Dispose();
+		if (hasError) return;
 
+		//Try to create the output file so any problems will cause early failure
+		var saveFile = new FileInfo(SavePath!);
+		saveFile.Create().Dispose();
 
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
 
-		var aoi = new Rectangle(LowerLeft.Value, UpperRight.Value);
+		var aoi = new Rectangle(LowerLeft!.Value, UpperRight!.Value);
 
 		var root = await DbRoot.CreateAsync();
-		var desiredDate = Date.Value.ToJpegCommentDate();
+		var desiredDate = Date!.Value.ToJpegCommentDate();
 		using var image = new EarthImage(aoi, ZoomLevel);
 
-		int count = 0;
+		int count = 0, numDl = 0;
 		int numTiles = aoi.GetTileCount(ZoomLevel);
 		ParallelProcessor<TileDataset> processor = new(ConcurrentDownload);
 
-		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(downloadTile)))
+		await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(downloadTile))) 
 			using (tds)
-		{
-			if (tds.Dataset is not null)
-				image.AddTile(tds.Tile, tds.Dataset);
+			{
+				if (tds.Dataset is not null)
+				{
+					image.AddTile(tds.Tile, tds.Dataset);
+					numDl++;
+				}
 
-			if (tds.Message is not null)
-				Console.Error.WriteLine($"\r\n{tds.Message}");
+				if (tds.Message is not null)
+					Console.Error.WriteLine($"\r\n{tds.Message}");
 
-			ReportProgress(++count / (double)numTiles);
-		}
+				ReportProgress(++count / (double)numTiles);
+			}
 
 		ReplaceProgress("Done!\r\n");
+		Console.WriteLine($"{numDl} out of {numTiles} downloaded");
+
+		if (numDl == 0)
+		{
+			if (saveFile.Exists)
+				saveFile.Delete();
+			return;
+		}
+
 		Console.Write("Saving Image: ");
 		Progress = 0;
 

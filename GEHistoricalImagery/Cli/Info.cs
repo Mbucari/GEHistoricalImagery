@@ -6,7 +6,6 @@ namespace GoogleEarthImageDownload.Cli;
 [Verb("info", HelpText = "Get imagery info at a specified location")]
 internal class Info : OptionsBase
 {
-
 	[Option('l', "location", Required = true, HelpText = "Geographic location", MetaValue = "LAT,LONG")]
 	public Coordinate? Coordinate { get; set; }
 
@@ -43,7 +42,7 @@ internal class Info : OptionsBase
 			{
 				foreach (var dated in hLayer.DatesLayer.DatedTile)
 				{
-					var date = dated.ToDate();
+					var date = dated.Date.ToDate();
 
 					if (date.Year == 1) continue;
 					Console.WriteLine($"    date = {date:yyyy/MM/dd}, version = {dated.DatedTileEpoch}");

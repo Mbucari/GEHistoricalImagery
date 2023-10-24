@@ -4,45 +4,68 @@ namespace GoogleEarthImageDownload;
 
 internal class ParallelProcessor<T>
 {
-	public int Parallelism { get; }
-	private List<Task<T>> _tasks;
+	private int _parallelism;
+	public int Parallelism
+	{
+		get => _parallelism;
+		set
+		{
+			if (value < 1 || value > 100)
+				throw new ArgumentOutOfRangeException(nameof(Parallelism), "Valid values are [0, 100]");
+			_parallelism = value;
+		}
+	}
 	public ParallelProcessor(int parallelism)
 	{
 		Parallelism = parallelism;
-		_tasks = new List<Task<T>>(parallelism);
 	}
+
 	public IAsyncEnumerable<T> GetAsyncEnumerator(IEnumerable<Func<T>> generator, CancellationToken cancellationToken = default)
-		=> EnumerateWork(generator.Select(f => Task.Run(f)), cancellationToken);
+		=> EnumerateWork(generator.Select(Task.Run), cancellationToken);
+
 	public IAsyncEnumerable<T> GetAsyncEnumerator(IEnumerable<Func<Task<T>>> generator, CancellationToken cancellationToken = default)
-		=> EnumerateWork(generator.Select(f => Task.Run(f)), cancellationToken);
+		=> EnumerateWork(generator.Select(Task.Run), cancellationToken);
 
 	public async IAsyncEnumerable<T> EnumerateWork(IEnumerable<Task<T>> generator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
+		Task<T>?[] tasks = new Task<T>[Parallelism];
+		int taskCount = 0;
+
 		foreach (var t in generator)
 		{
-			if (cancellationToken.IsCancellationRequested) yield break;
+			int newParallelism;
 
-			Task<T>? completedTask;
+			while (taskCount >= (newParallelism = Parallelism) && !cancellationToken.IsCancellationRequested)
+				yield return await popOne();
 
-			if (_tasks.Count == Parallelism)
+			if (cancellationToken.IsCancellationRequested)
+				yield break;
+
+			if (tasks.Length != newParallelism)
 			{
-				completedTask = await Task.WhenAny(_tasks);
-
-				_tasks.Remove(completedTask);
+				var newTasks = new Task<T>[newParallelism];
+				Array.Copy(tasks, 0, newTasks, 0, taskCount);
+				tasks = newTasks;
 			}
-			else completedTask = null;
 
-			_tasks.Add(t);
-
-			if (completedTask is not null)
-				yield return completedTask.Result;
+			if (taskCount < tasks.Length)
+				pushOne(t);
 		}
 
-		while (_tasks.Count > 0 && !cancellationToken.IsCancellationRequested)
+		while (taskCount > 0 && !cancellationToken.IsCancellationRequested)
+			yield return await popOne();
+
+		void pushOne(Task<T> task)
+			=> tasks[taskCount++] = task;
+
+		async Task<T> popOne()
 		{
-			var completed = await Task.WhenAny(_tasks);
-			_tasks.Remove(completed);
-			yield return completed.Result;
+			var completedTask = await Task.WhenAny(tasks.OfType<Task<T>>());
+			var completedIndex = Array.IndexOf(tasks, completedTask);
+			tasks[completedIndex] = null;
+			taskCount--;
+			(tasks[completedIndex], tasks[taskCount]) = (tasks[taskCount], tasks[completedIndex]);
+			return completedTask.Result;
 		}
 	}
 }

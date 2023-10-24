@@ -24,24 +24,38 @@ internal class Availability : OptionsBase
 
 	public override async Task Run()
 	{
+		bool hasError = false;
 		if (LowerLeft is null || UpperRight is null)
 		{
 			Console.Error.WriteLine("Invalid coordinate(s).\r\n Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305");
-			return;
+			hasError = true;
 		}
 
-		if (ZoomLevel < 0 || ZoomLevel > 24)
+		if (ZoomLevel > 24)
 		{
-			Console.Error.WriteLine("Invalid zoom level");
-			return;
+			Console.Error.WriteLine($"Zoom level: {ZoomLevel} is too large. Max zoom is 24");
+			hasError = true;
+		}
+		else if (ZoomLevel < 0)
+		{
+			Console.Error.WriteLine($"Zoom level: {ZoomLevel} is too small. Min zoom is 0");
+			hasError = true;
 		}
 
-		var aoi = new Rectangle(LowerLeft.Value, UpperRight.Value);
+		if (hasError) return;
+
+		var aoi = new Rectangle(LowerLeft!.Value, UpperRight!.Value);
 		var root = await DbRoot.CreateAsync();
 		Console.Write("Loading Quad Tree Packets: ");
 
 		var all = await GetAllDatesAsync(root, aoi, ZoomLevel);
 		ReplaceProgress("Done!\r\n");
+
+		if (all.Length == 0)
+		{
+			Console.Error.WriteLine($"No dataed imagery available at zoom level {ZoomLevel}");
+			return;
+		}
 
 		int counter = 0;
 		var dateDict = all.ToDictionary(d => INDICES[counter++]);

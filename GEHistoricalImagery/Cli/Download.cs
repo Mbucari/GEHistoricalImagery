@@ -73,37 +73,37 @@ internal class Download : OptionsBase
 		ReportProgress(0);
 
 		var aoi = new Rectangle(LowerLeft!.Value, UpperRight!.Value);
-
 		var root = await DbRoot.CreateAsync();
 		var desiredDate = Date!.Value.ToJpegCommentDate();
 		var tempFile = Path.GetTempFileName();
+		int tileProcessedCount = 0;
+		int tileDownloadCount = 0;
+		int tileCount = aoi.GetTileCount(ZoomLevel);
+		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+
 		try
 		{
 			using EarthImage image = new(aoi, ZoomLevel, tempFile);
 
-			int count = 0, numDl = 0;
-			int numTiles = aoi.GetTileCount(ZoomLevel);
-			ParallelProcessor<TileDataset> processor = new(ConcurrentDownload);
-
-			await foreach (var tds in processor.EnumerateWork(aoi.GetTiles(ZoomLevel).Select(t => Task.Run(() => downloadTile(t)))))
+			await foreach (var tds in processor.EnumerateWorkAsync(generateWork()))
 				using (tds)
 				{
 					if (tds.Dataset is not null)
 					{
 						image.AddTile(tds.Tile, tds.Dataset);
-						numDl++;
+						tileDownloadCount++;
 					}
 
 					if (tds.Message is not null)
 						Console.Error.WriteLine($"\r\n{tds.Message}");
 
-					ReportProgress(++count / (double)numTiles);
+					ReportProgress(++tileProcessedCount / (double)tileCount);
 				}
 
 			ReplaceProgress("Done!\r\n");
-			Console.WriteLine($"{numDl} out of {numTiles} downloaded");
+			Console.WriteLine($"{tileDownloadCount} out of {tileCount} downloaded");
 
-			if (numDl == 0)
+			if (tileDownloadCount == 0)
 			{
 				if (saveFile.Exists)
 					saveFile.Delete();
@@ -122,43 +122,44 @@ internal class Download : OptionsBase
 				File.Delete(tempFile);
 		}
 
-		async Task<TileDataset> downloadTile(Tile tile)
+		IEnumerable<Task<TileDataset>> generateWork()
+			=> aoi
+			.GetTiles(ZoomLevel)
+			.Select(t => Task.Run(() => downloadTile(root, t, desiredDate)));
+	}
+
+	private async Task<TileDataset> downloadTile(DbRoot root, Tile tile, int desiredDate)
+	{
+		const GDAL_OF_ openOptions = GDAL_OF_.GDAL_OF_RASTER | GDAL_OF_.GDAL_OF_INTERNAL | GDAL_OF_.GDAL_OF_READONLY;
+		const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
+		var node = await root.GetNodeAsync(tile.QtPath);
+
+		var tempFilename = Path.GetTempFileName();
+
+		foreach (var dd in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate - d.Date)))
 		{
-			const GDAL_OF_ openOptions = GDAL_OF_.GDAL_OF_RASTER | GDAL_OF_.GDAL_OF_INTERNAL | GDAL_OF_.GDAL_OF_READONLY;
-			const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
-			var node = await root.GetNodeAsync(tile.QtPath);
+			string url = string.Format(ROOT_URL, tile.QtPath, dd.DatedTileEpoch, dd.Date.ToString("x"));
 
-			var tempFilename = Path.GetTempFileName();
-
-			int tries = 0;
-			foreach (var dd in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate - d.Date)))
+			try
 			{
-				string url = string.Format(ROOT_URL, tile.QtPath, dd.DatedTileEpoch, dd.Date.ToString("x"));
+				var imageBts = await root.DownloadBytesAsync(url);
+				await File.WriteAllBytesAsync(tempFilename, imageBts);
 
-				try
+				return new()
 				{
-					var imageBts = await root.DownloadBytesAsync(url);
-					await File.WriteAllBytesAsync(tempFilename, imageBts);
-
-					return new()
-					{
-						Tile = tile,
-						Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, new string[] { "" }),
-						FileName = tempFilename,
-						Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date.ToDate()} for tile at {tile.LowerLeft}"
-					};
-				}
-				catch (HttpRequestException)
-				{
-					tries++;
-				}
+					Tile = tile,
+					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, new string[] { "" }),
+					FileName = tempFilename,
+					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date.ToDate()} for tile at {tile.LowerLeft}"
+				};
 			}
-			return new()
-			{
-				Tile = tile,
-				Message = $"No imagery available for tile at {tile.LowerLeft}"
-			};
+			catch (HttpRequestException) { }
 		}
+		return new()
+		{
+			Tile = tile,
+			Message = $"No imagery available for tile at {tile.LowerLeft}"
+		};
 	}
 
 	private class TileDataset : IDisposable

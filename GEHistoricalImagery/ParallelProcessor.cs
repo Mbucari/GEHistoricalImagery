@@ -20,13 +20,13 @@ internal class ParallelProcessor<T>
 		Parallelism = parallelism;
 	}
 
-	public IAsyncEnumerable<T> GetAsyncEnumerator(IEnumerable<Func<T>> generator, CancellationToken cancellationToken = default)
-		=> EnumerateWork(generator.Select(Task.Run), cancellationToken);
+	public IAsyncEnumerable<T> EnumerateWorkAsync(IEnumerable<Func<T>> generator, CancellationToken cancellationToken = default)
+		=> EnumerateWorkAsync(generator.Select(Task.Run), cancellationToken);
 
-	public IAsyncEnumerable<T> GetAsyncEnumerator(IEnumerable<Func<Task<T>>> generator, CancellationToken cancellationToken = default)
-		=> EnumerateWork(generator.Select(Task.Run), cancellationToken);
+	public IAsyncEnumerable<T> EnumerateWorkAsync(IEnumerable<Func<Task<T>>> generator, CancellationToken cancellationToken = default)
+		=> EnumerateWorkAsync(generator.Select(Task.Run), cancellationToken);
 
-	public async IAsyncEnumerable<T> EnumerateWork(IEnumerable<Task<T>> generator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<T> EnumerateWorkAsync(IEnumerable<Task<T>> generator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		Task<T>?[] tasks = new Task<T>[Parallelism];
 		int taskCount = 0;

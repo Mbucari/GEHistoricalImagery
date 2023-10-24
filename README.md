@@ -22,9 +22,11 @@ _Get imagery info at a specified location._
 This command prints out all arial imagery dates at a specified location.
 ### Usage
 ```Console
--l LAT,LONG, --location=LAT,LONG    Required. Geographic location
+GEHistoricalImagery info --location [LAT,LONG] [--zoom [N]]
 
--z N, --zoom=N                      Zoom level (Optional, [0-24])
+  -l LAT,LONG, --location=LAT,LONG    Required. Geographic location
+  
+  -z N, --zoom=N                      Zoom level (Optional, [0-24])
 ```
 ### Example
 1. Get imagery dates at 39.6305750,-104.8412990 for zoom level 21.
@@ -1050,13 +1052,15 @@ Tiles that are available from a specific date are shaded, and unavailable tiles 
 
 ### Usage
 ```Console
---lower-left=LAT,LONG     Required. Geographic location
+GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG] --zoom [N] [--parallel [N]]
 
---upper-right=LAT,LONG    Required. Geographic location
-
--z N, --zoom=N            Required. Zoom level (Optional, [0-24])
-
--p N, --parallel=N        (Default: 20) Number of concurrent downloads
+  --lower-left=LAT,LONG     Required. Geographic location
+  
+  --upper-right=LAT,LONG    Required. Geographic location
+  
+  -z N, --zoom=N            Required. Zoom level (Optional, [0-24])
+  
+  -p N, --parallel=N        (Default: 20) Number of concurrent downloads
 ```
 
 ### Example
@@ -1163,6 +1167,8 @@ If imagery is not available for the specified date, the downloader will use the 
 
 ### Usage
 ```Console
+ GEHistoricalImagery download --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]]
+
   --lower-left=LAT,LONG                   Required. Geographic location
 
   --upper-right=LAT,LONG                  Required. Geographic location

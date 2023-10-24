@@ -1177,7 +1177,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
   -d 10/23/2023, --date=10/23/2023        Required. Imagery Date
 
-  -p N, --parallel=N                      (Default: 10) Number of concurrent downloads
+  -p N, --parallel=N                      (Default: ALL_CPU) Number of concurrent downloads
 
   --target-sr=https://epsg.io/1234.wkt    Warp image to Spatial Reference
 

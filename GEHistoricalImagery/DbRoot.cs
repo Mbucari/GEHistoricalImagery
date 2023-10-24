@@ -180,7 +180,7 @@ public class DbRoot
 	{
 		/*
 		 * The root packet is 3-high, but all child nodes are 4 high.
-		 */ 
+		 */
 
 		public override async Task<QtPacket?> GetChildAsync(string quadTreePath)
 		{

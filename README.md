@@ -1177,11 +1177,17 @@ If imagery is not available for the specified date, the downloader will use the 
 
   -d 10/23/2023, --date=10/23/2023        Required. Imagery Date
 
-  -p N, --parallel=N                      (Default: ALL_CPU) Number of concurrent downloads
+  -o out.tif, --output=out.tif            Required. Output GeoTiff save location
+
+  -p N, --parallel=N                      (Default: ALL_CPUS) Number of concurrent downloads
 
   --target-sr=https://epsg.io/1234.wkt    Warp image to Spatial Reference
 
-  -o out.tif, --output=out.tif            Required. Output GeoTiff save location
+  --scale=S                               (Default: 1) Geo transform scale factor
+
+  --offset-x=X                            (Default: 0) Geo transform X offset (post-scaling)
+
+  --offset-y=Y                            (Default: 0) Geo transform Y offset (post-scaling)
 ```
 
 ### Example

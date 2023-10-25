@@ -37,15 +37,15 @@ internal class EarthImage : IDisposable
 
 		dataset = CreateEmptyDataset(Width, Height, cacheFile);
 		dataset.SetSpatialRef(wgs);
-		dataset.SetGeoTransform(new double[]
-		{
+		dataset.SetGeoTransform(
+		[
 			UpperLeft.UpperLeft.Longitude,
 			360d / (1 << level) / TILE_SZ,
 			0,
 			UpperLeft.UpperLeft.Latitude,
 			0,
 			-360d / (1 << level) / TILE_SZ
-		});
+		]);
 	}
 
 	private static Dataset CreateEmptyDataset(int width, int height, string? fileName)
@@ -76,9 +76,10 @@ internal class EarthImage : IDisposable
 		dataset.WriteRaster(x, y, TILE_SZ, TILE_SZ, buff2, TILE_SZ, TILE_SZ, bandCount, bandMap, bandCount, TILE_SZ * bandCount, 1);
 	}
 
-	public void Save(string path, string? outSR, Action<double> progress, int cpuCount)
+	public void Save(string path, string? outSR, Action<double> progress, int cpuCount, double scale, double offsetX, double offsetY)
 	{
 		dataset?.FlushCache();
+
 		if (outSR != null)
 		{
 			using var options = new GDALWarpAppOptions(
@@ -95,12 +96,13 @@ internal class EarthImage : IDisposable
 					"-s_srs", WGS_1984_WKT,
 					"-t_srs", outSR
 				});
-			using var _ = Gdal.Warp(path, new[] { dataset }, options, reportProgress, null);
+			using var ds = Gdal.Warp(path, new[] { dataset }, options, reportProgress, null);
+			adjustGeoTransform(ds);
 		}
 		else
 		{
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			using var _ = tifDriver.CreateCopy(path, dataset, 1,
+			using var ds = tifDriver.CreateCopy(path, dataset, 1,
 				new string[]
 				{
 					"COMPRESS=JPEG",
@@ -108,12 +110,33 @@ internal class EarthImage : IDisposable
 					$"NUM_THREADS={cpuCount}"
 				},
 				reportProgress, null);
+
+			adjustGeoTransform(ds);
 		}
 
 		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
 		{
 			progress(Complete);
 			return 1;
+		}
+
+		void adjustGeoTransform(Dataset dataset)
+		{
+			var geoTransform = new double[6];
+			dataset.GetGeoTransform(geoTransform);
+
+			//scale
+			geoTransform[0] *= scale;
+			geoTransform[1] *= scale;
+			geoTransform[3] *= scale;
+			geoTransform[5] *= scale;
+
+			//offset
+			geoTransform[0] += offsetX;
+			geoTransform[3] += offsetY;
+
+			dataset.SetGeoTransform(geoTransform);
+			dataset.FlushCache();
 		}
 	}
 

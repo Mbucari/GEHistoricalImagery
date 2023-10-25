@@ -19,14 +19,24 @@ internal class Download : OptionsBase
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "10/23/2023", Required = true)]
 	public DateOnly? Date { get; set; }
 
+	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "out.tif", Required = true)]
+	public string? SavePath { get; set; }
+
 	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
 	public int ConcurrentDownload { get; set; }
 
 	[Option("target-sr", HelpText = "Warp image to Spatial Reference", MetaValue = "https://epsg.io/1234.wkt", Default = null)]
 	public string? TargetSpatialReference { get; set; }
 
-	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "out.tif", Required = true)]
-	public string? SavePath { get; set; }
+	[Option("scale", HelpText = "Geo transform scale factor", MetaValue = "S", Default = 1d)]
+	public double ScaleFactor { get; set; }
+
+	[Option("offset-x", HelpText = "Geo transform X offset (post-scaling)", MetaValue = "X", Default = 0d)]
+	public double OffsetX { get; set; }
+
+	[Option("offset-y", HelpText = "Geo transform Y offset (post-scaling)", MetaValue = "Y", Default = 0d)]
+	public double OffsetY { get; set; }
+
 
 	public override async Task Run()
 	{
@@ -113,7 +123,7 @@ internal class Download : OptionsBase
 			Console.Write("Saving Image: ");
 			Progress = 0;
 
-			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload);
+			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY);
 			ReplaceProgress("Done!\r\n");
 		}
 		finally

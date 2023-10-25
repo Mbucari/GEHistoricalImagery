@@ -16,7 +16,7 @@ internal class Download : OptionsBase
 	[Option('z', "zoom", HelpText = "Zoom level [0-24]", MetaValue = "N", Required = true)]
 	public int ZoomLevel { get; set; }
 
-	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "10/23/2023", Required = true)]
+	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
 	public DateOnly? Date { get; set; }
 
 	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "out.tif", Required = true)]

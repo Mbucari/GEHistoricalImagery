@@ -11,9 +11,12 @@ internal class EarthImage : IDisposable
 	public int Height { get; }
 
 
-	private readonly Dataset dataset;
+	private readonly Dataset TempDataset;
 
 	public Tile UpperLeft { get; }
+
+	private int X_Left;
+	private int Y_Top;
 
 	static EarthImage()
 	{
@@ -26,31 +29,39 @@ internal class EarthImage : IDisposable
 		var ll = rectangle.LowerLeft.GetTile(level);
 		var ur = rectangle.UpperRight.GetTile(level);
 
+		var pixelScale = 360d / (1 << level) / TILE_SZ;
+
+		X_Left = (int)double.Round((rectangle.LowerLeft.Longitude - ll.LowerLeft.Longitude) / pixelScale);
+		var y_Bottom = (int)double.Round((rectangle.LowerLeft.Latitude - ll.LowerLeft.Latitude) / pixelScale);
+
+		var x_Right = (int)double.Round((ur.UpperRight.Longitude - rectangle.UpperRight.Longitude) / pixelScale);
+		Y_Top = (int)double.Round((ur.UpperRight.Latitude - rectangle.UpperRight.Latitude) / pixelScale);
+
 		var nRows = ur.Row - ll.Row + 1;
 		var nCols = ur.Column - ll.Column + 1;
 
-		Width = TILE_SZ * nCols;
-		Height = TILE_SZ * nRows;
+		Width = TILE_SZ * nCols - X_Left - x_Right;
+		Height = TILE_SZ * nRows - Y_Top - y_Bottom;
 		UpperLeft = new Tile(ur.Row, ll.Column, level);
 
 		using var wgs = new SpatialReference(WGS_1984_WKT);
 
-		dataset = CreateEmptyDataset(Width, Height, cacheFile);
-		dataset.SetSpatialRef(wgs);
-		dataset.SetGeoTransform(
+		TempDataset = CreateEmptyDataset(Width, Height, cacheFile);
+		TempDataset.SetSpatialRef(wgs);
+		TempDataset.SetGeoTransform(
 		[
-			UpperLeft.UpperLeft.Longitude,
-			360d / (1 << level) / TILE_SZ,
+			rectangle.LowerLeft.Longitude,
+			pixelScale,
 			0,
-			UpperLeft.UpperLeft.Latitude,
+			rectangle.UpperRight.Latitude,
 			0,
-			-360d / (1 << level) / TILE_SZ
+			-pixelScale
 		]);
 	}
 
 	private static Dataset CreateEmptyDataset(int width, int height, string? fileName)
 	{
-		if (fileName is null)
+		if (string.IsNullOrWhiteSpace(fileName))
 		{
 			using var tifDriver = Gdal.GetDriverByName("MEM");
 			return tifDriver.Create("", width, height, 3, DataType.GDT_Byte, null);
@@ -64,66 +75,69 @@ internal class EarthImage : IDisposable
 
 	public void AddTile(Tile tile, Dataset image)
 	{
-		var x = (tile.Column - UpperLeft.Column) * TILE_SZ;
-		var y = (UpperLeft.Row - tile.Row) * TILE_SZ;
+		var x = (tile.Column - UpperLeft.Column) * TILE_SZ - X_Left;
+		var y = (UpperLeft.Row - tile.Row) * TILE_SZ - Y_Top;
 
-		var bandCount = image.RasterCount;
+		int read_x = -int.Min(0, x);
+		int write_x = int.Max(0, x);
+		int size_x = int.Min(TILE_SZ - read_x, Width - x);
 
+		int read_y = -int.Min(0, y);
+		int write_y = int.Max(0, y);
+		int size_y = int.Min(TILE_SZ - read_y, Height - y);
+
+		int bandCount = image.RasterCount;
 		var bandMap = Enumerable.Range(1, bandCount).ToArray();
 
-		var buff2 = new byte[TILE_SZ * TILE_SZ * bandCount];
-		image.ReadRaster(0, 0, TILE_SZ, TILE_SZ, buff2, TILE_SZ, TILE_SZ, bandCount, bandMap, bandCount, TILE_SZ * bandCount, 1);
-		dataset.WriteRaster(x, y, TILE_SZ, TILE_SZ, buff2, TILE_SZ, TILE_SZ, bandCount, bandMap, bandCount, TILE_SZ * bandCount, 1);
+		var buff2 = new byte[size_x * size_y * bandCount];
+		image.ReadRaster(read_x, read_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
+		TempDataset.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}
 
 	public void Save(string path, string? outSR, Action<double> progress, int cpuCount, double scale, double offsetX, double offsetY)
 	{
-		dataset?.FlushCache();
+		TempDataset?.FlushCache();
+
+		Dataset saved;
 
 		if (outSR != null)
 		{
-			using var options = new GDALWarpAppOptions(
-				new string[]
-				{
-					"-multi",
-					"-wo", $"NUM_THREADS={cpuCount}",
-					"-of", "GTiff",
-					"-ot", "Byte",
-					"-wo", "OPTIMIZE_SIZE=TRUE",
-					"-co", "COMPRESS=JPEG",
-					"-co", "PHOTOMETRIC=YCBCR",
-					"-r", "bilinear",
-					"-s_srs", WGS_1984_WKT,
-					"-t_srs", outSR
-				});
-			using var ds = Gdal.Warp(path, new[] { dataset }, options, reportProgress, null);
-			adjustGeoTransform(ds);
+			var parameters = new string[]
+			{
+				"-multi",
+				"-wo", $"NUM_THREADS={cpuCount}",
+				"-of", "GTiff",
+				"-ot", "Byte",
+				"-wo", "OPTIMIZE_SIZE=TRUE",
+				"-co", "COMPRESS=JPEG",
+				"-co", "PHOTOMETRIC=YCBCR",
+				"-r", "bilinear",
+				"-s_srs", WGS_1984_WKT,
+				"-t_srs", outSR
+			};
+			using var options = new GDALWarpAppOptions(parameters);
+			saved = Gdal.Warp(path, new[] { TempDataset }, options, reportProgress, null);
 		}
 		else
 		{
+			var parameters = new string[]
+			{
+				"COMPRESS=JPEG",
+				"PHOTOMETRIC=YCBCR",
+				$"NUM_THREADS={cpuCount}"
+			};
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			using var ds = tifDriver.CreateCopy(path, dataset, 1,
-				new string[]
-				{
-					"COMPRESS=JPEG",
-					"PHOTOMETRIC=YCBCR",
-					$"NUM_THREADS={cpuCount}"
-				},
-				reportProgress, null);
-
-			adjustGeoTransform(ds);
+			saved = tifDriver.CreateCopy(path, TempDataset, 1, parameters, reportProgress, null);
 		}
 
-		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
-		{
-			progress(Complete);
-			return 1;
-		}
-
-		void adjustGeoTransform(Dataset dataset)
+		using (saved)
 		{
 			var geoTransform = new double[6];
-			dataset.GetGeoTransform(geoTransform);
+			saved.GetGeoTransform(geoTransform);
+
+			//offset
+			geoTransform[0] += offsetX;
+			geoTransform[3] += offsetY;
 
 			//scale
 			geoTransform[0] *= scale;
@@ -131,35 +145,37 @@ internal class EarthImage : IDisposable
 			geoTransform[3] *= scale;
 			geoTransform[5] *= scale;
 
-			//offset
-			geoTransform[0] += offsetX;
-			geoTransform[3] += offsetY;
+			saved.SetGeoTransform(geoTransform);
+			saved.FlushCache();
+		}
 
-			dataset.SetGeoTransform(geoTransform);
-			dataset.FlushCache();
+		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
+		{
+			progress(Complete);
+			return 1;
 		}
 	}
 
 	public void Dispose()
 	{
-		dataset?.FlushCache();
-		dataset?.Dispose();
+		TempDataset?.FlushCache();
+		TempDataset?.Dispose();
 	}
 }
 
 [Flags]
-public enum GDAL_OF_ : uint
+public enum GDAL_OF : uint
 {
-	GDAL_OF_READONLY = 0,
-	GDAL_OF_ALL = 0,
-	GDAL_OF_UPDATE = 1,
-	GDAL_OF_RASTER = 2,
-	GDAL_OF_VECTOR = 4,
-	GDAL_OF_GNM = 8,
-	GDAL_OF_MULTIDIM_RASTER = 0x10,
-	GDAL_OF_SHARED = 0x20,
-	GDAL_OF_VERBOSE_ERROR = 0x40,
-	GDAL_OF_INTERNAL = 0x80,
-	GDAL_OF_ARRAY_BLOCK_ACCESS = 0x100,
-	GDAL_OF_HASHSET_BLOCK_ACCESS = 0x100
+	READONLY = 0,
+	ALL = 0,
+	UPDATE = 1,
+	RASTER = 2,
+	VECTOR = 4,
+	GNM = 8,
+	MULTIDIM_RASTER = 0x10,
+	SHARED = 0x20,
+	VERBOSE_ERROR = 0x40,
+	INTERNAL = 0x80,
+	ARRAY_BLOCK_ACCESS = 0x100,
+	HASHSET_BLOCK_ACCESS = 0x100
 }

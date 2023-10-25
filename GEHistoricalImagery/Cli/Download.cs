@@ -86,34 +86,34 @@ internal class Download : OptionsBase
 		var root = await DbRoot.CreateAsync();
 		var desiredDate = Date!.Value.ToJpegCommentDate();
 		var tempFile = Path.GetTempFileName();
-		int tileProcessedCount = 0;
-		int tileDownloadCount = 0;
 		int tileCount = aoi.GetTileCount(ZoomLevel);
+		int numTilesProcessed = 0;
+		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		try
 		{
 			using EarthImage image = new(aoi, ZoomLevel, tempFile);
 
-			await foreach (var tds in processor.EnumerateWorkAsync(generateWork()))
+			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
 				{
 					if (tds.Dataset is not null)
 					{
 						image.AddTile(tds.Tile, tds.Dataset);
-						tileDownloadCount++;
+						numTilesDownload++;
 					}
 
 					if (tds.Message is not null)
 						Console.Error.WriteLine($"\r\n{tds.Message}");
 
-					ReportProgress(++tileProcessedCount / (double)tileCount);
+					ReportProgress(++numTilesProcessed / (double)tileCount);
 				}
 
 			ReplaceProgress("Done!\r\n");
-			Console.WriteLine($"{tileDownloadCount} out of {tileCount} downloaded");
+			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
-			if (tileDownloadCount == 0)
+			if (numTilesDownload == 0)
 			{
 				if (saveFile.Exists)
 					saveFile.Delete();
@@ -140,15 +140,15 @@ internal class Download : OptionsBase
 
 	private async Task<TileDataset> downloadTile(DbRoot root, Tile tile, int desiredDate)
 	{
-		const GDAL_OF_ openOptions = GDAL_OF_.GDAL_OF_RASTER | GDAL_OF_.GDAL_OF_INTERNAL | GDAL_OF_.GDAL_OF_READONLY;
+		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
 		const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
+		
 		var node = await root.GetNodeAsync(tile.QtPath);
-
 		var tempFilename = Path.GetTempFileName();
 
 		foreach (var dd in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate - d.Date)))
 		{
-			string url = string.Format(ROOT_URL, tile.QtPath, dd.DatedTileEpoch, dd.Date.ToString("x"));
+			var url = string.Format(ROOT_URL, tile.QtPath, dd.DatedTileEpoch, dd.Date.ToString("x"));
 
 			try
 			{

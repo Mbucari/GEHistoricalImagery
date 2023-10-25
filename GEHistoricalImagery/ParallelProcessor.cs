@@ -2,7 +2,7 @@
 
 namespace GoogleEarthImageDownload;
 
-internal class ParallelProcessor<T>
+internal class ParallelProcessor<TResult>
 {
 	private int _parallelism;
 	public int Parallelism
@@ -20,15 +20,15 @@ internal class ParallelProcessor<T>
 		Parallelism = parallelism;
 	}
 
-	public IAsyncEnumerable<T> EnumerateWorkAsync(IEnumerable<Func<T>> generator, CancellationToken cancellationToken = default)
-		=> EnumerateWorkAsync(generator.Select(Task.Run), cancellationToken);
+	public IAsyncEnumerable<TResult> EnumerateResults(IEnumerable<Func<TResult>> generator, CancellationToken cancellationToken = default)
+		=> EnumerateResults(generator.Select(Task.Run), cancellationToken);
 
-	public IAsyncEnumerable<T> EnumerateWorkAsync(IEnumerable<Func<Task<T>>> generator, CancellationToken cancellationToken = default)
-		=> EnumerateWorkAsync(generator.Select(Task.Run), cancellationToken);
+	public IAsyncEnumerable<TResult> EnumerateResults(IEnumerable<Func<Task<TResult>?>> generator, CancellationToken cancellationToken = default)
+		=> EnumerateResults(generator.Select(Task.Run), cancellationToken);
 
-	public async IAsyncEnumerable<T> EnumerateWorkAsync(IEnumerable<Task<T>> generator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<TResult> EnumerateResults(IEnumerable<Task<TResult>> generator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		Task<T>?[] tasks = new Task<T>[Parallelism];
+		Task<TResult>?[] tasks = new Task<TResult>[Parallelism];
 		int taskCount = 0;
 
 		foreach (var t in generator)
@@ -43,7 +43,7 @@ internal class ParallelProcessor<T>
 
 			if (tasks.Length != newParallelism)
 			{
-				var newTasks = new Task<T>[newParallelism];
+				var newTasks = new Task<TResult>[newParallelism];
 				Array.Copy(tasks, 0, newTasks, 0, taskCount);
 				tasks = newTasks;
 			}
@@ -55,12 +55,12 @@ internal class ParallelProcessor<T>
 		while (taskCount > 0 && !cancellationToken.IsCancellationRequested)
 			yield return await popOne();
 
-		void pushOne(Task<T> task)
+		void pushOne(Task<TResult> task)
 			=> tasks[taskCount++] = task;
 
-		async Task<T> popOne()
+		async Task<TResult> popOne()
 		{
-			var completedTask = await Task.WhenAny(tasks.OfType<Task<T>>());
+			var completedTask = await Task.WhenAny(tasks.OfType<Task<TResult>>());
 			var completedIndex = Array.IndexOf(tasks, completedTask);
 			tasks[completedIndex] = null;
 			taskCount--;

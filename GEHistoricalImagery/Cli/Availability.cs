@@ -162,7 +162,7 @@ internal class Availability : OptionsBase
 		SortedSet<DateOnly> dates = new();
 		ParallelProcessor<SortedSet<DateOnly>> processor = new(ConcurrentDownload);
 
-		await foreach (var dSet in processor.EnumerateWorkAsync(aoi.GetTiles(zoomLevel).Select(getDatedTiles)))
+		await foreach (var dSet in processor.EnumerateResults(aoi.GetTiles(zoomLevel).Select(getDatedTiles)))
 		{
 			foreach (var d in dSet)
 				dates.Add(d);

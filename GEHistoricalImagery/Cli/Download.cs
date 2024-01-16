@@ -75,9 +75,19 @@ internal class Download : OptionsBase
 
 		if (hasError) return;
 
-		//Try to create the output file so any problems will cause early failure
-		var saveFile = new FileInfo(SavePath!);
-		saveFile.Create().Dispose();
+		FileInfo saveFile;
+		try
+		{
+			//Try to create the output file so any problems will cause early failure
+			saveFile = new FileInfo(SavePath!);
+			saveFile.Create().Dispose();
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"Error saving file {SavePath}");
+			Console.Error.WriteLine($"\t{ex.Message}");
+			return;
+		}
 
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);

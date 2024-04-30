@@ -1,7 +1,7 @@
 ﻿using CommandLine;
 using Keyhole;
 
-namespace GoogleEarthImageDownload.Cli;
+namespace GEHistoricalImagery.Cli;
 
 [Verb("info", HelpText = "Get imagery info at a specified location")]
 internal class Info : OptionsBase

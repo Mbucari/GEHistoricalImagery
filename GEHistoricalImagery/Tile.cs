@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 internal class Tile
 {

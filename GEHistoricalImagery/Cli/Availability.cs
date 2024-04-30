@@ -2,7 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using System.Text;
 
-namespace GoogleEarthImageDownload.Cli;
+namespace GEHistoricalImagery.Cli;
 
 [Verb("availability", HelpText = "Get imagery date availability in a specified region")]
 internal class Availability : OptionsBase

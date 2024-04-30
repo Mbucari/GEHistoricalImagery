@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 internal class ParallelProcessor<TResult>
 {

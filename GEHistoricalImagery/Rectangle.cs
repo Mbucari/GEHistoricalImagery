@@ -1,4 +1,4 @@
-﻿namespace GoogleEarthImageDownload;
+﻿namespace GEHistoricalImagery;
 
 internal readonly struct Rectangle
 {

@@ -34,7 +34,7 @@ using Ogr = OSGeo.OGR.Ogr;
 
 #nullable disable
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 /// <summary>
 /// Replace the auto-generated GdalConfiguration to work with AoT

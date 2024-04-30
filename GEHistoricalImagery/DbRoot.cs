@@ -5,7 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 public class DbRoot
 {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 
-namespace GoogleEarthImageDownload.Cli;
+namespace GEHistoricalImagery.Cli;
 
 internal class CoordinateTypeConverter : TypeConverter
 {

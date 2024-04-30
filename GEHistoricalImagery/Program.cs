@@ -1,8 +1,8 @@
 ﻿using CommandLine;
-using GoogleEarthImageDownload.Cli;
+using GEHistoricalImagery.Cli;
 using System.Diagnostics.CodeAnalysis;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 public enum ExitCode
 {

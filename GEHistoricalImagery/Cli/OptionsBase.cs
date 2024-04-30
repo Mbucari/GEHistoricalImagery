@@ -1,4 +1,4 @@
-﻿namespace GoogleEarthImageDownload.Cli;
+﻿namespace GEHistoricalImagery.Cli;
 
 internal abstract class OptionsBase
 {

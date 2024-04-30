@@ -1,7 +1,7 @@
-﻿using GoogleEarthImageDownload.Cli;
+﻿using GEHistoricalImagery.Cli;
 using System.ComponentModel;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 [TypeConverter(typeof(CoordinateTypeConverter))]
 internal readonly struct Coordinate

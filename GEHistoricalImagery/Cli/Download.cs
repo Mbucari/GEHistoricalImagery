@@ -2,7 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using OSGeo.GDAL;
 
-namespace GoogleEarthImageDownload.Cli;
+namespace GEHistoricalImagery.Cli;
 
 [Verb("download", HelpText = "Download historical imagery")]
 internal class Download : OptionsBase

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics.CodeAnalysis;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 public class QtPacket
 {

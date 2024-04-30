@@ -1,7 +1,7 @@
 ﻿using OSGeo.GDAL;
 using OSGeo.OSR;
 
-namespace GoogleEarthImageDownload;
+namespace GEHistoricalImagery;
 
 internal class EarthImage : IDisposable
 {

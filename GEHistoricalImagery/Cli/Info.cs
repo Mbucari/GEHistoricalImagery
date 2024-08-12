@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using Keyhole;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -35,23 +34,22 @@ internal class Info : OptionsBase
 		for (int i = startLevel; i <= endLevel; i++)
 		{
 			var tile = Coordinate.Value.GetTile(i);
-			var node = await root.GetNodeAsync(tile.QtPath);
+			var node = await root.GetNodeAsync(tile);
 
 			Console.WriteLine($"  Level = {i}, Path = {tile.QtPath}");
-			if (node?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.ImageryHistory) is QuadtreeLayer hLayer)
-			{
-				foreach (var dated in hLayer.DatesLayer.DatedTile)
-				{
-					var date = dated.Date.ToDate();
-
-					if (date.Year == 1) continue;
-					Console.WriteLine($"    date = {date:yyyy/MM/dd}, version = {dated.DatedTileEpoch}");
-				}
-			}
-			else
+			if (node == null)
 			{
 				Console.Error.WriteLine($"    NO AVAILABLE IMAGERY");
 				break;
+			}
+			else
+			{
+				foreach (var dated in node.GetAllDatedTiles())
+				{
+					if (dated.Date.Year == 1)
+						continue;
+					Console.WriteLine($"    date = {dated.Date:yyyy/MM/dd}, version = {dated.Epoch}");
+				}
 			}
 		}
 	}

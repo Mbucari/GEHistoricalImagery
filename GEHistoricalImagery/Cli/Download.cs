@@ -94,7 +94,7 @@ internal class Download : OptionsBase
 
 		var aoi = new Rectangle(LowerLeft!.Value, UpperRight!.Value);
 		var root = await DbRoot.CreateAsync();
-		var desiredDate = Date!.Value.ToJpegCommentDate();
+		var desiredDate = Date!.Value;
 		var tempFile = Path.GetTempFileName();
 		int tileCount = aoi.GetTileCount(ZoomLevel);
 		int numTilesProcessed = 0;
@@ -148,21 +148,20 @@ internal class Download : OptionsBase
 			.Select(t => Task.Run(() => downloadTile(root, t, desiredDate)));
 	}
 
-	private async Task<TileDataset> downloadTile(DbRoot root, Tile tile, int desiredDate)
+	private async Task<TileDataset> downloadTile(DbRoot root, Tile tile, DateOnly desiredDate)
 	{
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
-		const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
 		
-		var node = await root.GetNodeAsync(tile.QtPath);
+		if (await root.GetNodeAsync(tile) is not Node node)
+			return emptyDataset();
+
 		var tempFilename = Path.GetTempFileName();
 
-		foreach (var dd in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate - d.Date)))
+		foreach (var dd in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
 		{
-			var url = string.Format(ROOT_URL, tile.QtPath, dd.DatedTileEpoch, dd.Date.ToString("x"));
-
 			try
 			{
-				var imageBts = await root.DownloadBytesAsync(url);
+				var imageBts = await root.DownloadBytesAsync(dd.TileUrl);
 				await File.WriteAllBytesAsync(tempFilename, imageBts);
 
 				return new()
@@ -170,12 +169,15 @@ internal class Download : OptionsBase
 					Tile = tile,
 					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, new string[] { "" }),
 					FileName = tempFilename,
-					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date.ToDate()} for tile at {tile.LowerLeft}"
+					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date} for tile at {tile.LowerLeft}"
 				};
 			}
 			catch (HttpRequestException) { }
 		}
-		return new()
+
+		return emptyDataset();
+
+		TileDataset emptyDataset() => new()
 		{
 			Tile = tile,
 			Message = $"No imagery available for tile at {tile.LowerLeft}"

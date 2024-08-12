@@ -129,11 +129,11 @@ internal class Availability : OptionsBase
 			{
 				var tile = new Tile(r, c, ZoomLevel);
 
-				var node = await root.GetNodeAsync(tile.QtPath);
+				var node = await root.GetNodeAsync(tile);
 
 				var cIndex = c - ll.Column;
 
-				if (node.HasDate(date))
+				if (node?.HasDate(date) is true)
 				{
 					if (rIndex % 2 == 0)
 						availability[rIndex / 2][cIndex] = '▀';
@@ -176,7 +176,9 @@ internal class Availability : OptionsBase
 		{
 			SortedSet<DateOnly> dates = new();
 
-			var node = await root.GetNodeAsync(tile.QtPath);
+			if (await root.GetNodeAsync(tile) is not Node node)
+				return dates;
+
 			foreach (var date in node.GetAllDates())
 			{
 				if (date.Year == 1) continue;

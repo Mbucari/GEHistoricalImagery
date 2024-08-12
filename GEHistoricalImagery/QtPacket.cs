@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace GEHistoricalImagery;
 
-public class QtPacket
+internal class QtPacket
 {
 
 	public string FullPath { get; }
@@ -20,8 +20,9 @@ public class QtPacket
 		Packet = packet;
 	}
 
-	public async Task<QuadtreeNode?> GetNodeAsync(string path)
+	public async Task<Node?> GetNodeAsync(Tile tile)
 	{
+		var path = tile.QtPath;
 		var child = await GetChildAsync(path);
 		if (child is null) return null;
 
@@ -33,7 +34,7 @@ public class QtPacket
 		int subIndex = child.GetNodeIndex(remainder);
 
 		var cc = child.Packet.SparseQuadtreeNode.SingleOrDefault(n => n.Index == subIndex);
-		return child.Packet.SparseQuadtreeNode.SingleOrDefault(n => n.Index == subIndex)?.Node;
+		return cc?.Node is QuadtreeNode n ? new Node(tile, n) : null;
 	}
 
 	public virtual async Task<QtPacket?> GetChildAsync(string quadTreePath)

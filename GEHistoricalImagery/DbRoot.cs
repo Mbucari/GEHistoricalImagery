@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace GEHistoricalImagery;
 
-public class DbRoot
+internal class DbRoot
 {
 	private static readonly HttpClient HttpClient = new();
 	private const string QP2_URL = "https://khmdb.google.com/flatfile?db=tm&qp-{0}-q.{1}";
@@ -72,10 +72,10 @@ public class DbRoot
 	public async Task<QtPacket> GetRootPacket()
 		=> Root ??= new QtRoot(this, await GetPacketAsync("0", (int)Buffer.DatabaseVersion.QuadtreeVersion));
 
-	public async Task<QuadtreeNode?> GetNodeAsync(string quadTreePath)
+	public async Task<Node?> GetNodeAsync(Tile tile)
 	{
 		var root = await GetRootPacket();
-		return await root.GetNodeAsync(quadTreePath);
+		return await root.GetNodeAsync(tile);
 	}
 
 	public async Task<QuadtreePacket> GetPacketAsync(string qtPath, int epoch)

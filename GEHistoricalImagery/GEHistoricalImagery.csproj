@@ -19,15 +19,15 @@
   </PropertyGroup>
 	
   <ItemGroup>
-    <PackageReference Include="GDAL" Version="3.7.2" />
-    <PackageReference Include="GDAL.Native" Version="3.7.2" />
+    <PackageReference Include="GDAL" Version="3.9.1" />
+    <PackageReference Include="GDAL.Native" Version="3.9.1" />
     <PackageReference Include="Google.Protobuf" Version="3.24.4" />
 	<PackageReference Include="CommandLineParser" Version="2.9.1" />
-	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="Publish">
-	  <Exec Command="xcopy &quot;$(TargetDir)gdal\&quot; &quot;$(PublishDir)gdal\&quot; /s /y > nul" />
+	  <Exec Command="xcopy &quot;$(TargetDir)gdal\&quot; &quot;$(PublishDir)gdal\&quot; /s /y &gt; nul" />
 	  <Exec Condition="$(RuntimeIdentifier.Contains('x64'))" Command="rmdir &quot;$(PublishDir)gdal\x86&quot; /s /q" />
   </Target>
 

@@ -20,7 +20,7 @@ internal class EarthImage : IDisposable
 
 	static EarthImage()
 	{
-		GdalConfiguration2.ConfigureGdal();
+		GdalConfiguration.ConfigureGdal();
 		Gdal.SetCacheMax(1024 * 1024 * 100);
 	}
 

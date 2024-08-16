@@ -94,7 +94,7 @@ internal class EarthImage : IDisposable
 		TempDataset.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}
 
-	public void Save(string path, string? outSR, Action<double> progress, int cpuCount, double scale, double offsetX, double offsetY)
+	public void Save(string path, string? outSR, Action<double> progress, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
 	{
 		TempDataset?.FlushCache();
 
@@ -135,15 +135,27 @@ internal class EarthImage : IDisposable
 			var geoTransform = new double[6];
 			saved.GetGeoTransform(geoTransform);
 
+			if (scaleFirst)
+			{
+				//scale
+				geoTransform[0] *= scale;
+				geoTransform[1] *= scale;
+				geoTransform[3] *= scale;
+				geoTransform[5] *= scale;
+			}
+
 			//offset
 			geoTransform[0] += offsetX;
 			geoTransform[3] += offsetY;
 
-			//scale
-			geoTransform[0] *= scale;
-			geoTransform[1] *= scale;
-			geoTransform[3] *= scale;
-			geoTransform[5] *= scale;
+			if (!scaleFirst)
+			{
+				//scale
+				geoTransform[0] *= scale;
+				geoTransform[1] *= scale;
+				geoTransform[3] *= scale;
+				geoTransform[5] *= scale;
+			}
 
 			saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();

@@ -35,7 +35,10 @@ internal class Download : OptionsBase
 	public double OffsetX { get; set; }
 
 	[Option("offset-y", HelpText = "Geo transform Y offset (post-scaling)", MetaValue = "Y", Default = 0d)]
-	public double OffsetY { get; set; }
+	public double OffsetY { get; set; }	
+
+	[Option("scale-first", HelpText = "Performe scaling before translation", Default = false)]
+	public bool ScaleFirst { get; set; }
 
 
 	public override async Task Run()
@@ -133,7 +136,7 @@ internal class Download : OptionsBase
 			Console.Write("Saving Image: ");
 			Progress = 0;
 
-			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY);
+			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
 			ReplaceProgress("Done!\r\n");
 		}
 		finally

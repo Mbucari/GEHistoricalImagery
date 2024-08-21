@@ -7,7 +7,7 @@ internal class Tile
 	public int Level { get; }
 	public int Row { get; }
 	public int Column { get; }
-	public string QtPath { get; }
+	public QtPath QtPath { get; }
 
 	private double RowColToLatLong(double rowCol)
 		=> rowCol * 360d / (1 << Level) - 180;
@@ -16,6 +16,16 @@ internal class Tile
 	public Coordinate LowerRight => new(RowColToLatLong(Row), RowColToLatLong(Column + 1));
 	public Coordinate UpperLeft => new(RowColToLatLong(Row + 1), RowColToLatLong(Column));
 	public Coordinate UpperRight => new(RowColToLatLong(Row + 1), RowColToLatLong(Column + 1));
+
+	public Coordinate GetCenter()
+	{
+		var ll = LowerLeft;
+		var ur = UpperRight;
+
+		var midLat = (ll.Latitude + ur.Latitude) / 2;
+		var midLong = (ll.Longitude + ur.Longitude) / 2;
+		return new Coordinate(midLat, midLong);
+	}
 
 
 	/*
@@ -45,7 +55,9 @@ internal class Tile
 
 			chars[i] = (char)(row << 1 | (row ^ col) | 0x30);
 		}
-		QtPath = new string(chars);
+		if (!QtPath.TryParse(new string(chars), out var p))
+			throw new InvalidDataException($"Unable to convert tole to quad tree path. R = {Row}, C = {Column}, Z = {Level}");
+		QtPath = p;
 	}
 
 	public static bool TryParse(string rowColId, [NotNullWhen(true)] out Tile? quadtreePath)

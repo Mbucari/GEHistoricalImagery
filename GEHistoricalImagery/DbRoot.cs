@@ -16,9 +16,7 @@ internal class DbRoot
 	private DbRootProto Buffer { get; }
 	public DirectoryInfo CacheDir { get; }
 	private ReadOnlyMemory<byte> EncryptionData { get; }
-
-	private QtPacket? Root { get; set; }
-	public MemoryCache PacketCache { get; } = new MemoryCache(new MemoryCacheOptions());
+	private MemoryCache PacketCache { get; } = new MemoryCache(new MemoryCacheOptions());
 
 	private DbRoot(DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
 	{
@@ -69,18 +67,56 @@ internal class DbRoot
 		return new DbRoot(cacheDirInfo, EncryptedDbRootProto.Parser.ParseFrom(dbRootBts));
 	}
 
-	public async Task<QtPacket> GetRootPacket()
-		=> Root ??= new QtRoot(this, await GetPacketAsync("0", (int)Buffer.DatabaseVersion.QuadtreeVersion));
-
 	public async Task<Node?> GetNodeAsync(Tile tile)
 	{
-		var root = await GetRootPacket();
-		return await root.GetNodeAsync(tile);
+		if (tile.QtPath.IsRoot)
+			return null; 
+
+		var packet = await GetRootCachedAsync();
+
+		if (packet == null)
+			return null;
+
+		foreach (var path in tile.QtPath.EnumerateIndices())
+		{
+			packet = await GetChildCachedAsync(packet, path);
+			if (packet == null)
+				return null;
+		}
+
+		var sparceNode = packet.SparseQuadtreeNode.SingleOrDefault(n => n.Index == tile.QtPath.SubIndex);
+		return sparceNode?.Node is QuadtreeNode n ? new Node(tile, n) : null;
 	}
 
-	public async Task<QuadtreePacket> GetPacketAsync(string qtPath, int epoch)
+	private async Task<QuadtreePacket?> GetRootCachedAsync()
 	{
-		byte[] packetData = await DownloadBytesAsync(string.Format(QP2_URL, qtPath, epoch));
+		return await PacketCache.GetOrCreateAsync(QtPath.Root, loadRootPacketAsync);
+
+		async Task<QuadtreePacket> loadRootPacketAsync(ICacheEntry _)
+			=> await GetPacketAsync(QtPath.Root, (int)Buffer.DatabaseVersion.QuadtreeVersion);
+	}
+
+	private async Task<QuadtreePacket?> GetChildCachedAsync(QuadtreePacket parentPacket, QtPath path)
+	{
+		return await PacketCache.GetOrCreateAsync(path, loadChildPacketAsync);
+
+		async Task<QuadtreePacket?> loadChildPacketAsync(ICacheEntry _)
+		{
+			var childNode
+				= parentPacket.SparseQuadtreeNode
+				.Where(n => n.Node.CacheNodeEpoch != 0)
+				.SingleOrDefault(n => n.Index == path.SubIndex)?.Node;
+
+			if (childNode is null) return null;
+
+			var childPacket = await GetPacketAsync(path, childNode.CacheNodeEpoch);
+			return childPacket;
+		}
+	}
+
+	private async Task<QuadtreePacket> GetPacketAsync(QtPath path, int epoch)
+	{
+		byte[] packetData = await DownloadBytesAsync(string.Format(QP2_URL, path, epoch));
 
 		return DecodeBufferInternal(QuadtreePacket.Parser, packetData);
 	}
@@ -174,49 +210,5 @@ internal class DbRoot
 
 		decompSz = 0;
 		return false;
-	}
-
-	private class QtRoot : QtPacket
-	{
-		/*
-		 * The root packet is 3-high, but all child nodes are 4 high.
-		 */
-
-		public override async Task<QtPacket?> GetChildAsync(string quadTreePath)
-		{
-			ValidateQuadTreePath(quadTreePath);
-			if (quadTreePath.Length < 1 || quadTreePath[0] != '0')
-				throw new ArgumentException("Paths must begin with '0'.", nameof(quadTreePath));
-			if (quadTreePath.Length <= 4) return this;
-
-			var sub = quadTreePath.Substring(1, 3);
-
-			return
-				await GetChildInternalAsync(sub) is QtPacket c
-				? await c.GetChildAsync(quadTreePath)
-				: null;
-		}
-
-		protected override int GetNodeIndex(string qtp)
-		{
-			ValidateQuadTreePath(qtp);
-			if (qtp.Length > 3)
-				throw new ArgumentException("Root Quad Tree Path mst be a string of 0 to 3 characters", nameof(qtp));
-
-			if (qtp.Length == 0) return 0;
-
-			int subIndex = 0;
-
-			for (int i = 0; i < qtp.Length; i++)
-			{
-				subIndex *= 4;
-				subIndex += qtp[i] - 0x30 + 1;
-			}
-
-			return subIndex;
-		}
-
-		public QtRoot(DbRoot dbRoot, QuadtreePacket packet)
-			: base(dbRoot, null, "0", packet) { }
 	}
 }

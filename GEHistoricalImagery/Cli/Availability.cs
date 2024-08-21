@@ -64,7 +64,7 @@ internal class Availability : OptionsBase
 
 		Console.OutputEncoding = Encoding.Unicode;
 
-		char[][] array = Array.Empty<char[]>();
+		char[][] array = [];
 
 		while (true)
 		{
@@ -72,10 +72,8 @@ internal class Availability : OptionsBase
 
 			if (key.Key == ConsoleKey.Escape)
 				return;
-			else if (dateDict.ContainsKey(key.KeyChar))
+			else if (dateDict.TryGetValue(key.KeyChar, out var date))
 			{
-				var date = dateDict[key.KeyChar];
-
 				var availabilityStr = $"Tile availability on {date:yyyy/MM/dd}";
 				Console.WriteLine("\r\n" + availabilityStr);
 				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
@@ -159,7 +157,7 @@ internal class Availability : OptionsBase
 		int numTiles = aoi.GetTileCount(zoomLevel);
 		ReportProgress(0);
 
-		SortedSet<DateOnly> dates = new();
+		SortedSet<DateOnly> dates = [];
 		ParallelProcessor<SortedSet<DateOnly>> processor = new(ConcurrentDownload);
 
 		await foreach (var dSet in processor.EnumerateResults(aoi.GetTiles(zoomLevel).Select(getDatedTiles)))
@@ -174,7 +172,7 @@ internal class Availability : OptionsBase
 
 		async Task<SortedSet<DateOnly>> getDatedTiles(Tile tile)
 		{
-			SortedSet<DateOnly> dates = new();
+			SortedSet<DateOnly> dates = [];
 
 			if (await root.GetNodeAsync(tile) is not Node node)
 				return dates;

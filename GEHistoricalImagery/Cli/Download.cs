@@ -35,7 +35,7 @@ internal class Download : OptionsBase
 	public double OffsetX { get; set; }
 
 	[Option("offset-y", HelpText = "Geo transform Y offset (post-scaling)", MetaValue = "Y", Default = 0d)]
-	public double OffsetY { get; set; }	
+	public double OffsetY { get; set; }
 
 	[Option("scale-first", HelpText = "Performe scaling before translation", Default = false)]
 	public bool ScaleFirst { get; set; }
@@ -148,13 +148,13 @@ internal class Download : OptionsBase
 		IEnumerable<Task<TileDataset>> generateWork()
 			=> aoi
 			.GetTiles(ZoomLevel)
-			.Select(t => Task.Run(() => downloadTile(root, t, desiredDate)));
+			.Select(t => Task.Run(() => DownloadTile(root, t, desiredDate)));
 	}
 
-	private async Task<TileDataset> downloadTile(DbRoot root, Tile tile, DateOnly desiredDate)
+	private static async Task<TileDataset> DownloadTile(DbRoot root, Tile tile, DateOnly desiredDate)
 	{
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
-		
+
 		if (await root.GetNodeAsync(tile) is not Node node)
 			return emptyDataset();
 
@@ -170,9 +170,9 @@ internal class Download : OptionsBase
 				return new()
 				{
 					Tile = tile,
-					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, new string[] { "" }),
+					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, []),
 					FileName = tempFilename,
-					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date} for tile at {tile.LowerLeft}"
+					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date} for tile at {tile.GetCenter()}"
 				};
 			}
 			catch (HttpRequestException) { }

@@ -22,20 +22,25 @@ internal class Node
 
 	public IEnumerable<DatedTile> GetAllDatedTiles()
 	{
-		var datesLayer = QuadtreeNode?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.ImageryHistory)?.DatesLayer.DatedTile;
+		var datesLayer
+			= QuadtreeNode
+			?.Layer
+			?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.ImageryHistory)
+			?.DatesLayer
+			.DatedTile;
 
 		if (datesLayer == null)
 			yield break;
 
 		foreach (var dt in datesLayer)
 		{
-			if (dt.Date < MIN_JPEG_DATE)
+			if (dt.Date <= MIN_JPEG_DATE)
 				continue;
 			else if (dt.Provider != 0)
 				yield return new DatedTile(Tile, dt);
 			//When Provider is zero, that tile's imagery is being used as the default and is in the Imagery layer.
 			else if (QuadtreeNode?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery)
-				yield return new DatedTile(Tile, dt.Date.ToDate(), regImagery);
+				yield return new DatedTile(Tile, dt.GetDate(), regImagery);
 		}
 	}
 }

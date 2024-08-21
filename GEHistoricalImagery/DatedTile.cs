@@ -16,7 +16,7 @@ internal record DatedTile
 	{
 		Tile = tile;
 		Provider = datedTile.Provider;
-		Date = datedTile.Date.ToDate();
+		Date = datedTile.GetDate();
 		Epoch = datedTile.DatedTileEpoch;
 
 		TileUrl = string.Format(ROOT_URL, tile.QtPath, Epoch, datedTile.Date.ToString("x"));

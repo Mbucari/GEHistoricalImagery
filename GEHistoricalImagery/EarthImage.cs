@@ -15,8 +15,8 @@ internal class EarthImage : IDisposable
 
 	public Tile UpperLeft { get; }
 
-	private int X_Left;
-	private int Y_Top;
+	private readonly int X_Left;
+	private readonly int Y_Top;
 
 	static EarthImage()
 	{
@@ -48,15 +48,13 @@ internal class EarthImage : IDisposable
 
 		TempDataset = CreateEmptyDataset(Width, Height, cacheFile);
 		TempDataset.SetSpatialRef(wgs);
-		TempDataset.SetGeoTransform(
-		[
-			rectangle.LowerLeft.Longitude,
-			pixelScale,
-			0,
-			rectangle.UpperRight.Latitude,
-			0,
-			-pixelScale
-		]);
+		TempDataset.SetGeoTransform(new GeoTransform
+		{
+			UpperLeft_X = rectangle.LowerLeft.Longitude,
+			UpperLeft_Y = rectangle.UpperRight.Latitude,
+			PixelWidth = pixelScale,
+			PixelHeight = -pixelScale
+		});
 	}
 
 	private static Dataset CreateEmptyDataset(int width, int height, string? fileName)
@@ -116,7 +114,7 @@ internal class EarthImage : IDisposable
 				"-t_srs", outSR
 			};
 			using var options = new GDALWarpAppOptions(parameters);
-			saved = Gdal.Warp(path, new[] { TempDataset }, options, reportProgress, null);
+			saved = Gdal.Warp(path, [TempDataset], options, reportProgress, null);
 		}
 		else
 		{
@@ -132,30 +130,15 @@ internal class EarthImage : IDisposable
 
 		using (saved)
 		{
-			var geoTransform = new double[6];
-			saved.GetGeoTransform(geoTransform);
+			var geoTransform = saved.GetGeoTransform();
 
 			if (scaleFirst)
-			{
-				//scale
-				geoTransform[0] *= scale;
-				geoTransform[1] *= scale;
-				geoTransform[3] *= scale;
-				geoTransform[5] *= scale;
-			}
+				geoTransform.Scale(scale);
 
-			//offset
-			geoTransform[0] += offsetX;
-			geoTransform[3] += offsetY;
+			geoTransform.Translate(offsetX, offsetY);
 
 			if (!scaleFirst)
-			{
-				//scale
-				geoTransform[0] *= scale;
-				geoTransform[1] *= scale;
-				geoTransform[3] *= scale;
-				geoTransform[5] *= scale;
-			}
+				geoTransform.Scale(scale);
 
 			saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();

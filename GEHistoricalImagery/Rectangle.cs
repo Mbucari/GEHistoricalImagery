@@ -1,13 +1,8 @@
 ﻿namespace GEHistoricalImagery;
 
-internal readonly struct Rectangle
+internal readonly struct Rectangle(Coordinate lowerLeft, Coordinate upperRight)
 {
-	public readonly Coordinate LowerLeft, UpperRight;
-	public Rectangle(Coordinate lowerLeft, Coordinate upperRight)
-	{
-		LowerLeft = lowerLeft;
-		UpperRight = upperRight;
-	}
+	public readonly Coordinate LowerLeft = lowerLeft, UpperRight = upperRight;
 
 	public int GetTileCount(int level)
 	{

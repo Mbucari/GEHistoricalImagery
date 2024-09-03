@@ -1,5 +1,10 @@
 ﻿namespace GEHistoricalImagery;
 
+/// <summary>
+/// A region of space on earth defined by the lower-left and upper-right geographic coordinates.
+/// </summary>
+/// <param name="lowerLeft"></param>
+/// <param name="upperRight"></param>
 internal readonly struct Rectangle(Coordinate lowerLeft, Coordinate upperRight)
 {
 	public readonly Coordinate LowerLeft = lowerLeft, UpperRight = upperRight;

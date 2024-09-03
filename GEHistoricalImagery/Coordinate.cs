@@ -3,6 +3,9 @@ using System.ComponentModel;
 
 namespace GEHistoricalImagery;
 
+/// <summary>
+/// A geographic coordinate
+/// </summary>
 [TypeConverter(typeof(CoordinateTypeConverter))]
 internal readonly struct Coordinate
 {
@@ -15,6 +18,10 @@ internal readonly struct Coordinate
 
 	public Coordinate(double latitude, double longitude)
 	{
+		ArgumentOutOfRangeException.ThrowIfLessThan(latitude, -90, nameof(latitude));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(latitude, 90, nameof(latitude));
+		ArgumentOutOfRangeException.ThrowIfLessThan(longitude, -180, nameof(longitude));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(longitude, 180, nameof(longitude));
 		Latitude = latitude;
 		Longitude = longitude;
 	}

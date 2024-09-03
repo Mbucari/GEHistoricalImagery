@@ -1,9 +1,12 @@
-﻿using Google.Protobuf;
+﻿using GEHistoricalImagery.IO;
+using Google.Protobuf;
 using Keyhole;
 using Keyhole.Dbroot;
 using Microsoft.Extensions.Caching.Memory;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GEHistoricalImagery;
 
@@ -13,8 +16,8 @@ internal class DbRoot
 	private const string QP2_URL = "https://khmdb.google.com/flatfile?db=tm&qp-{0}-q.{1}";
 	private const string DBROOT_URL = "https://khmdb.google.com/dbRoot.v5?db=tm&hl=en&gl=us&output=proto";
 
-	private DbRootProto Buffer { get; }
 	public DirectoryInfo CacheDir { get; }
+	private DbRootProto DbRootBuffer { get; }
 	private ReadOnlyMemory<byte> EncryptionData { get; }
 	private MemoryCache PacketCache { get; } = new MemoryCache(new MemoryCacheOptions());
 
@@ -24,7 +27,7 @@ internal class DbRoot
 		EncryptionData = dbRootEnc.EncryptionData.Memory;
 		var bts = dbRootEnc.DbrootData.ToByteArray();
 		Decrypt(bts);
-		Buffer = DecodeBufferInternal(DbRootProto.Parser, bts);
+		DbRootBuffer = DecodeBufferInternal(DbRootProto.Parser, bts);
 	}
 
 	public static async Task<DbRoot> CreateAsync(string cacheDir = ".\\cache")
@@ -36,6 +39,8 @@ internal class DbRoot
 
 		using var request = new HttpRequestMessage(HttpMethod.Get, uri);
 		var dbRootFile = new FileInfo(Path.Combine(cacheDirInfo.FullName, Path.GetFileName(uri.AbsolutePath)));
+
+		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(dbRootFile.FullName));
 
 		if (dbRootFile.Exists)
 			request.Headers.IfModifiedSince = dbRootFile.LastWriteTimeUtc;
@@ -70,7 +75,7 @@ internal class DbRoot
 	public async Task<Node?> GetNodeAsync(Tile tile)
 	{
 		if (tile.QtPath.IsRoot)
-			return null; 
+			return null;
 
 		var packet = await GetRootCachedAsync();
 
@@ -93,7 +98,7 @@ internal class DbRoot
 		return await PacketCache.GetOrCreateAsync(QtPath.Root, loadRootPacketAsync);
 
 		async Task<QuadtreePacket> loadRootPacketAsync(ICacheEntry _)
-			=> await GetPacketAsync(QtPath.Root, (int)Buffer.DatabaseVersion.QuadtreeVersion);
+			=> await GetPacketAsync(QtPath.Root, (int)DbRootBuffer.DatabaseVersion.QuadtreeVersion);
 	}
 
 	private async Task<QuadtreePacket?> GetChildCachedAsync(QuadtreePacket parentPacket, QtPath path)
@@ -125,12 +130,10 @@ internal class DbRoot
 	{
 		var uri = new Uri(url);
 		var fileName = Path.Combine(CacheDir.FullName, Path.GetFileName(uri.PathAndQuery.Replace('?', '-')));
+		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(fileName));
 
 		if (File.Exists(fileName))
-		{
-			lock (this)
-				return File.ReadAllBytes(fileName);
-		}
+			return File.ReadAllBytes(fileName);
 		else
 		{
 			var data = await HttpClient.GetByteArrayAsync(uri);
@@ -138,8 +141,7 @@ internal class DbRoot
 
 			try
 			{
-				lock (this)
-					File.WriteAllBytes(fileName, data);
+				File.WriteAllBytes(fileName, data);
 			}
 			catch (Exception ex)
 			{
@@ -148,22 +150,6 @@ internal class DbRoot
 			}
 			return data;
 		}
-	}
-
-	private static T DecodeBufferInternal<T>(MessageParser<T> parser, byte[] packet) where T : IMessage<T>
-	{
-		if (!TryGetDecompressBufferSize(packet, out var decompSz))
-			throw new InvalidDataException("Failed to determine packet size.");
-
-		var decompressed = new byte[decompSz];
-		using var compressedStream = new MemoryStream(packet, 8, packet.Length - 8, writable: false);
-
-		using (var outputStream = new MemoryStream(decompressed))
-		{
-			using var decompressor = new ZLibStream(compressedStream, CompressionMode.Decompress);
-			decompressor.CopyTo(outputStream);
-		}
-		return parser.ParseFrom(decompressed);
 	}
 
 	private void Decrypt(Span<byte> cipherText)
@@ -181,34 +167,49 @@ internal class DbRoot
 		}
 	}
 
-	private static bool TryGetDecompressBufferSize(ReadOnlySpan<byte> buff, out int decompSz)
+	private static T DecodeBufferInternal<T>(MessageParser<T> parser, byte[] packet) where T : IMessage<T>
 	{
 		const int kPacketCompressHdrSize = 8;
-		const uint kPktMagic = 0x7468deadu;
-		const uint kPktMagicSwap = 0xadde6874u;
 
-		var intBuf = MemoryMarshal.Cast<byte, uint>(buff);
+		if (!TryGetDecompressBufferSize(packet, out var decompSz))
+			throw new InvalidDataException("Failed to determine packet size.");
 
-		if (buff.Length >= kPacketCompressHdrSize)
+		var decompressed = new byte[decompSz];
+		using var compressedStream = new MemoryStream(packet[kPacketCompressHdrSize..], writable: false);
+
+		using (var outputStream = new MemoryStream(decompressed))
 		{
-			if (intBuf[0] == kPktMagic)
-			{
-				decompSz = (int)intBuf[1];
-				return true;
-			}
-			else if (intBuf[0] == kPktMagicSwap)
-			{
-				uint len = intBuf[1];
-				uint v = ((len >> 24) & 0x000000ffu) |
-						   ((len >> 8) & 0x0000ff00u) |
-						   ((len << 8) & 0x00ff0000u) |
-						   ((len << 24) & 0xff000000u);
-				decompSz = (int)v;
-				return true;
-			}
+			using var decompressor = new ZLibStream(compressedStream, CompressionMode.Decompress);
+			decompressor.CopyTo(outputStream);
 		}
+		return parser.ParseFrom(decompressed);
 
-		decompSz = 0;
-		return false;
+		static bool TryGetDecompressBufferSize(ReadOnlySpan<byte> buff, out int decompSz)
+		{
+			const uint kPktMagic = 0x7468deadu;
+			const uint kPktMagicSwap = 0xadde6874u;
+
+			var intBuf = MemoryMarshal.Cast<byte, uint>(buff);
+
+			if (buff.Length >= kPacketCompressHdrSize)
+			{
+				if (intBuf[0] == kPktMagic)
+				{
+					decompSz = (int)intBuf[1];
+					return true;
+				}
+				else if (intBuf[0] == kPktMagicSwap)
+				{
+					decompSz = (int)System.Buffers.Binary.BinaryPrimitives.ReverseEndianness(intBuf[1]);
+					return true;
+				}
+			}
+
+			decompSz = 0;
+			return false;
+		}
 	}
+
+	private static string HashString(string s)
+		=> Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(s)));
 }

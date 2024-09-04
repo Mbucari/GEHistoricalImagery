@@ -74,9 +74,6 @@ internal class DbRoot
 
 	public async Task<Node?> GetNodeAsync(Tile tile)
 	{
-		if (tile.QtPath.IsRoot)
-			return null;
-
 		var packet = await GetRootCachedAsync();
 
 		if (packet == null)

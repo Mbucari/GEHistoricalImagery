@@ -9,10 +9,10 @@ Tiles that are available from a specific date are shaded, and unavailable tiles 
 GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG] --zoom [N] [--parallel [N]]
 
   --lower-left=LAT,LONG     Required. Geographic location
-  
+
   --upper-right=LAT,LONG    Required. Geographic location
-  
-  -z N, --zoom=N            Required. Zoom level (Optional, [0-24])
+
+  -z N, --zoom=N            Required. Zoom level [1-24]
   
   -p N, --parallel=N        (Default: 20) Number of concurrent downloads
 ```

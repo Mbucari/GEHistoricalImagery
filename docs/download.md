@@ -12,7 +12,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
   --upper-right=LAT,LONG                  Required. Geographic location
 
-  -z N, --zoom=N                          Required. Zoom level [0-24]
+  -z N, --zoom=N                          Required. Zoom level [1-24]
 
   -d 10/23/2023, --date=10/23/2023        Required. Imagery Date
 

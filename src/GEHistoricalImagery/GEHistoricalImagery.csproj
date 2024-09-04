@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<Version>0.1.6.0</Version>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<SelfContained>true</SelfContained>
+	<PublishAot>true</PublishAot>
+	<PublishDir>..\publish</PublishDir>
+	<OptimizationPreference>Speed</OptimizationPreference>
+	<RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="GDAL" Version="3.9.1" />
+    <PackageReference Include="GDAL.Native" Version="3.9.1" />
+	<PackageReference Include="CommandLineParser" Version="2.9.1" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\LibGoogleEarth\LibGoogleEarth.csproj" />
+	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+	  <_Parameter1>GEHistoricalImageryTest</_Parameter1>
+	</AssemblyAttribute>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="Publish">
+	  <Exec Command="xcopy &quot;$(TargetDir)gdal\&quot; &quot;$(PublishDir)gdal\&quot; /s /y &gt; nul" />
+	  <Exec Condition="$(RuntimeIdentifier.Contains('x64'))" Command="rmdir &quot;$(PublishDir)gdal\x86&quot; /s /q" />
+  </Target>
+
+</Project>

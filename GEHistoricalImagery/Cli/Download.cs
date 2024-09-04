@@ -31,13 +31,13 @@ internal class Download : OptionsBase
 	[Option("scale", HelpText = "Geo transform scale factor", MetaValue = "S", Default = 1d)]
 	public double ScaleFactor { get; set; }
 
-	[Option("offset-x", HelpText = "Geo transform X offset (post-scaling)", MetaValue = "X", Default = 0d)]
+	[Option("offset-x", HelpText = "Geo transform X offset", MetaValue = "X", Default = 0d)]
 	public double OffsetX { get; set; }
 
-	[Option("offset-y", HelpText = "Geo transform Y offset (post-scaling)", MetaValue = "Y", Default = 0d)]
+	[Option("offset-y", HelpText = "Geo transform Y offset", MetaValue = "Y", Default = 0d)]
 	public double OffsetY { get; set; }
 
-	[Option("scale-first", HelpText = "Performe scaling before translation", Default = false)]
+	[Option("scale-first", HelpText = "Perform scaling before offsetting X and Y", Default = false)]
 	public bool ScaleFirst { get; set; }
 
 

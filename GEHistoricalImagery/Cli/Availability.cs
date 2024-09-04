@@ -91,7 +91,8 @@ internal class Availability : OptionsBase
 		void writeDateOptions()
 		{
 			const string spacer = "  ";
-			foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value:yyyy/MM/dd}"))
+			const string finalOption = "[Esc]  Exit";
+			foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value:yyyy/MM/dd}").Append(finalOption))
 			{
 				Console.Write(entry);
 

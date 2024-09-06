@@ -23,35 +23,34 @@ namespace Keyhole {
 
     static QuadtreesetReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
-          string.Concat(
-            "ChZxdWFkdHJlZXNldC5wcm90b2RldmVsEgdrZXlob2xlIjYKD1F1YWR0cmVl",
-            "Q2hhbm5lbBIMCgR0eXBlGAEgAigFEhUKDWNoYW5uZWxfZXBvY2gYAiACKAUi",
-            "XAoYUXVhZHRyZWVJbWFnZXJ5VGltZWRUaWxlEhQKDG1pbGxpc2Vjb25kcxgB",
-            "IAIoBRIYChB0aW1lZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMg",
-            "ASgFIowBChhRdWFkdHJlZUltYWdlcnlEYXRlZFRpbGUSDAoEZGF0ZRgBIAIo",
-            "BRIYChBkYXRlZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMgAigF",
-            "EjYKC3RpbWVkX3RpbGVzGAQgAygLMiEua2V5aG9sZS5RdWFkdHJlZUltYWdl",
-            "cnlUaW1lZFRpbGUipAEKFFF1YWR0cmVlSW1hZ2VyeURhdGVzEjUKCmRhdGVk",
-            "X3RpbGUYASADKAsyIS5rZXlob2xlLlF1YWR0cmVlSW1hZ2VyeURhdGVkVGls",
-            "ZRIYChBzaGFyZWRfdGlsZV9kYXRlGAIgASgFEhkKEWNvYXJzZV90aWxlX2Rh",
-            "dGVzGAMgAygFEiAKGHNoYXJlZF90aWxlX21pbGxpc2Vjb25kcxgEIAEoBSKO",
-            "AgoNUXVhZHRyZWVMYXllchIuCgR0eXBlGAEgAigOMiAua2V5aG9sZS5RdWFk",
-            "dHJlZUxheWVyLkxheWVyVHlwZRITCgtsYXllcl9lcG9jaBgCIAIoBRIQCghw",
-            "cm92aWRlchgDIAEoBRIyCgtkYXRlc19sYXllchgEIAEoCzIdLmtleWhvbGUu",
-            "UXVhZHRyZWVJbWFnZXJ5RGF0ZXMicgoJTGF5ZXJUeXBlEhYKEkxBWUVSX1RZ",
-            "UEVfSU1BR0VSWRAAEhYKEkxBWUVSX1RZUEVfVEVSUkFJThABEhUKEUxBWUVS",
-            "X1RZUEVfVkVDVE9SEAISHgoaTEFZRVJfVFlQRV9JTUFHRVJZX0hJU1RPUlkQ",
-            "AyKkAgoMUXVhZHRyZWVOb2RlEg0KBWZsYWdzGAEgASgFEhgKEGNhY2hlX25v",
-            "ZGVfZXBvY2gYAiABKAUSJQoFbGF5ZXIYAyADKAsyFi5rZXlob2xlLlF1YWR0",
-            "cmVlTGF5ZXISKQoHY2hhbm5lbBgEIAMoCzIYLmtleWhvbGUuUXVhZHRyZWVD",
-            "aGFubmVsIpgBCglOb2RlRmxhZ3MSGgoWTk9ERV9GTEFHU19DSElMRF9DT1VO",
-            "VBAEEhgKFE5PREVfRkxBR1NfQ0FDSEVfQklUEAQSGwoXTk9ERV9GTEFHU19E",
-            "UkFXQUJMRV9CSVQQBRIYChROT0RFX0ZMQUdTX0lNQUdFX0JJVBAGEhoKFk5P",
-            "REVfRkxBR1NfVEVSUkFJTl9CSVQQBxoCEAEiuAEKDlF1YWR0cmVlUGFja2V0",
-            "EhQKDHBhY2tldF9lcG9jaBgBIAIoBRJGChJzcGFyc2VxdWFkdHJlZW5vZGUY",
-            "AiADKAoyKi5rZXlob2xlLlF1YWR0cmVlUGFja2V0LlNwYXJzZVF1YWR0cmVl",
-            "Tm9kZRpIChJTcGFyc2VRdWFkdHJlZU5vZGUSDQoFaW5kZXgYAyACKAUSIwoE",
-            "Tm9kZRgEIAIoCzIVLmtleWhvbGUuUXVhZHRyZWVOb2Rl"));
+            "ChZxdWFkdHJlZXNldC5wcm90b2RldmVsEgdrZXlob2xlIjYKD1F1YWR0cmVl" +
+            "Q2hhbm5lbBIMCgR0eXBlGAEgAigFEhUKDWNoYW5uZWxfZXBvY2gYAiACKAUi" +
+            "XAoYUXVhZHRyZWVJbWFnZXJ5VGltZWRUaWxlEhQKDG1pbGxpc2Vjb25kcxgB" +
+            "IAIoBRIYChB0aW1lZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMg" +
+            "ASgFIowBChhRdWFkdHJlZUltYWdlcnlEYXRlZFRpbGUSDAoEZGF0ZRgBIAIo" +
+            "BRIYChBkYXRlZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMgAigF" +
+            "EjYKC3RpbWVkX3RpbGVzGAQgAygLMiEua2V5aG9sZS5RdWFkdHJlZUltYWdl" +
+            "cnlUaW1lZFRpbGUipAEKFFF1YWR0cmVlSW1hZ2VyeURhdGVzEjUKCmRhdGVk" +
+            "X3RpbGUYASADKAsyIS5rZXlob2xlLlF1YWR0cmVlSW1hZ2VyeURhdGVkVGls" +
+            "ZRIYChBzaGFyZWRfdGlsZV9kYXRlGAIgASgFEhkKEWNvYXJzZV90aWxlX2Rh" +
+            "dGVzGAMgAygFEiAKGHNoYXJlZF90aWxlX21pbGxpc2Vjb25kcxgEIAEoBSKO" +
+            "AgoNUXVhZHRyZWVMYXllchIuCgR0eXBlGAEgAigOMiAua2V5aG9sZS5RdWFk" +
+            "dHJlZUxheWVyLkxheWVyVHlwZRITCgtsYXllcl9lcG9jaBgCIAIoBRIQCghw" +
+            "cm92aWRlchgDIAEoBRIyCgtkYXRlc19sYXllchgEIAEoCzIdLmtleWhvbGUu" +
+            "UXVhZHRyZWVJbWFnZXJ5RGF0ZXMicgoJTGF5ZXJUeXBlEhYKEkxBWUVSX1RZ" +
+            "UEVfSU1BR0VSWRAAEhYKEkxBWUVSX1RZUEVfVEVSUkFJThABEhUKEUxBWUVS" +
+            "X1RZUEVfVkVDVE9SEAISHgoaTEFZRVJfVFlQRV9JTUFHRVJZX0hJU1RPUlkQ" +
+            "AyKkAgoMUXVhZHRyZWVOb2RlEg0KBWZsYWdzGAEgASgFEhgKEGNhY2hlX25v" +
+            "ZGVfZXBvY2gYAiABKAUSJQoFbGF5ZXIYAyADKAsyFi5rZXlob2xlLlF1YWR0" +
+            "cmVlTGF5ZXISKQoHY2hhbm5lbBgEIAMoCzIYLmtleWhvbGUuUXVhZHRyZWVD" +
+            "aGFubmVsIpgBCglOb2RlRmxhZ3MSGgoWTk9ERV9GTEFHU19DSElMRF9DT1VO" +
+            "VBAEEhgKFE5PREVfRkxBR1NfQ0FDSEVfQklUEAQSGwoXTk9ERV9GTEFHU19E" +
+            "UkFXQUJMRV9CSVQQBRIYChROT0RFX0ZMQUdTX0lNQUdFX0JJVBAGEhoKFk5P" +
+            "REVfRkxBR1NfVEVSUkFJTl9CSVQQBxoCEAEiuAEKDlF1YWR0cmVlUGFja2V0" +
+            "EhQKDHBhY2tldF9lcG9jaBgBIAIoBRJGChJzcGFyc2VxdWFkdHJlZW5vZGUY" +
+            "AiADKAoyKi5rZXlob2xlLlF1YWR0cmVlUGFja2V0LlNwYXJzZVF1YWR0cmVl" +
+            "Tm9kZRpIChJTcGFyc2VRdWFkdHJlZU5vZGUSDQoFaW5kZXgYAyACKAUSIwoE" +
+            "Tm9kZRgEIAIoCzIVLmtleWhvbGUuUXVhZHRyZWVOb2Rl");
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -71,6 +70,7 @@ namespace Keyhole {
   /// <summary>
   /// Channels come from Fusion and use Fusion's numbering scheme.
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeChannel : pb::IMessage<QuadtreeChannel>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -287,7 +287,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -310,7 +314,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -333,6 +341,7 @@ namespace Keyhole {
   /// "Timed" tile for a specific day:
   /// Each tile's tile within the day and version are given in this message.
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeImageryTimedTile : pb::IMessage<QuadtreeImageryTimedTile>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -606,7 +615,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -633,7 +646,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -668,6 +685,7 @@ namespace Keyhole {
   /// Note that a "one day" tile is still required for older
   /// clients which won't see the timed_tiles field.
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeImageryDatedTile : pb::IMessage<QuadtreeImageryDatedTile>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -946,7 +964,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -977,7 +999,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -1004,6 +1030,7 @@ namespace Keyhole {
 
   }
 
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeImageryDates : pb::IMessage<QuadtreeImageryDates>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1271,7 +1298,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -1303,7 +1334,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -1331,6 +1366,7 @@ namespace Keyhole {
 
   }
 
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeLayer : pb::IMessage<QuadtreeLayer>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1635,7 +1671,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -1669,7 +1709,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -1714,6 +1758,7 @@ namespace Keyhole {
 
   }
 
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeNode : pb::IMessage<QuadtreeNode>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -1982,7 +2027,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -2013,7 +2062,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -2083,6 +2136,7 @@ namespace Keyhole {
   /// A full quadtree packet.  This contains a subtree of the full global
   /// quadtree.
   /// </summary>
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreePacket : pb::IMessage<QuadtreePacket>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -2276,7 +2330,11 @@ namespace Keyhole {
     #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
@@ -2299,7 +2357,11 @@ namespace Keyhole {
     void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
@@ -2324,6 +2386,7 @@ namespace Keyhole {
       /// <summary>
       /// All the quadtree nodes in this packet, with subindex indices.
       /// </summary>
+      [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
       public sealed partial class SparseQuadtreeNode : pb::IMessage<SparseQuadtreeNode>
       #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
           , pb::IBufferMessage
@@ -2537,9 +2600,11 @@ namespace Keyhole {
         #else
           uint tag;
           while ((tag = input.ReadTag()) != 0) {
-            switch(tag) {
-              case 20:
-                return;
+          if ((tag & 7) == 4) {
+            // Abort on any end group tag.
+            return;
+          }
+          switch(tag) {
               default:
                 _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
                 break;
@@ -2565,9 +2630,11 @@ namespace Keyhole {
         void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
           uint tag;
           while ((tag = input.ReadTag()) != 0) {
-            switch(tag) {
-              case 20:
-                return;
+          if ((tag & 7) == 4) {
+            // Abort on any end group tag.
+            return;
+          }
+          switch(tag) {
               default:
                 _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
                 break;

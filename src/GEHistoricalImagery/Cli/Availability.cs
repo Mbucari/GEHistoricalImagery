@@ -10,7 +10,7 @@ internal class Availability : AoiVerb
 	[Option('p', "parallel", HelpText = "Number of concurrent downloads", MetaValue = "N", Default = 20)]
 	public int ConcurrentDownload { get; set; }
 
-	static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	public override async Task RunAsync()
 	{
@@ -36,24 +36,27 @@ internal class Availability : AoiVerb
 			return;
 		}
 
-		int counter = 0;
-		var dateDict = all.ToDictionary(d => INDICES[counter++]);
-
-		writeDateOptions();
-
 		Console.OutputEncoding = Encoding.Unicode;
 
+		if (all.Length <= INDICES.Length)
+			await WaitForSingleCharSelection(root, all);
+		else
+			await WaitForMultiCharSelection(root, all);
+	}
+	
+	async Task WaitForSingleCharSelection(DbRoot root, DateOnly[] dates)
+	{
+		const string finalOption = "[Esc]  Exit";
 		char[][] array = [];
 
-		while (true)
-		{
-			var key = Console.ReadKey(true);
+		var dateDict = dates.Select((d, i) => new KeyValuePair<char, DateOnly>(INDICES[i], d)).ToDictionary();
 
-			if (key.Key == ConsoleKey.Escape)
-				return;
-			else if (dateDict.TryGetValue(key.KeyChar, out var date))
+		WriteDateOptions(dateDict, finalOption);
+		while (Console.ReadKey(true) is ConsoleKeyInfo key && key.Key != ConsoleKey.Escape)
+		{
+			if (dateDict.TryGetValue(key.KeyChar, out var date))
 			{
-				var availabilityStr = $"Tile availability on {date:yyyy/MM/dd}";
+				var availabilityStr = $"Tile availability on {DateString(date)}";
 				Console.WriteLine("\r\n" + availabilityStr);
 				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 
@@ -63,28 +66,59 @@ internal class Availability : AoiVerb
 					Console.WriteLine(new string(ca));
 
 				Console.WriteLine();
-				writeDateOptions();
+				WriteDateOptions(dateDict, finalOption);
 			}
 		}
+	}
 
-		void writeDateOptions()
+	async Task WaitForMultiCharSelection(DbRoot root, DateOnly[] dates)
+	{
+		const string finalOption = "[E]  Exit";
+		char[][] array = [];
+
+		int numPlaces = (int)Math.Ceiling(Math.Log10(dates.Length));
+		var decFormat = "D" + numPlaces;
+		var printableDict = dates.Select((d, i) => new KeyValuePair<string, DateOnly>(i.ToString(decFormat), d));
+
+		WriteDateOptions(printableDict, finalOption);
+		while (Console.ReadLine() is string key && !string.Equals(key, "E", StringComparison.OrdinalIgnoreCase))
 		{
-			const string spacer = "  ";
-			const string finalOption = "[Esc]  Exit";
-			foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value:yyyy/MM/dd}").Append(finalOption))
+			if (key != null && int.TryParse(key, out var selectedInt) && selectedInt >=0 && selectedInt < dates.Length)
 			{
-				Console.Write(entry);
+				var date = dates[selectedInt];
+				var availabilityStr = $"Tile availability on {DateString(date)}";
 
-				var remainingSpace = Console.WindowWidth - Console.CursorLeft;
+				Console.WriteLine("\r\n" + availabilityStr);
+				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 
-				if (remainingSpace < entry.Length + spacer.Length)
-					Console.WriteLine();
-				else
-					Console.Write(spacer);
-			}
-			if (Console.CursorLeft > 0)
+				array = await DrawAvailability(root, Aoi, date);
+
+				foreach (var ca in array)
+					Console.WriteLine(new string(ca));
+
 				Console.WriteLine();
+				WriteDateOptions(printableDict, finalOption);
+			}
 		}
+	}
+
+	void WriteDateOptions<T>(IEnumerable<KeyValuePair<T,DateOnly>> dateDict, string finalOption) where T : notnull
+	{
+		const string spacer = "  ";
+
+		foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {DateString(kvp.Value)}").Append(finalOption))
+		{
+			Console.Write(entry);
+
+			var remainingSpace = Console.WindowWidth - Console.CursorLeft;
+
+			if (remainingSpace < entry.Length + spacer.Length)
+				Console.WriteLine();
+			else
+				Console.Write(spacer);
+		}
+		if (Console.CursorLeft > 0)
+			Console.WriteLine();
 	}
 
 	private async Task<char[][]> DrawAvailability(DbRoot root, Rectangle aoi, DateOnly date)

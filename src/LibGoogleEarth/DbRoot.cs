@@ -160,8 +160,8 @@ public class DbRoot
 		var fileName = Path.Combine(CacheDir.FullName, Path.GetFileName(uri.PathAndQuery.Replace('?', '-')));
 		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(fileName));
 
-		if (File.Exists(fileName))
-			return File.ReadAllBytes(fileName);
+		if (File.Exists(fileName) && File.ReadAllBytes(fileName) is byte[] b && b.Length > 0)
+			return b;
 		else
 		{
 			var data = await HttpClient.GetByteArrayAsync(uri);

@@ -31,4 +31,6 @@ internal abstract class OptionsBase
 		Progress = 0;
 		lastProgLen = 0;
 	}
+
+	protected static string DateString(DateOnly date) => date.ToString("yyyy/MM/dd");
 }

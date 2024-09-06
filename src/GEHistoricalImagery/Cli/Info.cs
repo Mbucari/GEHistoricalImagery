@@ -49,7 +49,7 @@ internal class Info : OptionsBase
 				{
 					if (dated.Date.Year == 1)
 						continue;
-					Console.WriteLine($"    date = {dated.Date:yyyy/MM/dd}, version = {dated.Epoch}");
+					Console.WriteLine($"    date = {DateString(dated.Date)}, version = {dated.Epoch}");
 				}
 			}
 		}

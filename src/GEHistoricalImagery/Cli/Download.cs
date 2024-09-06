@@ -152,7 +152,7 @@ internal class Download : AoiVerb
 					Tile = tile,
 					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, []),
 					FileName = tempFilename,
-					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {dd.Date} for tile at {tile.Center}"
+					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {DateString(dd.Date)} for tile at {tile.Center}"
 				};
 			}
 			catch (HttpRequestException)

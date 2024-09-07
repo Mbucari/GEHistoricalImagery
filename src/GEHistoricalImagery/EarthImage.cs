@@ -11,13 +11,13 @@ internal class EarthImage : IDisposable
 	public int Width { get; }
 	public int Height { get; }
 
-
 	private readonly Dataset TempDataset;
 
-	public Tile UpperLeft { get; }
+	/// <summary> The x-coordinate of the output dataset's top-left corner relative to global pixel space </summary>
+	private readonly int RasterX;
 
-	private readonly int X_Left;
-	private readonly int Y_Top;
+	/// <summary> The y-coordinate of the output dataset's top-left corner relative to global pixel space  </summary>
+	private readonly int RasterY;
 
 	static EarthImage()
 	{
@@ -27,22 +27,20 @@ internal class EarthImage : IDisposable
 
 	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)
 	{
-		var ll = rectangle.LowerLeft.GetTile(level);
-		var ur = rectangle.UpperRight.GetTile(level);
-
 		var pixelScale = 360d / (1 << level) / TILE_SZ;
 
-		X_Left = (int)double.Round((rectangle.LowerLeft.Longitude - ll.LowerLeft.Longitude) / pixelScale);
-		var y_Bottom = (int)double.Round((rectangle.LowerLeft.Latitude - ll.LowerLeft.Latitude) / pixelScale);
+		RasterX = (int)double.Round((rectangle.LowerLeft.Longitude + 180) / pixelScale);
+		//Web Mercater is a square of 360d x 360d, but only the middle 180d height is used.
+		RasterY = (int)double.Round((180 - rectangle.UpperRight.Latitude) / pixelScale);
 
-		var x_Right = (int)double.Round((ur.UpperRight.Longitude - rectangle.UpperRight.Longitude) / pixelScale);
-		Y_Top = (int)double.Round((ur.UpperRight.Latitude - rectangle.UpperRight.Latitude) / pixelScale);
+		var heightDeg = rectangle.UpperRight.Latitude - rectangle.LowerLeft.Latitude;
+		var widthDeg = rectangle.UpperRight.Longitude - rectangle.LowerLeft.Longitude;
+		//Allow wrapping around 180/-180
+		if (widthDeg < 0)
+			widthDeg += 360;
 
-		rectangle.GetNumRowsAndColumns(level, out var nRows, out var nColumns);
-
-		Width = TILE_SZ * nColumns - X_Left - x_Right;
-		Height = TILE_SZ * nRows - Y_Top - y_Bottom;
-		UpperLeft = new Tile(ur.Row, ll.Column, level);
+		Width = (int)double.Round(widthDeg / pixelScale);
+		Height = (int)double.Round(heightDeg / pixelScale);
 
 		using var wgs = new SpatialReference(WGS_1984_WKT);
 
@@ -73,16 +71,29 @@ internal class EarthImage : IDisposable
 
 	public void AddTile(Tile tile, Dataset image)
 	{
-		var x = Tile.ColumnSpan(UpperLeft, tile) * TILE_SZ - X_Left;
-		var y = (UpperLeft.Row - tile.Row) * TILE_SZ - Y_Top;
+		//Tile's global pixel coordinates of the tile's top-left corner.
+		var gpx_x = tile.Column * TILE_SZ;
+		//Rows are from bottom-to-top, but Gdal datasets are top-to-bottom.
+		var gpx_y = ((1 << tile.Level) - tile.Row - 1) * TILE_SZ;
 
-		int read_x = -int.Min(0, x);
-		int write_x = int.Max(0, x);
-		int size_x = int.Min(TILE_SZ - read_x, Width - x);
+		//The tile is entirely to the left of the region, so wrap around the globe.
+		if (gpx_x + TILE_SZ < RasterX)
+			gpx_x += (1 << tile.Level) * TILE_SZ;
 
-		int read_y = -int.Min(0, y);
-		int write_y = int.Max(0, y);
-		int size_y = int.Min(TILE_SZ - read_y, Height - y);
+		//Pixel coordinate to read the tile's data, relative to the tile's top-left corner.
+		int read_x = int.Max(0, RasterX - gpx_x);
+		int read_y = int.Max(0, RasterY - gpx_y);
+
+		//Pixel coordinate to write the data, relative to output dataset's top-left corner.
+		int write_x = gpx_x + read_x - RasterX;
+		int write_y = gpx_y + read_y - RasterY;
+
+		//Raster dimensions to read/write
+		int size_x = int.Min(TILE_SZ - read_x, Width - write_x);
+		int size_y = int.Min(TILE_SZ - read_y, Height - write_y);
+
+		if (size_x <= 0 || size_y <= 0)
+			return;
 
 		int bandCount = image.RasterCount;
 		var bandMap = Enumerable.Range(1, bandCount).ToArray();

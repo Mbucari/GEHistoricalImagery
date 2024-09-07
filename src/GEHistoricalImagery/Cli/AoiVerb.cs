@@ -40,18 +40,7 @@ internal abstract class AoiVerb : OptionsBase
 				errorMessage = $"Invalid rectangle.\r\n {e.Message}";
 			}
 			if (errorMessage != null)
-			{
 				yield return errorMessage;
-				yield break;
-			}
-
-			var ll = LowerLeft.Value.GetTile(ZoomLevel);
-			var ur = UpperRight.Value.GetTile(ZoomLevel);
-
-			if (ll.Column == ur.Column)
-				yield return $"Selected region spaons only 1 column. Currently unsupported.";
-			if (ll.Row == ur.Row)
-				yield return $"Selected region spaons only 1 row. Currently unsupported.";
 		}
 	}
 }

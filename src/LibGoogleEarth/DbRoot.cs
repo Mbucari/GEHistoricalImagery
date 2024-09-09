@@ -202,7 +202,7 @@ public class DbRoot
 		if (!TryGetDecompressBufferSize(packet, out var decompSz))
 			throw new InvalidDataException("Failed to determine packet size.");
 
-		var decompressed = new byte[decompSz];
+		var decompressed = GC.AllocateUninitializedArray<byte>(decompSz);
 		using var compressedStream = new MemoryStream(packet[kPacketCompressHdrSize..], writable: false);
 
 		using (var outputStream = new MemoryStream(decompressed))

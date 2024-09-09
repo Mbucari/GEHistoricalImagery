@@ -98,7 +98,7 @@ internal class EarthImage : IDisposable
 		int bandCount = image.RasterCount;
 		var bandMap = Enumerable.Range(1, bandCount).ToArray();
 
-		var buff2 = new byte[size_x * size_y * bandCount];
+		var buff2 = GC.AllocateUninitializedArray<byte>(size_x * size_y * bandCount);
 		image.ReadRaster(read_x, read_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 		TempDataset.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}

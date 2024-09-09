@@ -75,7 +75,7 @@ internal class Download : AoiVerb
 
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
-		
+
 		var root = await DbRoot.CreateAsync();
 		var desiredDate = Date!.Value;
 		var tempFile = Path.GetTempFileName();
@@ -164,7 +164,7 @@ internal class Download : AoiVerb
 		TileDataset emptyDataset() => new()
 		{
 			Tile = tile,
-			Message = $"No imagery available for tile at {tile.LowerLeft}"
+			Message = $"No imagery available for tile at {tile.Center}"
 		};
 	}
 

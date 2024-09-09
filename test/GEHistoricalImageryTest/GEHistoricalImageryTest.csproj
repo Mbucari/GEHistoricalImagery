@@ -3,6 +3,7 @@
   <PropertyGroup>
 	<TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>

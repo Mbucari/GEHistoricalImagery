@@ -5,21 +5,21 @@ namespace LibGoogleEarthTest;
 [TestClass]
 public class TileTests
 {
-	private const int MAX_WOX_COL_SZ = (1 << Tile.MaxLevel) - 1;
+	private const int MAX_ROX_COL_SZ = (1 << Tile.MaxLevel) - 1;
 
 	[DataTestMethod]
-	[DataRow(0,0,0, "0")]
-	[DataRow(0,0,1, "00")]
-	[DataRow(0,1,1, "01")]
-	[DataRow(1,1,1, "02")]
-	[DataRow(1,0,1, "03")]
-	[DataRow(1,0,1, "03")]
+	[DataRow(0, 0, 0, "0")]
+	[DataRow(0, 0, 1, "00")]
+	[DataRow(0, 1, 1, "01")]
+	[DataRow(1, 1, 1, "02")]
+	[DataRow(1, 0, 1, "03")]
+	[DataRow(1, 0, 1, "03")]
 	[DataRow((1 << 10) - 1, 0, 10, "03333333333")]
 	[DataRow(0, (1 << 10) - 1, 10, "01111111111")]
 	[DataRow((1 << 10) - 1, (1 << 10) - 1, 10, "02222222222")]
-	[DataRow(MAX_WOX_COL_SZ, 0, Tile.MaxLevel, "0333333333333333333333333333333")]
-	[DataRow(0, MAX_WOX_COL_SZ, Tile.MaxLevel, "0111111111111111111111111111111")]
-	[DataRow(MAX_WOX_COL_SZ, MAX_WOX_COL_SZ, Tile.MaxLevel, "0222222222222222222222222222222")]
+	[DataRow(MAX_ROX_COL_SZ, 0, Tile.MaxLevel, "0333333333333333333333333333333")]
+	[DataRow(0, MAX_ROX_COL_SZ, Tile.MaxLevel, "0111111111111111111111111111111")]
+	[DataRow(MAX_ROX_COL_SZ, MAX_ROX_COL_SZ, Tile.MaxLevel, "0222222222222222222222222222222")]
 
 	/*
 	   c0    c1
@@ -41,9 +41,9 @@ r0	|  0  |  1  |
 	=> rowCol * 360d / (1 << level) - 180;
 
 	[DataTestMethod]
-	[DataRow(0,0,-1)]
-	[DataRow(0,-1,0)]
-	[DataRow(-1,0,0)]
+	[DataRow(0, 0, -1)]
+	[DataRow(0, -1, 0)]
+	[DataRow(-1, 0, 0)]
 	[DataRow(1 << 10, 0, 10)]
 	[DataRow(0, 1 << 10, 10)]
 	[DataRow(0, 0, 31)]

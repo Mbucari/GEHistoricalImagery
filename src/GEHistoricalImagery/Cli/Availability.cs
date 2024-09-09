@@ -10,12 +10,12 @@ internal class Availability : AoiVerb
 	[Option('p', "parallel", HelpText = "Number of concurrent downloads", MetaValue = "N", Default = 20)]
 	public int ConcurrentDownload { get; set; }
 
-	static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
+	private static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	public override async Task RunAsync()
 	{
 		bool hasError = false;
-		
+
 		foreach (var errorMessage in GetAoiErrors())
 		{
 			Console.Error.WriteLine(errorMessage);
@@ -32,7 +32,7 @@ internal class Availability : AoiVerb
 
 		if (all.Length == 0)
 		{
-			Console.Error.WriteLine($"No dataed imagery available at zoom level {ZoomLevel}");
+			Console.Error.WriteLine($"No dated imagery available at zoom level {ZoomLevel}");
 			return;
 		}
 
@@ -43,8 +43,8 @@ internal class Availability : AoiVerb
 		else
 			await WaitForMultiCharSelection(root, all);
 	}
-	
-	async Task WaitForSingleCharSelection(DbRoot root, DateOnly[] dates)
+
+	private async Task WaitForSingleCharSelection(DbRoot root, DateOnly[] dates)
 	{
 		const string finalOption = "[Esc]  Exit";
 		char[][] array = [];
@@ -60,7 +60,7 @@ internal class Availability : AoiVerb
 				Console.WriteLine("\r\n" + availabilityStr);
 				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 
-				array = await DrawAvailability(root, Aoi, date);
+				array = await DrawAvailability(root, date);
 
 				foreach (var ca in array)
 					Console.WriteLine(new string(ca));
@@ -71,7 +71,7 @@ internal class Availability : AoiVerb
 		}
 	}
 
-	async Task WaitForMultiCharSelection(DbRoot root, DateOnly[] dates)
+	private async Task WaitForMultiCharSelection(DbRoot root, DateOnly[] dates)
 	{
 		const string finalOption = "[E]  Exit";
 		char[][] array = [];
@@ -83,7 +83,7 @@ internal class Availability : AoiVerb
 		WriteDateOptions(printableDict, finalOption);
 		while (Console.ReadLine() is string key && !string.Equals(key, "E", StringComparison.OrdinalIgnoreCase))
 		{
-			if (key != null && int.TryParse(key, out var selectedInt) && selectedInt >=0 && selectedInt < dates.Length)
+			if (key != null && int.TryParse(key, out var selectedInt) && selectedInt >= 0 && selectedInt < dates.Length)
 			{
 				var date = dates[selectedInt];
 				var availabilityStr = $"Tile availability on {DateString(date)}";
@@ -91,7 +91,7 @@ internal class Availability : AoiVerb
 				Console.WriteLine("\r\n" + availabilityStr);
 				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 
-				array = await DrawAvailability(root, Aoi, date);
+				array = await DrawAvailability(root, date);
 
 				foreach (var ca in array)
 					Console.WriteLine(new string(ca));
@@ -102,7 +102,7 @@ internal class Availability : AoiVerb
 		}
 	}
 
-	void WriteDateOptions<T>(IEnumerable<KeyValuePair<T,DateOnly>> dateDict, string finalOption) where T : notnull
+	private static void WriteDateOptions<T>(IEnumerable<KeyValuePair<T, DateOnly>> dateDict, string finalOption) where T : notnull
 	{
 		const string spacer = "  ";
 
@@ -121,10 +121,10 @@ internal class Availability : AoiVerb
 			Console.WriteLine();
 	}
 
-	private async Task<char[][]> DrawAvailability(DbRoot root, Rectangle aoi, DateOnly date)
+	private async Task<char[][]> DrawAvailability(DbRoot root, DateOnly date)
 	{
-		var ll = aoi.LowerLeft.GetTile(ZoomLevel);
-		var ur = aoi.UpperRight.GetTile(ZoomLevel);
+		var ll = Aoi.LowerLeft.GetTile(ZoomLevel);
+		var ur = Aoi.UpperRight.GetTile(ZoomLevel);
 
 		var width = ur.Column - ll.Column + 1;
 		var height = ur.Row - ll.Row + 1;

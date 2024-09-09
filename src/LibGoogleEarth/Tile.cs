@@ -14,7 +14,7 @@ public class Tile
 	public int SubIndex { get; }
 	/// <summary> Indicates if this instances represents the root quadtree node. </summary>
 	public bool IsRoot => Path == Root.Path;
-	/// <summary> Enumerates all qusd tree indices after the root node. </summary>
+	/// <summary> Enumerates all quad tree indices after the root node. </summary>
 	public IEnumerable<Tile> Indices => EnumerateIndices();
 
 	/*
@@ -121,8 +121,6 @@ r0	|  0  |  1  |
 	{
 		for (int end = SUBINDEX_MAX_SZ; end < Path.Length; end += SUBINDEX_MAX_SZ)
 			yield return new Tile(Path[..end]);
-		StringSplitOptions options = StringSplitOptions.None;
-		options.HasFlag(StringSplitOptions.RemoveEmptyEntries);
 	}
 	public override string ToString() => Path;
 	public override int GetHashCode() => Path.GetHashCode();
@@ -131,8 +129,8 @@ r0	|  0  |  1  |
 	/// <summary>
 	/// Gets the number of columns between teo <see cref="Tile"/>s. May span 180/-180
 	/// </summary>
-	/// <param name="leftTile">The left (western) <see cref="Tile"/> of the riegion</param>
-	/// <param name="rightTile">The right (eastern) <see cref="Tile"/> of the riegion</param>
+	/// <param name="leftTile">The left (western) <see cref="Tile"/> of the region</param>
+	/// <param name="rightTile">The right (eastern) <see cref="Tile"/> of the region</param>
 	/// <returns>The column span</returns>
 	/// <exception cref="ArgumentException">thrown if boh <see cref="Tile"/>s do not have the same <see cref="Tile.Level"/></exception>
 	public static int ColumnSpan(Tile leftTile, Tile rightTile)
@@ -173,7 +171,6 @@ r0	|  0  |  1  |
 	//
 	// The mangling of the second row is controlled by a parameter to the
 	// constructor.
-
 
 	private static int GetSubIndex(string quadTreePath)
 	{

@@ -39,7 +39,7 @@ public class QtPathTest
 			Assert.AreEqual(SubIndexDict[iStr], p.SubIndex);
 			Assert.AreEqual(qtPath, p.Path);
 			for (int j = 0; j < 4; j++)
-			{	
+			{
 				var jStr = iStr + j;
 				qtPath = qtIndex + jStr;
 				p = new Tile(qtPath);
@@ -111,9 +111,9 @@ public class QtPathTest
 	[DataRow("10001304")]
 	[DataRow(" 02322")]
 	[DataRow("")]
-	public void BadPaths(string qtpath)
+	public void BadPaths(string quadTreePath)
 	{
-		Assert.ThrowsException<ArgumentException>(() => new Tile(qtpath));
+		Assert.ThrowsException<ArgumentException>(() => new Tile(quadTreePath));
 	}
 
 	[TestMethod]
@@ -144,7 +144,7 @@ public class QtPathTest
 		}
 	}
 
-	private static readonly Random random = new Random();
+	private static readonly Random random = new();
 	private static string RandomQuadTreePath(int length)
 	{
 		char[] path = new char[length];

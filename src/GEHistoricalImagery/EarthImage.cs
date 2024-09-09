@@ -7,7 +7,7 @@ namespace GEHistoricalImagery;
 internal class EarthImage : IDisposable
 {
 	private const int TILE_SZ = 256;
-	const string WGS_1984_WKT = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+	private const string WGS_1984_WKT = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
 	public int Width { get; }
 	public int Height { get; }
 
@@ -111,8 +111,8 @@ internal class EarthImage : IDisposable
 
 		if (outSR != null)
 		{
-			var parameters = new string[]
-			{
+			string[] parameters =
+			[
 				"-multi",
 				"-wo", $"NUM_THREADS={cpuCount}",
 				"-of", "GTiff",
@@ -123,18 +123,18 @@ internal class EarthImage : IDisposable
 				"-r", "bilinear",
 				"-s_srs", WGS_1984_WKT,
 				"-t_srs", outSR
-			};
+			];
 			using var options = new GDALWarpAppOptions(parameters);
 			saved = Gdal.Warp(path, [TempDataset], options, reportProgress, null);
 		}
 		else
 		{
-			var parameters = new string[]
-			{
+			string[] parameters =
+			[
 				"COMPRESS=JPEG",
 				"PHOTOMETRIC=YCBCR",
 				$"NUM_THREADS={cpuCount}"
-			};
+			];
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
 			saved = tifDriver.CreateCopy(path, TempDataset, 1, parameters, reportProgress, null);
 		}

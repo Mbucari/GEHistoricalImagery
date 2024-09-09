@@ -25,7 +25,7 @@ internal class Program
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Info))]
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Availability))]
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Download))]
-	static async Task Main(string[] args)
+	private static async Task Main(string[] args)
 	{
 		var parser = new Parser(ConfigureParser);
 

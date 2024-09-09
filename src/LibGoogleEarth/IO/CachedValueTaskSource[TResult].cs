@@ -29,7 +29,8 @@ internal class CachedValueTaskSource<TResult>(int capacity)
 		public ValueTask<TResult> GetValueTask() => new(Task);
 	}
 
-	/// <summary>Provides the core logic for implementing a <see cref="IValueTaskSource{TResult}"/>.</summary>
+	/// <summary>Provides the core logic for implementing a <see cref="IValueTaskSource{TResult}"/>.
+	/// Cribbed from <see cref="ManualResetValueTaskSourceCore{TResult}"/></summary>
 	/// <typeparam name="TResult">Specifies the type of results of the operation represented by this instance.</typeparam>
 	private class ValueTaskSource : ITaskCompletionSource<TResult>, IValueTaskSource<TResult>
 	{
@@ -134,7 +135,7 @@ internal class CachedValueTaskSource<TResult>(int capacity)
 			}
 
 			// Operation already completed, so we need to queue the supplied callback.
-			// At this point the storedContinuation should be the sentinal; if it's not, the instance was misused.
+			// At this point the storedContinuation should be the sentinel; if it's not, the instance was misused.
 			Debug.Assert(storedContinuation is not null, $"{nameof(storedContinuation)} is null");
 			ThreadPool.QueueUserWorkItem(continuation, state, preferLocal: true);
 		}

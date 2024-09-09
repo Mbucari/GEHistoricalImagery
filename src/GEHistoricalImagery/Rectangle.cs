@@ -24,9 +24,9 @@ internal readonly struct Rectangle
 			throw new ArgumentException($"Invalid geographic coordinate {lowerLeft}", nameof(lowerLeft));
 		if (!upperRight.IsValidGeographicCoordinate)
 			throw new ArgumentException($"Invalid geographic coordinate {upperRight}", nameof(upperRight));
-		if (lowerLeft.Latitude >=  upperRight.Latitude)
+		if (lowerLeft.Latitude >= upperRight.Latitude)
 			throw new ArgumentException($"{nameof(lowerLeft)} is not south of {nameof(upperRight)}");
-		if (lowerLeft.Longitude ==  upperRight.Longitude)
+		if (lowerLeft.Longitude == upperRight.Longitude)
 			throw new ArgumentException($"{nameof(lowerLeft)} and {nameof(upperRight)} have the same longitude");
 
 		LowerLeft = lowerLeft;

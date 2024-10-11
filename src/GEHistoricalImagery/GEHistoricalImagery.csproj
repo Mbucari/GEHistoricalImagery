@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <OutputType>Exe</OutputType>
+	<OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<Version>0.1.6.0</Version>
+	<Version>0.1.7.0</Version>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	<SelfContained>true</SelfContained>
 	<PublishAot>true</PublishAot>

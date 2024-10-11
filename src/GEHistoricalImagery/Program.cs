@@ -25,12 +25,20 @@ internal class Program
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Info))]
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Availability))]
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Download))]
+	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Dump))]
 	private static async Task Main(string[] args)
 	{
 		var parser = new Parser(ConfigureParser);
 
-		var result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download));
+		var result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
 
-		await result.WithParsedAsync<OptionsBase>(opt => opt.RunAsync());
+		try
+		{
+			await result.WithParsedAsync<OptionsBase>(opt => opt.RunAsync());
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine("An error occurred:\r\n\r\n" + ex.ToString());
+		}
 	}
 }

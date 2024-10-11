@@ -6,10 +6,10 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class AoiVerb : OptionsBase
 {
-	[Option("lower-left", Required = true, HelpText = "Geographic location", MetaValue = "LAT,LONG")]
+	[Option("lower-left", Required = true, HelpText = "Geographic coordinate of the lower-left (southwest) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
 	public Coordinate? LowerLeft { get; set; }
 
-	[Option("upper-right", Required = true, HelpText = "Geographic location", MetaValue = "LAT,LONG")]
+	[Option("upper-right", Required = true, HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
 	public Coordinate? UpperRight { get; set; }
 
 	[Option('z', "zoom", HelpText = "Zoom level [1-24]", MetaValue = "N", Required = true)]

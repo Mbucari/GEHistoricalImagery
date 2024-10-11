@@ -8,9 +8,11 @@ Tiles that are available from a specific date are shaded, and unavailable tiles 
 ```Console
 GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG] --zoom [N] [--parallel [N]]
 
-  --lower-left=LAT,LONG     Required. Geographic location
+  --lower-left=LAT,LONG     Required. Geographic coordinate of the lower-left (southwest) corner of the rectangular area
+                            of interest.
 
-  --upper-right=LAT,LONG    Required. Geographic location
+  --upper-right=LAT,LONG    Required. Geographic coordinate of the upper-right (northeast) corner of the rectangular
+                            area of interest.
 
   -z N, --zoom=N            Required. Zoom level [1-24]
   
@@ -146,4 +148,4 @@ Tile availability on 2021/05/17
 ```
 
 ************************
-<p align="center"><i>Updated 2024/9/4</i></p>
+<p align="center"><i>Updated 2024/10/11</i></p>

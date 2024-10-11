@@ -15,6 +15,7 @@ GEHistoricalImagery is a utility for downloading historical aerial imagery from 
 |[info](https://github.com/Mbucari/GEHistoricalImagery/blob/master/docs/info.md)|Get imagery info at a specified location.|
 |[availability](https://github.com/Mbucari/GEHistoricalImagery/blob/master/docs/availability.md)|Get imagery date availability in a specified region.|
 |[download](https://github.com/Mbucari/GEHistoricalImagery/blob/master/docs/download.md)|Download historical imagery.|
+|[dump](https://github.com/Mbucari/GEHistoricalImagery/blob/master/docs/dump.md)|Dump historical image tiles into a folder.|
 
 ************************
 <p align="center"><i>Updated 2024/9/4</i></p>

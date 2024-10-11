@@ -39,7 +39,7 @@ Loading Quad Tree Packets: Done!
 From here you can select different dates to display the imagery availability.
 
 ### Availability Map 1 - Imagery from 2024/06/05
-This diagram, shown by pressing `0` in the console, shows the tils with available imagery from 2024/06/05. The shaded areas represent tiles which contain imagery for the selected date. The entire region is shaded, so imagery from 2024/06/05 is available for all tiles within the region.
+This diagram, shown by pressing `0` in the console, shows the tiles with available imagery from 2024/06/05. The shaded areas represent tiles which contain imagery for the selected date. The entire region is shaded, so imagery from 2024/06/05 is available for all tiles within the region.
 
 ```console
 Tile availability on 2024/06/05
@@ -75,7 +75,7 @@ Tile availability on 2024/06/05
 ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 ```
 ### Availability Map 2 - Imagery from 2023/04/29
-This diagram, shown by pressing `3` in the console, shows the tils with available imagery from 2023/04/29. The shaded areas represent tiles which contain imagery for the selected date, and the dots represent tiles which have no imagery for the selected date. The right ~70% of this region is shaded, so only that area has imagery from 2023/04/29.
+This diagram, shown by pressing `3` in the console, shows the tiles with available imagery from 2023/04/29. The shaded areas represent tiles which contain imagery for the selected date, and the dots represent tiles which have no imagery for the selected date. The right ~70% of this region is shaded, so only that area has imagery from 2023/04/29.
 
 ```console
 Tile availability on 2023/04/29
@@ -111,7 +111,7 @@ Tile availability on 2023/04/29
 ::::::::::::::::::::::::::::▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 ```
 ### Availability Map 3 - Imagery from 2021/05/17
-This diagram, shown by pressing `5` in the console, shows the tils with available imagery from 2021/08/17. The shaded areas represent tiles which contain imagery for the selected date, and the dots represent tiles which have no imagery for the selected date. Only a narrow L-shaped region is shaded, so the majority of this region has no imagery from 2021/08/17.
+This diagram, shown by pressing `5` in the console, shows the tiles with available imagery from 2021/08/17. The shaded areas represent tiles which contain imagery for the selected date, and the dots represent tiles which have no imagery for the selected date. Only a narrow L-shaped region is shaded, so the majority of this region has no imagery from 2021/08/17.
 
 ```console
 Tile availability on 2021/05/17

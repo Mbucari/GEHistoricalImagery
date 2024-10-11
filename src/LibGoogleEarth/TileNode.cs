@@ -9,15 +9,27 @@ public class TileNode
 {
 	private const int MIN_JPEG_DATE = 545;
 	/// <summary> The Google Earth quadtree node </summary>
-	public QuadtreeNode QuadtreeNode { get; }
+	public IQuadtreeNode QuadtreeNode { get; }
 	/// <summary> The <see cref="LibGoogleEarth.Tile"/> associated with the <see cref="QuadtreeNode"/> </summary>
 	public Tile Tile { get; }
 
-	internal TileNode(Tile tile, QuadtreeNode quadtreeNode)
+	internal TileNode(Tile tile, IQuadtreeNode quadtreeNode)
 	{
 		QuadtreeNode = quadtreeNode;
 		Tile = tile;
 	}
+
+	public bool HasTerrain()
+	=> QuadtreeNode.Layer.Any(l => l.Type is QuadtreeLayer.Types.LayerType.Terrain);
+
+	public TerrainTile? GetTerrain()
+	{
+		var terrainLayer = QuadtreeNode.Layer.SingleOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Terrain);
+
+		return terrainLayer == null ? null
+			: new TerrainTile(Tile, terrainLayer);
+	}
+
 
 	/// <summary>
 	/// Determines whether this quadtree node has imagery available from a specific date.
@@ -32,8 +44,11 @@ public class TileNode
 	/// </summary>
 	public IEnumerable<DatedTile> GetAllDatedTiles()
 	{
+		if (QuadtreeNode is not QuadtreeNode node)
+			yield break;
+
 		var datesLayer
-			= QuadtreeNode
+			= node
 			?.Layer
 			?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.ImageryHistory)
 			?.DatesLayer
@@ -49,7 +64,7 @@ public class TileNode
 			else if (dt.Provider != 0)
 				yield return new DatedTile(Tile, dt);
 			//When Provider is zero, that tile's imagery is being used as the default and is in the Imagery layer.
-			else if (QuadtreeNode?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery)
+			else if (node?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery)
 				yield return new DatedTile(Tile, dt.DateOnly, regImagery);
 		}
 	}

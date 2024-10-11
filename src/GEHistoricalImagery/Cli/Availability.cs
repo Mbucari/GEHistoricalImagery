@@ -24,7 +24,7 @@ internal class Availability : AoiVerb
 
 		if (hasError) return;
 
-		var root = await DbRoot.CreateAsync();
+		var root = await DbRoot.CreateAsync(Database.TimeMachine);
 		Console.Write("Loading Quad Tree Packets: ");
 
 		var all = await GetAllDatesAsync(root, Aoi, ZoomLevel);

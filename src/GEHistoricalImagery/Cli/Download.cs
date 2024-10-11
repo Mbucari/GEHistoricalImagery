@@ -76,7 +76,7 @@ internal class Download : AoiVerb
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
 
-		var root = await DbRoot.CreateAsync();
+		var root = await DbRoot.CreateAsync(Database.TimeMachine);
 		var desiredDate = Date!.Value;
 		var tempFile = Path.GetTempFileName();
 		int tileCount = Aoi.GetTileCount(ZoomLevel);
@@ -140,11 +140,14 @@ internal class Download : AoiVerb
 
 		var tempFilename = Path.GetTempFileName();
 
-		foreach (var dd in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
+		foreach (var dt in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
 		{
 			try
 			{
-				var imageBts = await root.DownloadBytesAsync(dd.ImageUrl);
+				var imageBts = await root.GetEarthAssetAsync(dt);
+				if (imageBts == null)
+					continue;
+
 				await File.WriteAllBytesAsync(tempFilename, imageBts);
 
 				return new()
@@ -152,7 +155,7 @@ internal class Download : AoiVerb
 					Tile = tile,
 					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, []),
 					FileName = tempFilename,
-					Message = dd.Date == desiredDate ? null : $"Substituting imagery from {DateString(dd.Date)} for tile at {tile.Center}"
+					Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
 				};
 			}
 			catch (HttpRequestException)

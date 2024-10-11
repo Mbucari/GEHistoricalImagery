@@ -27,7 +27,7 @@ internal class Info : OptionsBase
 
 		Console.WriteLine($"Dated Imagery at {Coordinate}");
 
-		var root = await DbRoot.CreateAsync();
+		var root = await DbRoot.CreateAsync(Database.TimeMachine);
 
 		int startLevel = ZoomLevel ?? 1;
 		int endLevel = ZoomLevel ?? 24;

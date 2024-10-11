@@ -1,8 +1,8 @@
-﻿using Google.Protobuf;
-using Keyhole;
+﻿using Keyhole;
 using Keyhole.Dbroot;
 using LibGoogleEarth.IO;
 using Microsoft.Extensions.Caching.Memory;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -10,44 +10,57 @@ using System.Text;
 
 namespace LibGoogleEarth;
 
+public enum Database
+{
+	Default,
+	TimeMachine,
+	Sky,
+	Moon,
+	Mars
+}
+
 /// <summary>
 /// A Google earth database instance
 /// </summary>
-public class DbRoot
+public abstract class DbRoot
 {
 	private static readonly HttpClient HttpClient = new();
-	private const string QP2_URL = "https://khmdb.google.com/flatfile?db=tm&qp-{0}-q.{1}";
-	private const string DBROOT_URL = "https://khmdb.google.com/dbRoot.v5?db=tm&hl=en&gl=us&output=proto";
+
 	/// <summary> The database's local cache directory </summary>
 	public DirectoryInfo CacheDir { get; }
 	/// <summary>  The keyhole DbRoot protocol buffer  </summary>
 	public DbRootProto DbRootBuffer { get; }
+	/// <summary> The google earth database </summary>
+	public abstract Database Database { get; }
 	private ReadOnlyMemory<byte> EncryptionData { get; }
 	private MemoryCache PacketCache { get; } = new MemoryCache(new MemoryCacheOptions());
 
-	private DbRoot(DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
+	protected DbRoot(DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
 	{
 		CacheDir = cacheDir;
 		EncryptionData = dbRootEnc.EncryptionData.Memory;
 		var bts = dbRootEnc.DbrootData.ToByteArray();
 		Decrypt(bts);
-		DbRootBuffer = DecodeBufferInternal(DbRootProto.Parser, bts);
+		DbRootBuffer = DbRootProto.Parser.ParseFrom(DecompressBuffer(bts));
 	}
+
 
 	/// <summary>
 	/// Create a new instance of the Google Earth database
 	/// </summary>
 	/// <param name="cacheDir">path to the cache directory. (default is .\cache\</param>
 	/// <returns>A new instance of the Google Earth database</returns>
-	public static async Task<DbRoot> CreateAsync(string cacheDir = ".\\cache")
+	public static async Task<DbRoot> CreateAsync(Database database, string cacheDir = "./cache")
 	{
-		var uri = new Uri(DBROOT_URL);
+		var url = database is Database.Default ? DefaultDbRoot.DatabaseUrl : NamedDbRoot.DatabaseUrl(database);
+
+		var uri = new Uri(url);
 
 		var cacheDirInfo = new DirectoryInfo(cacheDir);
 		cacheDirInfo.Create();
 
 		using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-		var dbRootFile = new FileInfo(Path.Combine(cacheDirInfo.FullName, Path.GetFileName(uri.AbsolutePath)));
+		var dbRootFile = new FileInfo(Path.Combine(cacheDirInfo.FullName, Path.GetFileName(uri.AbsolutePath) + "_" + database.ToString()));
 
 		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(dbRootFile.FullName));
 
@@ -77,8 +90,11 @@ public class DbRoot
 				Console.Error.WriteLine(ex.Message);
 			}
 		}
+		var proto = EncryptedDbRootProto.Parser.ParseFrom(dbRootBts);
 
-		return new DbRoot(cacheDirInfo, EncryptedDbRootProto.Parser.ParseFrom(dbRootBts));
+		return database is Database.Default
+			? new DefaultDbRoot(cacheDirInfo, proto)
+			: new NamedDbRoot(database, cacheDirInfo, proto);
 	}
 
 	/// <summary>
@@ -90,17 +106,32 @@ public class DbRoot
 	{
 		var packet = await GetQuadtreePacketAsync(tile);
 		return
-			packet?.SparseQuadtreeNode?.SingleOrDefault(n => n.Index == tile.SubIndex)?.Node is QuadtreeNode n
+			packet?.SparseQuadtreeNode?.SingleOrDefault(n => n.Index == tile.SubIndex)?.Node is IQuadtreeNode n
 			? new TileNode(tile, n)
 			: null;
 	}
+
+
+	[return: NotNullIfNotNull(nameof(terrainTile))]
+	public async Task<T?> GetEarthAssetAsync<T>(IEarthAsset<T>? terrainTile)
+	{
+		if (terrainTile is null)
+			return default;
+
+		var rawAsset = await DownloadBytesAsync(terrainTile.AssetUrl);
+		if (terrainTile.Compressed)
+			rawAsset = DecompressBuffer(rawAsset);
+
+		return terrainTile.Decode(rawAsset);
+	}
+
 
 	/// <summary>
 	/// Gets a <see cref="QuadtreePacket"/> which references a specified <see cref="Tile"/>
 	/// </summary>
 	/// <param name="tile">The tile to get</param>
 	/// <returns>The <see cref="QuadtreePacket"/> which references the <see cref="TileNode"/></returns>
-	public async Task<QuadtreePacket?> GetQuadtreePacketAsync(Tile tile)
+	private async Task<IQuadtreePacket?> GetQuadtreePacketAsync(Tile tile)
 	{
 		var packet = await GetRootCachedAsync();
 
@@ -116,19 +147,19 @@ public class DbRoot
 		return packet;
 	}
 
-	private async Task<QuadtreePacket?> GetRootCachedAsync()
+	private async Task<IQuadtreePacket?> GetRootCachedAsync()
 	{
 		return await PacketCache.GetOrCreateAsync(Tile.Root, loadRootPacketAsync);
 
-		async Task<QuadtreePacket> loadRootPacketAsync(ICacheEntry _)
+		async Task<IQuadtreePacket> loadRootPacketAsync(ICacheEntry _)
 			=> await GetPacketAsync(Tile.Root, (int)DbRootBuffer.DatabaseVersion.QuadtreeVersion);
 	}
 
-	private async Task<QuadtreePacket?> GetChildCachedAsync(QuadtreePacket parentPacket, Tile path)
+	private async Task<IQuadtreePacket?> GetChildCachedAsync(IQuadtreePacket parentPacket, Tile path)
 	{
 		return await PacketCache.GetOrCreateAsync(path, loadChildPacketAsync);
 
-		async Task<QuadtreePacket?> loadChildPacketAsync(ICacheEntry _)
+		async Task<IQuadtreePacket?> loadChildPacketAsync(ICacheEntry _)
 		{
 			var childNode
 				= parentPacket.SparseQuadtreeNode
@@ -142,19 +173,14 @@ public class DbRoot
 		}
 	}
 
-	private async Task<QuadtreePacket> GetPacketAsync(Tile path, int epoch)
-	{
-		byte[] packetData = await DownloadBytesAsync(string.Format(QP2_URL, path, epoch));
-
-		return DecodeBufferInternal(QuadtreePacket.Parser, packetData);
-	}
+	protected abstract Task<IQuadtreePacket> GetPacketAsync(Tile path, int epoch);
 
 	/// <summary>
 	/// Download, decrypt and cache a file from Google Earth.
 	/// </summary>
 	/// <param name="url">The Google Earth asset Url</param>
 	/// <returns>The decrypted asset's bytes</returns>
-	public async Task<byte[]> DownloadBytesAsync(string url)
+	protected async Task<byte[]> DownloadBytesAsync(string url)
 	{
 		var uri = new Uri(url);
 		var fileName = Path.Combine(CacheDir.FullName, Path.GetFileName(uri.PathAndQuery.Replace('?', '-')));
@@ -165,7 +191,9 @@ public class DbRoot
 		else
 		{
 			var data = await HttpClient.GetByteArrayAsync(uri);
-			Decrypt(data);
+			bool decrypt = true;
+			if (decrypt)
+				Decrypt(data);
 
 			try
 			{
@@ -195,24 +223,25 @@ public class DbRoot
 		}
 	}
 
-	private static T DecodeBufferInternal<T>(MessageParser<T> parser, byte[] packet) where T : IMessage<T>
+	protected static byte[] DecompressBuffer(byte[] compressedPacket)
 	{
 		const int kPacketCompressHdrSize = 8;
 
-		if (!TryGetDecompressBufferSize(packet, out var decompSz))
+		if (!tryGetDecompressBufferSize(compressedPacket, out var decompSz))
 			throw new InvalidDataException("Failed to determine packet size.");
 
 		var decompressed = GC.AllocateUninitializedArray<byte>(decompSz);
-		using var compressedStream = new MemoryStream(packet[kPacketCompressHdrSize..], writable: false);
+		using var compressedStream = new MemoryStream(compressedPacket[kPacketCompressHdrSize..], writable: false);
 
 		using (var outputStream = new MemoryStream(decompressed))
 		{
 			using var decompressor = new ZLibStream(compressedStream, CompressionMode.Decompress);
 			decompressor.CopyTo(outputStream);
 		}
-		return parser.ParseFrom(decompressed);
 
-		static bool TryGetDecompressBufferSize(ReadOnlySpan<byte> buff, out int decompSz)
+		return decompressed;
+
+		static bool tryGetDecompressBufferSize(ReadOnlySpan<byte> buff, out int decompSz)
 		{
 			const uint kPktMagic = 0x7468deadu;
 			const uint kPktMagicSwap = 0xadde6874u;

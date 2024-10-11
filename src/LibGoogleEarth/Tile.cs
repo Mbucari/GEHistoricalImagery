@@ -43,7 +43,7 @@ r0	|  0  |  1  |
 	/// <param name="quadTreePath">The rooted quadtree path string.</param>
 	public Tile(string quadTreePath)
 	{
-		ValidateQuadTreePath(quadTreePath);
+		Util.ValidateQuadTreePath(quadTreePath);
 
 		Path = quadTreePath;
 		SubIndex = GetSubIndex(Path);
@@ -68,11 +68,11 @@ r0	|  0  |  1  |
 	/// <param name="level">The <see cref="Tile"/>'s zoom level</param>
 	public Tile(int rowIndex, int colIndex, int level)
 	{
-		Util.ValidateLevel(level);
+		var numTiles = Util.ValidateLevel(level);
 		ArgumentOutOfRangeException.ThrowIfNegative(rowIndex, nameof(rowIndex));
 		ArgumentOutOfRangeException.ThrowIfNegative(colIndex, nameof(colIndex));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(rowIndex, (1 << level) - 1, nameof(rowIndex));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(colIndex, (1 << level) - 1, nameof(colIndex));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(rowIndex, numTiles - 1, nameof(rowIndex));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(colIndex, numTiles - 1, nameof(colIndex));
 
 		Row = rowIndex;
 		Column = colIndex;
@@ -90,19 +90,14 @@ r0	|  0  |  1  |
 		}
 
 		Path = new string(chars);
-		ValidateQuadTreePath(Path);
+		Util.ValidateQuadTreePath(Path);
 		SubIndex = GetSubIndex(Path);
 	}
 	#endregion
 
 	#region Coordinates
 	private double RowColToLatLong(double rowCol)
-	{
-		int numTiles = 1 << Level;
-		ArgumentOutOfRangeException.ThrowIfNegative(rowCol, nameof(rowCol));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(rowCol, numTiles, nameof(rowCol));
-		return rowCol * 360d / numTiles - 180;
-	}
+		=> Util.RowColToLatLong(Level, rowCol);
 
 	/// <summary> The lower-left (southwest) <see cref="Coordinate"/> of this <see cref="Tile"/> </summary>
 	public Coordinate LowerLeft => new(RowColToLatLong(Row), RowColToLatLong(Column));
@@ -175,48 +170,12 @@ r0	|  0  |  1  |
 	private static int GetSubIndex(string quadTreePath)
 	{
 		return quadTreePath.Length <= SUBINDEX_MAX_SZ
-			? getRootSubIndex(quadTreePath)
-			: getSubIndex(getSubindexPath());
+			? Util.GetRootSubIndex(quadTreePath)
+			: Util.GetTreeSubIndex(getSubindexPath());
 
 		string getSubindexPath()
 			=> quadTreePath.Substring((quadTreePath.Length - 1) / SUBINDEX_MAX_SZ * SUBINDEX_MAX_SZ);
-
-		static int getSubIndex(string quadTreePath)
-			=> getRootSubIndex(quadTreePath) + (quadTreePath[0] - 0x30) * 85 + 1;
-
-		static int getRootSubIndex(string quadTreePath)
-		{
-			ValidatePathCharacters(quadTreePath);
-			ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTreePath.Length, SUBINDEX_MAX_SZ, nameof(quadTreePath));
-
-			int subIndex = 0;
-
-			for (int i = 1; i < quadTreePath.Length; i++)
-			{
-				subIndex *= SUBINDEX_MAX_SZ;
-				subIndex += quadTreePath[i] - 0x30 + 1;
-			}
-			return subIndex;
-		}
 	}
 	#endregion
 
-	#region Validation
-
-	[StackTraceHidden]
-	private static void ValidateQuadTreePath([NotNull] string? quadTreePath)
-	{
-		ValidatePathCharacters(quadTreePath);
-		if (quadTreePath[0] != '0')
-			throw new ArgumentException("All quadtree paths must begin with a '0'", nameof(quadTreePath));
-	}
-
-	[StackTraceHidden]
-	private static void ValidatePathCharacters([NotNull] string? quadTreePath)
-	{
-		ArgumentException.ThrowIfNullOrEmpty(quadTreePath, nameof(quadTreePath));
-		if (quadTreePath?.All(c => c is '0' or '1' or '2' or '3') is not true)
-			throw new ArgumentException("Quad Tree Path can only contain the characters '0', '1', '2', and '3'", nameof(quadTreePath));
-	}
-	#endregion
 }

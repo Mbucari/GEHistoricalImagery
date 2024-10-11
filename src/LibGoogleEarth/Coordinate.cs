@@ -22,15 +22,7 @@ public readonly struct Coordinate
 	/// <param name="level">The <see cref="Tile"/>'s zoom level</param>
 	public Tile GetTile(int level)
 	{
-		Util.ValidateLevel(level);
-		return new(LatLongToRowCol(Latitude, level), LatLongToRowCol(Longitude, level), level);
-	}
-
-	private static int LatLongToRowCol(double latLong, int level)
-	{
-		int numTiles = 1 << level;
-		int rowCol = (int)Math.Floor((latLong + 180) / 360 * numTiles);
-		return Math.Min(rowCol, numTiles - 1);
+		return new(Util.LatLongToRowCol(Latitude, level), Util.LatLongToRowCol(Longitude, level), level);
 	}
 
 	/// <summary>

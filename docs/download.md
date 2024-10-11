@@ -6,7 +6,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
 ## Usage
 ```Console
- GEHistoricalImagery download --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]]
+ GEHistoricalImagery download --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]] [--scale [S]] [--offset-x [X]] [--offset-y [Y]] [--scale-first]
 
   --lower-left=LAT,LONG                   Required. Geographic location
 
@@ -14,7 +14,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
   -z N, --zoom=N                          Required. Zoom level [1-24]
 
-  -d 10/23/2023, --date=10/23/2023        Required. Imagery Date
+  -d yyyy/MM/dd, --date=yyyy/MM/dd        Required. Imagery Date
 
   -o out.tif, --output=out.tif            Required. Output GeoTiff save location
 

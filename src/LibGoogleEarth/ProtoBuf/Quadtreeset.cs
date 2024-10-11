@@ -14,56 +14,56 @@ namespace Keyhole {
   /// <summary>Holder for reflection information generated from quadtreeset.protodevel</summary>
   public static partial class QuadtreesetReflection {
 
-    #region Descriptor
-    /// <summary>File descriptor for quadtreeset.protodevel</summary>
-    public static pbr::FileDescriptor Descriptor {
-      get { return descriptor; }
-    }
-    private static pbr::FileDescriptor descriptor;
+	#region Descriptor
+	/// <summary>File descriptor for quadtreeset.protodevel</summary>
+	public static pbr::FileDescriptor Descriptor {
+	  get { return descriptor; }
+	}
+	private static pbr::FileDescriptor descriptor;
 
-    static QuadtreesetReflection() {
-      byte[] descriptorData = global::System.Convert.FromBase64String(
-            "ChZxdWFkdHJlZXNldC5wcm90b2RldmVsEgdrZXlob2xlIjYKD1F1YWR0cmVl" +
-            "Q2hhbm5lbBIMCgR0eXBlGAEgAigFEhUKDWNoYW5uZWxfZXBvY2gYAiACKAUi" +
-            "XAoYUXVhZHRyZWVJbWFnZXJ5VGltZWRUaWxlEhQKDG1pbGxpc2Vjb25kcxgB" +
-            "IAIoBRIYChB0aW1lZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMg" +
-            "ASgFIowBChhRdWFkdHJlZUltYWdlcnlEYXRlZFRpbGUSDAoEZGF0ZRgBIAIo" +
-            "BRIYChBkYXRlZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMgAigF" +
-            "EjYKC3RpbWVkX3RpbGVzGAQgAygLMiEua2V5aG9sZS5RdWFkdHJlZUltYWdl" +
-            "cnlUaW1lZFRpbGUipAEKFFF1YWR0cmVlSW1hZ2VyeURhdGVzEjUKCmRhdGVk" +
-            "X3RpbGUYASADKAsyIS5rZXlob2xlLlF1YWR0cmVlSW1hZ2VyeURhdGVkVGls" +
-            "ZRIYChBzaGFyZWRfdGlsZV9kYXRlGAIgASgFEhkKEWNvYXJzZV90aWxlX2Rh" +
-            "dGVzGAMgAygFEiAKGHNoYXJlZF90aWxlX21pbGxpc2Vjb25kcxgEIAEoBSKO" +
-            "AgoNUXVhZHRyZWVMYXllchIuCgR0eXBlGAEgAigOMiAua2V5aG9sZS5RdWFk" +
-            "dHJlZUxheWVyLkxheWVyVHlwZRITCgtsYXllcl9lcG9jaBgCIAIoBRIQCghw" +
-            "cm92aWRlchgDIAEoBRIyCgtkYXRlc19sYXllchgEIAEoCzIdLmtleWhvbGUu" +
-            "UXVhZHRyZWVJbWFnZXJ5RGF0ZXMicgoJTGF5ZXJUeXBlEhYKEkxBWUVSX1RZ" +
-            "UEVfSU1BR0VSWRAAEhYKEkxBWUVSX1RZUEVfVEVSUkFJThABEhUKEUxBWUVS" +
-            "X1RZUEVfVkVDVE9SEAISHgoaTEFZRVJfVFlQRV9JTUFHRVJZX0hJU1RPUlkQ" +
-            "AyKkAgoMUXVhZHRyZWVOb2RlEg0KBWZsYWdzGAEgASgFEhgKEGNhY2hlX25v" +
-            "ZGVfZXBvY2gYAiABKAUSJQoFbGF5ZXIYAyADKAsyFi5rZXlob2xlLlF1YWR0" +
-            "cmVlTGF5ZXISKQoHY2hhbm5lbBgEIAMoCzIYLmtleWhvbGUuUXVhZHRyZWVD" +
-            "aGFubmVsIpgBCglOb2RlRmxhZ3MSGgoWTk9ERV9GTEFHU19DSElMRF9DT1VO" +
-            "VBAEEhgKFE5PREVfRkxBR1NfQ0FDSEVfQklUEAQSGwoXTk9ERV9GTEFHU19E" +
-            "UkFXQUJMRV9CSVQQBRIYChROT0RFX0ZMQUdTX0lNQUdFX0JJVBAGEhoKFk5P" +
-            "REVfRkxBR1NfVEVSUkFJTl9CSVQQBxoCEAEiuAEKDlF1YWR0cmVlUGFja2V0" +
-            "EhQKDHBhY2tldF9lcG9jaBgBIAIoBRJGChJzcGFyc2VxdWFkdHJlZW5vZGUY" +
-            "AiADKAoyKi5rZXlob2xlLlF1YWR0cmVlUGFja2V0LlNwYXJzZVF1YWR0cmVl" +
-            "Tm9kZRpIChJTcGFyc2VRdWFkdHJlZU5vZGUSDQoFaW5kZXgYAyACKAUSIwoE" +
-            "Tm9kZRgEIAIoCzIVLmtleWhvbGUuUXVhZHRyZWVOb2Rl");
-      descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeChannel), global::Keyhole.QuadtreeChannel.Parser, new[]{ "Type", "ChannelEpoch" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeImageryTimedTile), global::Keyhole.QuadtreeImageryTimedTile.Parser, new[]{ "Milliseconds", "TimedTileEpoch", "Provider" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeImageryDatedTile), global::Keyhole.QuadtreeImageryDatedTile.Parser, new[]{ "Date", "DatedTileEpoch", "Provider", "TimedTiles" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeImageryDates), global::Keyhole.QuadtreeImageryDates.Parser, new[]{ "DatedTile", "SharedTileDate", "CoarseTileDates", "SharedTileMilliseconds" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeLayer), global::Keyhole.QuadtreeLayer.Parser, new[]{ "Type", "LayerEpoch", "Provider", "DatesLayer" }, null, new[]{ typeof(global::Keyhole.QuadtreeLayer.Types.LayerType) }, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeNode), global::Keyhole.QuadtreeNode.Parser, new[]{ "Flags", "CacheNodeEpoch", "Layer", "Channel" }, null, new[]{ typeof(global::Keyhole.QuadtreeNode.Types.NodeFlags) }, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreePacket), global::Keyhole.QuadtreePacket.Parser, new[]{ "PacketEpoch", "SparseQuadtreeNode" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode), global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode.Parser, new[]{ "Index", "Node" }, null, null, null, null)})
-          }));
-    }
-    #endregion
+	static QuadtreesetReflection() {
+	  byte[] descriptorData = global::System.Convert.FromBase64String(
+			"ChZxdWFkdHJlZXNldC5wcm90b2RldmVsEgdrZXlob2xlIjYKD1F1YWR0cmVl" +
+			"Q2hhbm5lbBIMCgR0eXBlGAEgAigFEhUKDWNoYW5uZWxfZXBvY2gYAiACKAUi" +
+			"XAoYUXVhZHRyZWVJbWFnZXJ5VGltZWRUaWxlEhQKDG1pbGxpc2Vjb25kcxgB" +
+			"IAIoBRIYChB0aW1lZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMg" +
+			"ASgFIowBChhRdWFkdHJlZUltYWdlcnlEYXRlZFRpbGUSDAoEZGF0ZRgBIAIo" +
+			"BRIYChBkYXRlZF90aWxlX2Vwb2NoGAIgAigFEhAKCHByb3ZpZGVyGAMgAigF" +
+			"EjYKC3RpbWVkX3RpbGVzGAQgAygLMiEua2V5aG9sZS5RdWFkdHJlZUltYWdl" +
+			"cnlUaW1lZFRpbGUipAEKFFF1YWR0cmVlSW1hZ2VyeURhdGVzEjUKCmRhdGVk" +
+			"X3RpbGUYASADKAsyIS5rZXlob2xlLlF1YWR0cmVlSW1hZ2VyeURhdGVkVGls" +
+			"ZRIYChBzaGFyZWRfdGlsZV9kYXRlGAIgASgFEhkKEWNvYXJzZV90aWxlX2Rh" +
+			"dGVzGAMgAygFEiAKGHNoYXJlZF90aWxlX21pbGxpc2Vjb25kcxgEIAEoBSKO" +
+			"AgoNUXVhZHRyZWVMYXllchIuCgR0eXBlGAEgAigOMiAua2V5aG9sZS5RdWFk" +
+			"dHJlZUxheWVyLkxheWVyVHlwZRITCgtsYXllcl9lcG9jaBgCIAIoBRIQCghw" +
+			"cm92aWRlchgDIAEoBRIyCgtkYXRlc19sYXllchgEIAEoCzIdLmtleWhvbGUu" +
+			"UXVhZHRyZWVJbWFnZXJ5RGF0ZXMicgoJTGF5ZXJUeXBlEhYKEkxBWUVSX1RZ" +
+			"UEVfSU1BR0VSWRAAEhYKEkxBWUVSX1RZUEVfVEVSUkFJThABEhUKEUxBWUVS" +
+			"X1RZUEVfVkVDVE9SEAISHgoaTEFZRVJfVFlQRV9JTUFHRVJZX0hJU1RPUlkQ" +
+			"AyKkAgoMUXVhZHRyZWVOb2RlEg0KBWZsYWdzGAEgASgFEhgKEGNhY2hlX25v" +
+			"ZGVfZXBvY2gYAiABKAUSJQoFbGF5ZXIYAyADKAsyFi5rZXlob2xlLlF1YWR0" +
+			"cmVlTGF5ZXISKQoHY2hhbm5lbBgEIAMoCzIYLmtleWhvbGUuUXVhZHRyZWVD" +
+			"aGFubmVsIpgBCglOb2RlRmxhZ3MSGgoWTk9ERV9GTEFHU19DSElMRF9DT1VO" +
+			"VBAEEhgKFE5PREVfRkxBR1NfQ0FDSEVfQklUEAQSGwoXTk9ERV9GTEFHU19E" +
+			"UkFXQUJMRV9CSVQQBRIYChROT0RFX0ZMQUdTX0lNQUdFX0JJVBAGEhoKFk5P" +
+			"REVfRkxBR1NfVEVSUkFJTl9CSVQQBxoCEAEiuAEKDlF1YWR0cmVlUGFja2V0" +
+			"EhQKDHBhY2tldF9lcG9jaBgBIAIoBRJGChJzcGFyc2VxdWFkdHJlZW5vZGUY" +
+			"AiADKAoyKi5rZXlob2xlLlF1YWR0cmVlUGFja2V0LlNwYXJzZVF1YWR0cmVl" +
+			"Tm9kZRpIChJTcGFyc2VRdWFkdHJlZU5vZGUSDQoFaW5kZXgYAyACKAUSIwoE" +
+			"Tm9kZRgEIAIoCzIVLmtleWhvbGUuUXVhZHRyZWVOb2Rl");
+	  descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
+		  new pbr::FileDescriptor[] { },
+		  new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeChannel), global::Keyhole.QuadtreeChannel.Parser, new[]{ "Type", "ChannelEpoch" }, null, null, null, null),
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeImageryTimedTile), global::Keyhole.QuadtreeImageryTimedTile.Parser, new[]{ "Milliseconds", "TimedTileEpoch", "Provider" }, null, null, null, null),
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeImageryDatedTile), global::Keyhole.QuadtreeImageryDatedTile.Parser, new[]{ "Date", "DatedTileEpoch", "Provider", "TimedTiles" }, null, null, null, null),
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeImageryDates), global::Keyhole.QuadtreeImageryDates.Parser, new[]{ "DatedTile", "SharedTileDate", "CoarseTileDates", "SharedTileMilliseconds" }, null, null, null, null),
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeLayer), global::Keyhole.QuadtreeLayer.Parser, new[]{ "Type", "LayerEpoch", "Provider", "DatesLayer" }, null, new[]{ typeof(global::Keyhole.QuadtreeLayer.Types.LayerType) }, null, null),
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreeNode), global::Keyhole.QuadtreeNode.Parser, new[]{ "Flags", "CacheNodeEpoch", "Layer", "Channel" }, null, new[]{ typeof(global::Keyhole.QuadtreeNode.Types.NodeFlags) }, null, null),
+			new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreePacket), global::Keyhole.QuadtreePacket.Parser, new[]{ "PacketEpoch", "SparseQuadtreeNode" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode), global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode.Parser, new[]{ "Index", "Node" }, null, null, null, null)})
+		  }));
+	}
+	#endregion
 
   }
   #region Messages
@@ -73,267 +73,267 @@ namespace Keyhole {
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeChannel : pb::IMessage<QuadtreeChannel>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreeChannel> _parser = new pb::MessageParser<QuadtreeChannel>(() => new QuadtreeChannel());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreeChannel> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreeChannel> _parser = new pb::MessageParser<QuadtreeChannel>(() => new QuadtreeChannel());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreeChannel> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[0]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[0]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeChannel() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeChannel() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeChannel(QuadtreeChannel other) : this() {
-      _hasBits0 = other._hasBits0;
-      type_ = other.type_;
-      channelEpoch_ = other.channelEpoch_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeChannel(QuadtreeChannel other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  type_ = other.type_;
+	  channelEpoch_ = other.channelEpoch_;
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeChannel Clone() {
-      return new QuadtreeChannel(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeChannel Clone() {
+	  return new QuadtreeChannel(this);
+	}
 
-    /// <summary>Field number for the "type" field.</summary>
-    public const int TypeFieldNumber = 1;
-    private readonly static int TypeDefaultValue = 0;
+	/// <summary>Field number for the "type" field.</summary>
+	public const int TypeFieldNumber = 1;
+	private readonly static int TypeDefaultValue = 0;
 
-    private int type_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Type {
-      get { if ((_hasBits0 & 1) != 0) { return type_; } else { return TypeDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        type_ = value;
-      }
-    }
-    /// <summary>Gets whether the "type" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasType {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "type" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearType() {
-      _hasBits0 &= ~1;
-    }
+	private int type_;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Type {
+	  get { if ((_hasBits0 & 1) != 0) { return type_; } else { return TypeDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		type_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "type" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasType {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "type" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearType() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "channel_epoch" field.</summary>
-    public const int ChannelEpochFieldNumber = 2;
-    private readonly static int ChannelEpochDefaultValue = 0;
+	/// <summary>Field number for the "channel_epoch" field.</summary>
+	public const int ChannelEpochFieldNumber = 2;
+	private readonly static int ChannelEpochDefaultValue = 0;
 
-    private int channelEpoch_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int ChannelEpoch {
-      get { if ((_hasBits0 & 2) != 0) { return channelEpoch_; } else { return ChannelEpochDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        channelEpoch_ = value;
-      }
-    }
-    /// <summary>Gets whether the "channel_epoch" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasChannelEpoch {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "channel_epoch" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearChannelEpoch() {
-      _hasBits0 &= ~2;
-    }
+	private int channelEpoch_;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int ChannelEpoch {
+	  get { if ((_hasBits0 & 2) != 0) { return channelEpoch_; } else { return ChannelEpochDefaultValue; } }
+	  set {
+		_hasBits0 |= 2;
+		channelEpoch_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "channel_epoch" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasChannelEpoch {
+	  get { return (_hasBits0 & 2) != 0; }
+	}
+	/// <summary>Clears the value of the "channel_epoch" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearChannelEpoch() {
+	  _hasBits0 &= ~2;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreeChannel);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreeChannel);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreeChannel other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Type != other.Type) return false;
-      if (ChannelEpoch != other.ChannelEpoch) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreeChannel other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if (Type != other.Type) return false;
+	  if (ChannelEpoch != other.ChannelEpoch) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasType) hash ^= Type.GetHashCode();
-      if (HasChannelEpoch) hash ^= ChannelEpoch.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  if (HasType) hash ^= Type.GetHashCode();
+	  if (HasChannelEpoch) hash ^= ChannelEpoch.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (HasType) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Type);
-      }
-      if (HasChannelEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(ChannelEpoch);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  if (HasType) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Type);
+	  }
+	  if (HasChannelEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(ChannelEpoch);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (HasType) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Type);
-      }
-      if (HasChannelEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(ChannelEpoch);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  if (HasType) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Type);
+	  }
+	  if (HasChannelEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(ChannelEpoch);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasType) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Type);
-      }
-      if (HasChannelEpoch) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ChannelEpoch);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  if (HasType) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Type);
+	  }
+	  if (HasChannelEpoch) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(ChannelEpoch);
+	  }
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreeChannel other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasType) {
-        Type = other.Type;
-      }
-      if (other.HasChannelEpoch) {
-        ChannelEpoch = other.ChannelEpoch;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreeChannel other) {
+	  if (other == null) {
+		return;
+	  }
+	  if (other.HasType) {
+		Type = other.Type;
+	  }
+	  if (other.HasChannelEpoch) {
+		ChannelEpoch = other.ChannelEpoch;
+	  }
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            Type = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            ChannelEpoch = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 8: {
+			Type = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			ChannelEpoch = input.ReadInt32();
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            Type = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            ChannelEpoch = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 8: {
+			Type = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			ChannelEpoch = input.ReadInt32();
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
   }
 
@@ -344,332 +344,332 @@ namespace Keyhole {
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeImageryTimedTile : pb::IMessage<QuadtreeImageryTimedTile>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreeImageryTimedTile> _parser = new pb::MessageParser<QuadtreeImageryTimedTile>(() => new QuadtreeImageryTimedTile());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreeImageryTimedTile> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreeImageryTimedTile> _parser = new pb::MessageParser<QuadtreeImageryTimedTile>(() => new QuadtreeImageryTimedTile());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreeImageryTimedTile> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[1]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[1]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryTimedTile() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryTimedTile() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryTimedTile(QuadtreeImageryTimedTile other) : this() {
-      _hasBits0 = other._hasBits0;
-      milliseconds_ = other.milliseconds_;
-      timedTileEpoch_ = other.timedTileEpoch_;
-      provider_ = other.provider_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryTimedTile(QuadtreeImageryTimedTile other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  milliseconds_ = other.milliseconds_;
+	  timedTileEpoch_ = other.timedTileEpoch_;
+	  provider_ = other.provider_;
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryTimedTile Clone() {
-      return new QuadtreeImageryTimedTile(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryTimedTile Clone() {
+	  return new QuadtreeImageryTimedTile(this);
+	}
 
-    /// <summary>Field number for the "milliseconds" field.</summary>
-    public const int MillisecondsFieldNumber = 1;
-    private readonly static int MillisecondsDefaultValue = 0;
+	/// <summary>Field number for the "milliseconds" field.</summary>
+	public const int MillisecondsFieldNumber = 1;
+	private readonly static int MillisecondsDefaultValue = 0;
 
-    private int milliseconds_;
-    /// <summary>
-    /// Milliseconds since midnight, have to be "required" to make legacy client
-    /// work.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Milliseconds {
-      get { if ((_hasBits0 & 1) != 0) { return milliseconds_; } else { return MillisecondsDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        milliseconds_ = value;
-      }
-    }
-    /// <summary>Gets whether the "milliseconds" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasMilliseconds {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "milliseconds" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearMilliseconds() {
-      _hasBits0 &= ~1;
-    }
+	private int milliseconds_;
+	/// <summary>
+	/// Milliseconds since midnight, have to be "required" to make legacy client
+	/// work.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Milliseconds {
+	  get { if ((_hasBits0 & 1) != 0) { return milliseconds_; } else { return MillisecondsDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		milliseconds_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "milliseconds" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasMilliseconds {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "milliseconds" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearMilliseconds() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "timed_tile_epoch" field.</summary>
-    public const int TimedTileEpochFieldNumber = 2;
-    private readonly static int TimedTileEpochDefaultValue = 0;
+	/// <summary>Field number for the "timed_tile_epoch" field.</summary>
+	public const int TimedTileEpochFieldNumber = 2;
+	private readonly static int TimedTileEpochDefaultValue = 0;
 
-    private int timedTileEpoch_;
-    /// <summary>
-    /// The version of the timed tile, exists if different from "dated_tile_epoch"
-    /// in "QuadtreeImageryDatedTile", have to be "required" to make legacy client
-    /// work.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int TimedTileEpoch {
-      get { if ((_hasBits0 & 2) != 0) { return timedTileEpoch_; } else { return TimedTileEpochDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        timedTileEpoch_ = value;
-      }
-    }
-    /// <summary>Gets whether the "timed_tile_epoch" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasTimedTileEpoch {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "timed_tile_epoch" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearTimedTileEpoch() {
-      _hasBits0 &= ~2;
-    }
+	private int timedTileEpoch_;
+	/// <summary>
+	/// The version of the timed tile, exists if different from "dated_tile_epoch"
+	/// in "QuadtreeImageryDatedTile", have to be "required" to make legacy client
+	/// work.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int TimedTileEpoch {
+	  get { if ((_hasBits0 & 2) != 0) { return timedTileEpoch_; } else { return TimedTileEpochDefaultValue; } }
+	  set {
+		_hasBits0 |= 2;
+		timedTileEpoch_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "timed_tile_epoch" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasTimedTileEpoch {
+	  get { return (_hasBits0 & 2) != 0; }
+	}
+	/// <summary>Clears the value of the "timed_tile_epoch" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearTimedTileEpoch() {
+	  _hasBits0 &= ~2;
+	}
 
-    /// <summary>Field number for the "provider" field.</summary>
-    public const int ProviderFieldNumber = 3;
-    private readonly static int ProviderDefaultValue = 0;
+	/// <summary>Field number for the "provider" field.</summary>
+	public const int ProviderFieldNumber = 3;
+	private readonly static int ProviderDefaultValue = 0;
 
-    private int provider_;
-    /// <summary>
-    /// The provider of the timed tile, exists if different from "provider" in
-    /// "QuadtreeImageryDatedTile".
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Provider {
-      get { if ((_hasBits0 & 4) != 0) { return provider_; } else { return ProviderDefaultValue; } }
-      set {
-        _hasBits0 |= 4;
-        provider_ = value;
-      }
-    }
-    /// <summary>Gets whether the "provider" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasProvider {
-      get { return (_hasBits0 & 4) != 0; }
-    }
-    /// <summary>Clears the value of the "provider" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearProvider() {
-      _hasBits0 &= ~4;
-    }
+	private int provider_;
+	/// <summary>
+	/// The provider of the timed tile, exists if different from "provider" in
+	/// "QuadtreeImageryDatedTile".
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Provider {
+	  get { if ((_hasBits0 & 4) != 0) { return provider_; } else { return ProviderDefaultValue; } }
+	  set {
+		_hasBits0 |= 4;
+		provider_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "provider" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasProvider {
+	  get { return (_hasBits0 & 4) != 0; }
+	}
+	/// <summary>Clears the value of the "provider" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearProvider() {
+	  _hasBits0 &= ~4;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreeImageryTimedTile);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreeImageryTimedTile);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreeImageryTimedTile other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Milliseconds != other.Milliseconds) return false;
-      if (TimedTileEpoch != other.TimedTileEpoch) return false;
-      if (Provider != other.Provider) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreeImageryTimedTile other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if (Milliseconds != other.Milliseconds) return false;
+	  if (TimedTileEpoch != other.TimedTileEpoch) return false;
+	  if (Provider != other.Provider) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasMilliseconds) hash ^= Milliseconds.GetHashCode();
-      if (HasTimedTileEpoch) hash ^= TimedTileEpoch.GetHashCode();
-      if (HasProvider) hash ^= Provider.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  if (HasMilliseconds) hash ^= Milliseconds.GetHashCode();
+	  if (HasTimedTileEpoch) hash ^= TimedTileEpoch.GetHashCode();
+	  if (HasProvider) hash ^= Provider.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (HasMilliseconds) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Milliseconds);
-      }
-      if (HasTimedTileEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(TimedTileEpoch);
-      }
-      if (HasProvider) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Provider);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  if (HasMilliseconds) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Milliseconds);
+	  }
+	  if (HasTimedTileEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(TimedTileEpoch);
+	  }
+	  if (HasProvider) {
+		output.WriteRawTag(24);
+		output.WriteInt32(Provider);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (HasMilliseconds) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Milliseconds);
-      }
-      if (HasTimedTileEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(TimedTileEpoch);
-      }
-      if (HasProvider) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Provider);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  if (HasMilliseconds) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Milliseconds);
+	  }
+	  if (HasTimedTileEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(TimedTileEpoch);
+	  }
+	  if (HasProvider) {
+		output.WriteRawTag(24);
+		output.WriteInt32(Provider);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasMilliseconds) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Milliseconds);
-      }
-      if (HasTimedTileEpoch) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TimedTileEpoch);
-      }
-      if (HasProvider) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Provider);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  if (HasMilliseconds) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Milliseconds);
+	  }
+	  if (HasTimedTileEpoch) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(TimedTileEpoch);
+	  }
+	  if (HasProvider) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Provider);
+	  }
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreeImageryTimedTile other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasMilliseconds) {
-        Milliseconds = other.Milliseconds;
-      }
-      if (other.HasTimedTileEpoch) {
-        TimedTileEpoch = other.TimedTileEpoch;
-      }
-      if (other.HasProvider) {
-        Provider = other.Provider;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreeImageryTimedTile other) {
+	  if (other == null) {
+		return;
+	  }
+	  if (other.HasMilliseconds) {
+		Milliseconds = other.Milliseconds;
+	  }
+	  if (other.HasTimedTileEpoch) {
+		TimedTileEpoch = other.TimedTileEpoch;
+	  }
+	  if (other.HasProvider) {
+		Provider = other.Provider;
+	  }
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            Milliseconds = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            TimedTileEpoch = input.ReadInt32();
-            break;
-          }
-          case 24: {
-            Provider = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 8: {
+			Milliseconds = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			TimedTileEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 24: {
+			Provider = input.ReadInt32();
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            Milliseconds = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            TimedTileEpoch = input.ReadInt32();
-            break;
-          }
-          case 24: {
-            Provider = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 8: {
+			Milliseconds = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			TimedTileEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 24: {
+			Provider = input.ReadInt32();
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
   }
 
@@ -688,1447 +688,1447 @@ namespace Keyhole {
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeImageryDatedTile : pb::IMessage<QuadtreeImageryDatedTile>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreeImageryDatedTile> _parser = new pb::MessageParser<QuadtreeImageryDatedTile>(() => new QuadtreeImageryDatedTile());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreeImageryDatedTile> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreeImageryDatedTile> _parser = new pb::MessageParser<QuadtreeImageryDatedTile>(() => new QuadtreeImageryDatedTile());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreeImageryDatedTile> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[2]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[2]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryDatedTile() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryDatedTile() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryDatedTile(QuadtreeImageryDatedTile other) : this() {
-      _hasBits0 = other._hasBits0;
-      date_ = other.date_;
-      datedTileEpoch_ = other.datedTileEpoch_;
-      provider_ = other.provider_;
-      timedTiles_ = other.timedTiles_.Clone();
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryDatedTile(QuadtreeImageryDatedTile other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  date_ = other.date_;
+	  datedTileEpoch_ = other.datedTileEpoch_;
+	  provider_ = other.provider_;
+	  timedTiles_ = other.timedTiles_.Clone();
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryDatedTile Clone() {
-      return new QuadtreeImageryDatedTile(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryDatedTile Clone() {
+	  return new QuadtreeImageryDatedTile(this);
+	}
 
-    /// <summary>Field number for the "date" field.</summary>
-    public const int DateFieldNumber = 1;
-    private readonly static int DateDefaultValue = 0;
+	/// <summary>Field number for the "date" field.</summary>
+	public const int DateFieldNumber = 1;
+	private readonly static int DateDefaultValue = 0;
 
-    private int date_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Date {
-      get { if ((_hasBits0 & 1) != 0) { return date_; } else { return DateDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        date_ = value;
-      }
-    }
-    /// <summary>Gets whether the "date" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasDate {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "date" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearDate() {
-      _hasBits0 &= ~1;
-    }
+	private int date_;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Date {
+	  get { if ((_hasBits0 & 1) != 0) { return date_; } else { return DateDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		date_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "date" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasDate {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "date" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearDate() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "dated_tile_epoch" field.</summary>
-    public const int DatedTileEpochFieldNumber = 2;
-    private readonly static int DatedTileEpochDefaultValue = 0;
+	/// <summary>Field number for the "dated_tile_epoch" field.</summary>
+	public const int DatedTileEpochFieldNumber = 2;
+	private readonly static int DatedTileEpochDefaultValue = 0;
 
-    private int datedTileEpoch_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int DatedTileEpoch {
-      get { if ((_hasBits0 & 2) != 0) { return datedTileEpoch_; } else { return DatedTileEpochDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        datedTileEpoch_ = value;
-      }
-    }
-    /// <summary>Gets whether the "dated_tile_epoch" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasDatedTileEpoch {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "dated_tile_epoch" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearDatedTileEpoch() {
-      _hasBits0 &= ~2;
-    }
+	private int datedTileEpoch_;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int DatedTileEpoch {
+	  get { if ((_hasBits0 & 2) != 0) { return datedTileEpoch_; } else { return DatedTileEpochDefaultValue; } }
+	  set {
+		_hasBits0 |= 2;
+		datedTileEpoch_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "dated_tile_epoch" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasDatedTileEpoch {
+	  get { return (_hasBits0 & 2) != 0; }
+	}
+	/// <summary>Clears the value of the "dated_tile_epoch" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearDatedTileEpoch() {
+	  _hasBits0 &= ~2;
+	}
 
-    /// <summary>Field number for the "provider" field.</summary>
-    public const int ProviderFieldNumber = 3;
-    private readonly static int ProviderDefaultValue = 0;
+	/// <summary>Field number for the "provider" field.</summary>
+	public const int ProviderFieldNumber = 3;
+	private readonly static int ProviderDefaultValue = 0;
 
-    private int provider_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Provider {
-      get { if ((_hasBits0 & 4) != 0) { return provider_; } else { return ProviderDefaultValue; } }
-      set {
-        _hasBits0 |= 4;
-        provider_ = value;
-      }
-    }
-    /// <summary>Gets whether the "provider" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasProvider {
-      get { return (_hasBits0 & 4) != 0; }
-    }
-    /// <summary>Clears the value of the "provider" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearProvider() {
-      _hasBits0 &= ~4;
-    }
+	private int provider_;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Provider {
+	  get { if ((_hasBits0 & 4) != 0) { return provider_; } else { return ProviderDefaultValue; } }
+	  set {
+		_hasBits0 |= 4;
+		provider_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "provider" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasProvider {
+	  get { return (_hasBits0 & 4) != 0; }
+	}
+	/// <summary>Clears the value of the "provider" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearProvider() {
+	  _hasBits0 &= ~4;
+	}
 
-    /// <summary>Field number for the "timed_tiles" field.</summary>
-    public const int TimedTilesFieldNumber = 4;
-    private static readonly pb::FieldCodec<global::Keyhole.QuadtreeImageryTimedTile> _repeated_timedTiles_codec
-        = pb::FieldCodec.ForMessage(34, global::Keyhole.QuadtreeImageryTimedTile.Parser);
-    private readonly pbc::RepeatedField<global::Keyhole.QuadtreeImageryTimedTile> timedTiles_ = new pbc::RepeatedField<global::Keyhole.QuadtreeImageryTimedTile>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::Keyhole.QuadtreeImageryTimedTile> TimedTiles {
-      get { return timedTiles_; }
-    }
+	/// <summary>Field number for the "timed_tiles" field.</summary>
+	public const int TimedTilesFieldNumber = 4;
+	private static readonly pb::FieldCodec<global::Keyhole.QuadtreeImageryTimedTile> _repeated_timedTiles_codec
+		= pb::FieldCodec.ForMessage(34, global::Keyhole.QuadtreeImageryTimedTile.Parser);
+	private readonly pbc::RepeatedField<global::Keyhole.QuadtreeImageryTimedTile> timedTiles_ = new pbc::RepeatedField<global::Keyhole.QuadtreeImageryTimedTile>();
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public pbc::RepeatedField<global::Keyhole.QuadtreeImageryTimedTile> TimedTiles {
+	  get { return timedTiles_; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreeImageryDatedTile);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreeImageryDatedTile);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreeImageryDatedTile other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Date != other.Date) return false;
-      if (DatedTileEpoch != other.DatedTileEpoch) return false;
-      if (Provider != other.Provider) return false;
-      if(!timedTiles_.Equals(other.timedTiles_)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreeImageryDatedTile other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if (Date != other.Date) return false;
+	  if (DatedTileEpoch != other.DatedTileEpoch) return false;
+	  if (Provider != other.Provider) return false;
+	  if(!timedTiles_.Equals(other.timedTiles_)) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasDate) hash ^= Date.GetHashCode();
-      if (HasDatedTileEpoch) hash ^= DatedTileEpoch.GetHashCode();
-      if (HasProvider) hash ^= Provider.GetHashCode();
-      hash ^= timedTiles_.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  if (HasDate) hash ^= Date.GetHashCode();
+	  if (HasDatedTileEpoch) hash ^= DatedTileEpoch.GetHashCode();
+	  if (HasProvider) hash ^= Provider.GetHashCode();
+	  hash ^= timedTiles_.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (HasDate) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Date);
-      }
-      if (HasDatedTileEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(DatedTileEpoch);
-      }
-      if (HasProvider) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Provider);
-      }
-      timedTiles_.WriteTo(output, _repeated_timedTiles_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  if (HasDate) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Date);
+	  }
+	  if (HasDatedTileEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(DatedTileEpoch);
+	  }
+	  if (HasProvider) {
+		output.WriteRawTag(24);
+		output.WriteInt32(Provider);
+	  }
+	  timedTiles_.WriteTo(output, _repeated_timedTiles_codec);
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (HasDate) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Date);
-      }
-      if (HasDatedTileEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(DatedTileEpoch);
-      }
-      if (HasProvider) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Provider);
-      }
-      timedTiles_.WriteTo(ref output, _repeated_timedTiles_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  if (HasDate) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Date);
+	  }
+	  if (HasDatedTileEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(DatedTileEpoch);
+	  }
+	  if (HasProvider) {
+		output.WriteRawTag(24);
+		output.WriteInt32(Provider);
+	  }
+	  timedTiles_.WriteTo(ref output, _repeated_timedTiles_codec);
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasDate) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Date);
-      }
-      if (HasDatedTileEpoch) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(DatedTileEpoch);
-      }
-      if (HasProvider) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Provider);
-      }
-      size += timedTiles_.CalculateSize(_repeated_timedTiles_codec);
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  if (HasDate) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Date);
+	  }
+	  if (HasDatedTileEpoch) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(DatedTileEpoch);
+	  }
+	  if (HasProvider) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Provider);
+	  }
+	  size += timedTiles_.CalculateSize(_repeated_timedTiles_codec);
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreeImageryDatedTile other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasDate) {
-        Date = other.Date;
-      }
-      if (other.HasDatedTileEpoch) {
-        DatedTileEpoch = other.DatedTileEpoch;
-      }
-      if (other.HasProvider) {
-        Provider = other.Provider;
-      }
-      timedTiles_.Add(other.timedTiles_);
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreeImageryDatedTile other) {
+	  if (other == null) {
+		return;
+	  }
+	  if (other.HasDate) {
+		Date = other.Date;
+	  }
+	  if (other.HasDatedTileEpoch) {
+		DatedTileEpoch = other.DatedTileEpoch;
+	  }
+	  if (other.HasProvider) {
+		Provider = other.Provider;
+	  }
+	  timedTiles_.Add(other.timedTiles_);
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            Date = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            DatedTileEpoch = input.ReadInt32();
-            break;
-          }
-          case 24: {
-            Provider = input.ReadInt32();
-            break;
-          }
-          case 34: {
-            timedTiles_.AddEntriesFrom(input, _repeated_timedTiles_codec);
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 8: {
+			Date = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			DatedTileEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 24: {
+			Provider = input.ReadInt32();
+			break;
+		  }
+		  case 34: {
+			timedTiles_.AddEntriesFrom(input, _repeated_timedTiles_codec);
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            Date = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            DatedTileEpoch = input.ReadInt32();
-            break;
-          }
-          case 24: {
-            Provider = input.ReadInt32();
-            break;
-          }
-          case 34: {
-            timedTiles_.AddEntriesFrom(ref input, _repeated_timedTiles_codec);
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 8: {
+			Date = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			DatedTileEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 24: {
+			Provider = input.ReadInt32();
+			break;
+		  }
+		  case 34: {
+			timedTiles_.AddEntriesFrom(ref input, _repeated_timedTiles_codec);
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeImageryDates : pb::IMessage<QuadtreeImageryDates>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreeImageryDates> _parser = new pb::MessageParser<QuadtreeImageryDates>(() => new QuadtreeImageryDates());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreeImageryDates> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreeImageryDates> _parser = new pb::MessageParser<QuadtreeImageryDates>(() => new QuadtreeImageryDates());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreeImageryDates> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[3]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[3]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryDates() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryDates() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryDates(QuadtreeImageryDates other) : this() {
-      _hasBits0 = other._hasBits0;
-      datedTile_ = other.datedTile_.Clone();
-      sharedTileDate_ = other.sharedTileDate_;
-      coarseTileDates_ = other.coarseTileDates_.Clone();
-      sharedTileMilliseconds_ = other.sharedTileMilliseconds_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryDates(QuadtreeImageryDates other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  datedTile_ = other.datedTile_.Clone();
+	  sharedTileDate_ = other.sharedTileDate_;
+	  coarseTileDates_ = other.coarseTileDates_.Clone();
+	  sharedTileMilliseconds_ = other.sharedTileMilliseconds_;
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeImageryDates Clone() {
-      return new QuadtreeImageryDates(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeImageryDates Clone() {
+	  return new QuadtreeImageryDates(this);
+	}
 
-    /// <summary>Field number for the "dated_tile" field.</summary>
-    public const int DatedTileFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::Keyhole.QuadtreeImageryDatedTile> _repeated_datedTile_codec
-        = pb::FieldCodec.ForMessage(10, global::Keyhole.QuadtreeImageryDatedTile.Parser);
-    private readonly pbc::RepeatedField<global::Keyhole.QuadtreeImageryDatedTile> datedTile_ = new pbc::RepeatedField<global::Keyhole.QuadtreeImageryDatedTile>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::Keyhole.QuadtreeImageryDatedTile> DatedTile {
-      get { return datedTile_; }
-    }
+	/// <summary>Field number for the "dated_tile" field.</summary>
+	public const int DatedTileFieldNumber = 1;
+	private static readonly pb::FieldCodec<global::Keyhole.QuadtreeImageryDatedTile> _repeated_datedTile_codec
+		= pb::FieldCodec.ForMessage(10, global::Keyhole.QuadtreeImageryDatedTile.Parser);
+	private readonly pbc::RepeatedField<global::Keyhole.QuadtreeImageryDatedTile> datedTile_ = new pbc::RepeatedField<global::Keyhole.QuadtreeImageryDatedTile>();
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public pbc::RepeatedField<global::Keyhole.QuadtreeImageryDatedTile> DatedTile {
+	  get { return datedTile_; }
+	}
 
-    /// <summary>Field number for the "shared_tile_date" field.</summary>
-    public const int SharedTileDateFieldNumber = 2;
-    private readonly static int SharedTileDateDefaultValue = 0;
+	/// <summary>Field number for the "shared_tile_date" field.</summary>
+	public const int SharedTileDateFieldNumber = 2;
+	private readonly static int SharedTileDateDefaultValue = 0;
 
-    private int sharedTileDate_;
-    /// <summary>
-    /// date of tile shared from keyhole
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int SharedTileDate {
-      get { if ((_hasBits0 & 1) != 0) { return sharedTileDate_; } else { return SharedTileDateDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        sharedTileDate_ = value;
-      }
-    }
-    /// <summary>Gets whether the "shared_tile_date" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasSharedTileDate {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "shared_tile_date" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearSharedTileDate() {
-      _hasBits0 &= ~1;
-    }
+	private int sharedTileDate_;
+	/// <summary>
+	/// date of tile shared from keyhole
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int SharedTileDate {
+	  get { if ((_hasBits0 & 1) != 0) { return sharedTileDate_; } else { return SharedTileDateDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		sharedTileDate_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "shared_tile_date" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasSharedTileDate {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "shared_tile_date" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearSharedTileDate() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "coarse_tile_dates" field.</summary>
-    public const int CoarseTileDatesFieldNumber = 3;
-    private static readonly pb::FieldCodec<int> _repeated_coarseTileDates_codec
-        = pb::FieldCodec.ForInt32(24);
-    private readonly pbc::RepeatedField<int> coarseTileDates_ = new pbc::RepeatedField<int>();
-    /// <summary>
-    /// Dates of tiles from coarser levels with assets that are visible in this
-    /// tile. Date is in JpegCommentDate::YearMonthDayKey format as an int.
-    /// These will be sorted in ascending order.
-    /// The dates here do not intersect the dates of tiles in dated_tile, but are
-    /// complement to them. "coarse_tile_dates" belong to tiles from upper levels
-    /// with coarser resolution and are not visible at current level. They exist
-    /// here to make user aware of different layers at upper level.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<int> CoarseTileDates {
-      get { return coarseTileDates_; }
-    }
+	/// <summary>Field number for the "coarse_tile_dates" field.</summary>
+	public const int CoarseTileDatesFieldNumber = 3;
+	private static readonly pb::FieldCodec<int> _repeated_coarseTileDates_codec
+		= pb::FieldCodec.ForInt32(24);
+	private readonly pbc::RepeatedField<int> coarseTileDates_ = new pbc::RepeatedField<int>();
+	/// <summary>
+	/// Dates of tiles from coarser levels with assets that are visible in this
+	/// tile. Date is in JpegCommentDate::YearMonthDayKey format as an int.
+	/// These will be sorted in ascending order.
+	/// The dates here do not intersect the dates of tiles in dated_tile, but are
+	/// complement to them. "coarse_tile_dates" belong to tiles from upper levels
+	/// with coarser resolution and are not visible at current level. They exist
+	/// here to make user aware of different layers at upper level.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public pbc::RepeatedField<int> CoarseTileDates {
+	  get { return coarseTileDates_; }
+	}
 
-    /// <summary>Field number for the "shared_tile_milliseconds" field.</summary>
-    public const int SharedTileMillisecondsFieldNumber = 4;
-    private readonly static int SharedTileMillisecondsDefaultValue = 0;
+	/// <summary>Field number for the "shared_tile_milliseconds" field.</summary>
+	public const int SharedTileMillisecondsFieldNumber = 4;
+	private readonly static int SharedTileMillisecondsDefaultValue = 0;
 
-    private int sharedTileMilliseconds_;
-    /// <summary>
-    /// Time (milliseconds from midnight) of tile shared from keyhole.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int SharedTileMilliseconds {
-      get { if ((_hasBits0 & 2) != 0) { return sharedTileMilliseconds_; } else { return SharedTileMillisecondsDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        sharedTileMilliseconds_ = value;
-      }
-    }
-    /// <summary>Gets whether the "shared_tile_milliseconds" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasSharedTileMilliseconds {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "shared_tile_milliseconds" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearSharedTileMilliseconds() {
-      _hasBits0 &= ~2;
-    }
+	private int sharedTileMilliseconds_;
+	/// <summary>
+	/// Time (milliseconds from midnight) of tile shared from keyhole.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int SharedTileMilliseconds {
+	  get { if ((_hasBits0 & 2) != 0) { return sharedTileMilliseconds_; } else { return SharedTileMillisecondsDefaultValue; } }
+	  set {
+		_hasBits0 |= 2;
+		sharedTileMilliseconds_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "shared_tile_milliseconds" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasSharedTileMilliseconds {
+	  get { return (_hasBits0 & 2) != 0; }
+	}
+	/// <summary>Clears the value of the "shared_tile_milliseconds" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearSharedTileMilliseconds() {
+	  _hasBits0 &= ~2;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreeImageryDates);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreeImageryDates);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreeImageryDates other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if(!datedTile_.Equals(other.datedTile_)) return false;
-      if (SharedTileDate != other.SharedTileDate) return false;
-      if(!coarseTileDates_.Equals(other.coarseTileDates_)) return false;
-      if (SharedTileMilliseconds != other.SharedTileMilliseconds) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreeImageryDates other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if(!datedTile_.Equals(other.datedTile_)) return false;
+	  if (SharedTileDate != other.SharedTileDate) return false;
+	  if(!coarseTileDates_.Equals(other.coarseTileDates_)) return false;
+	  if (SharedTileMilliseconds != other.SharedTileMilliseconds) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      hash ^= datedTile_.GetHashCode();
-      if (HasSharedTileDate) hash ^= SharedTileDate.GetHashCode();
-      hash ^= coarseTileDates_.GetHashCode();
-      if (HasSharedTileMilliseconds) hash ^= SharedTileMilliseconds.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  hash ^= datedTile_.GetHashCode();
+	  if (HasSharedTileDate) hash ^= SharedTileDate.GetHashCode();
+	  hash ^= coarseTileDates_.GetHashCode();
+	  if (HasSharedTileMilliseconds) hash ^= SharedTileMilliseconds.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      datedTile_.WriteTo(output, _repeated_datedTile_codec);
-      if (HasSharedTileDate) {
-        output.WriteRawTag(16);
-        output.WriteInt32(SharedTileDate);
-      }
-      coarseTileDates_.WriteTo(output, _repeated_coarseTileDates_codec);
-      if (HasSharedTileMilliseconds) {
-        output.WriteRawTag(32);
-        output.WriteInt32(SharedTileMilliseconds);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  datedTile_.WriteTo(output, _repeated_datedTile_codec);
+	  if (HasSharedTileDate) {
+		output.WriteRawTag(16);
+		output.WriteInt32(SharedTileDate);
+	  }
+	  coarseTileDates_.WriteTo(output, _repeated_coarseTileDates_codec);
+	  if (HasSharedTileMilliseconds) {
+		output.WriteRawTag(32);
+		output.WriteInt32(SharedTileMilliseconds);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      datedTile_.WriteTo(ref output, _repeated_datedTile_codec);
-      if (HasSharedTileDate) {
-        output.WriteRawTag(16);
-        output.WriteInt32(SharedTileDate);
-      }
-      coarseTileDates_.WriteTo(ref output, _repeated_coarseTileDates_codec);
-      if (HasSharedTileMilliseconds) {
-        output.WriteRawTag(32);
-        output.WriteInt32(SharedTileMilliseconds);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  datedTile_.WriteTo(ref output, _repeated_datedTile_codec);
+	  if (HasSharedTileDate) {
+		output.WriteRawTag(16);
+		output.WriteInt32(SharedTileDate);
+	  }
+	  coarseTileDates_.WriteTo(ref output, _repeated_coarseTileDates_codec);
+	  if (HasSharedTileMilliseconds) {
+		output.WriteRawTag(32);
+		output.WriteInt32(SharedTileMilliseconds);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      size += datedTile_.CalculateSize(_repeated_datedTile_codec);
-      if (HasSharedTileDate) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(SharedTileDate);
-      }
-      size += coarseTileDates_.CalculateSize(_repeated_coarseTileDates_codec);
-      if (HasSharedTileMilliseconds) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(SharedTileMilliseconds);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  size += datedTile_.CalculateSize(_repeated_datedTile_codec);
+	  if (HasSharedTileDate) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(SharedTileDate);
+	  }
+	  size += coarseTileDates_.CalculateSize(_repeated_coarseTileDates_codec);
+	  if (HasSharedTileMilliseconds) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(SharedTileMilliseconds);
+	  }
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreeImageryDates other) {
-      if (other == null) {
-        return;
-      }
-      datedTile_.Add(other.datedTile_);
-      if (other.HasSharedTileDate) {
-        SharedTileDate = other.SharedTileDate;
-      }
-      coarseTileDates_.Add(other.coarseTileDates_);
-      if (other.HasSharedTileMilliseconds) {
-        SharedTileMilliseconds = other.SharedTileMilliseconds;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreeImageryDates other) {
+	  if (other == null) {
+		return;
+	  }
+	  datedTile_.Add(other.datedTile_);
+	  if (other.HasSharedTileDate) {
+		SharedTileDate = other.SharedTileDate;
+	  }
+	  coarseTileDates_.Add(other.coarseTileDates_);
+	  if (other.HasSharedTileMilliseconds) {
+		SharedTileMilliseconds = other.SharedTileMilliseconds;
+	  }
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            datedTile_.AddEntriesFrom(input, _repeated_datedTile_codec);
-            break;
-          }
-          case 16: {
-            SharedTileDate = input.ReadInt32();
-            break;
-          }
-          case 26:
-          case 24: {
-            coarseTileDates_.AddEntriesFrom(input, _repeated_coarseTileDates_codec);
-            break;
-          }
-          case 32: {
-            SharedTileMilliseconds = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 10: {
+			datedTile_.AddEntriesFrom(input, _repeated_datedTile_codec);
+			break;
+		  }
+		  case 16: {
+			SharedTileDate = input.ReadInt32();
+			break;
+		  }
+		  case 26:
+		  case 24: {
+			coarseTileDates_.AddEntriesFrom(input, _repeated_coarseTileDates_codec);
+			break;
+		  }
+		  case 32: {
+			SharedTileMilliseconds = input.ReadInt32();
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 10: {
-            datedTile_.AddEntriesFrom(ref input, _repeated_datedTile_codec);
-            break;
-          }
-          case 16: {
-            SharedTileDate = input.ReadInt32();
-            break;
-          }
-          case 26:
-          case 24: {
-            coarseTileDates_.AddEntriesFrom(ref input, _repeated_coarseTileDates_codec);
-            break;
-          }
-          case 32: {
-            SharedTileMilliseconds = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 10: {
+			datedTile_.AddEntriesFrom(ref input, _repeated_datedTile_codec);
+			break;
+		  }
+		  case 16: {
+			SharedTileDate = input.ReadInt32();
+			break;
+		  }
+		  case 26:
+		  case 24: {
+			coarseTileDates_.AddEntriesFrom(ref input, _repeated_coarseTileDates_codec);
+			break;
+		  }
+		  case 32: {
+			SharedTileMilliseconds = input.ReadInt32();
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeLayer : pb::IMessage<QuadtreeLayer>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreeLayer> _parser = new pb::MessageParser<QuadtreeLayer>(() => new QuadtreeLayer());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreeLayer> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreeLayer> _parser = new pb::MessageParser<QuadtreeLayer>(() => new QuadtreeLayer());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreeLayer> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[4]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[4]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeLayer() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeLayer() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeLayer(QuadtreeLayer other) : this() {
-      _hasBits0 = other._hasBits0;
-      type_ = other.type_;
-      layerEpoch_ = other.layerEpoch_;
-      provider_ = other.provider_;
-      datesLayer_ = other.datesLayer_ != null ? other.datesLayer_.Clone() : null;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeLayer(QuadtreeLayer other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  type_ = other.type_;
+	  layerEpoch_ = other.layerEpoch_;
+	  provider_ = other.provider_;
+	  datesLayer_ = other.datesLayer_ != null ? other.datesLayer_.Clone() : null;
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeLayer Clone() {
-      return new QuadtreeLayer(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeLayer Clone() {
+	  return new QuadtreeLayer(this);
+	}
 
-    /// <summary>Field number for the "type" field.</summary>
-    public const int TypeFieldNumber = 1;
-    private readonly static global::Keyhole.QuadtreeLayer.Types.LayerType TypeDefaultValue = global::Keyhole.QuadtreeLayer.Types.LayerType.Imagery;
+	/// <summary>Field number for the "type" field.</summary>
+	public const int TypeFieldNumber = 1;
+	private readonly static global::Keyhole.QuadtreeLayer.Types.LayerType TypeDefaultValue = global::Keyhole.QuadtreeLayer.Types.LayerType.Imagery;
 
-    private global::Keyhole.QuadtreeLayer.Types.LayerType type_;
-    /// <summary>
-    /// type of this layer
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::Keyhole.QuadtreeLayer.Types.LayerType Type {
-      get { if ((_hasBits0 & 1) != 0) { return type_; } else { return TypeDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        type_ = value;
-      }
-    }
-    /// <summary>Gets whether the "type" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasType {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "type" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearType() {
-      _hasBits0 &= ~1;
-    }
+	private global::Keyhole.QuadtreeLayer.Types.LayerType type_;
+	/// <summary>
+	/// type of this layer
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public global::Keyhole.QuadtreeLayer.Types.LayerType Type {
+	  get { if ((_hasBits0 & 1) != 0) { return type_; } else { return TypeDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		type_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "type" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasType {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "type" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearType() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "layer_epoch" field.</summary>
-    public const int LayerEpochFieldNumber = 2;
-    private readonly static int LayerEpochDefaultValue = 0;
+	/// <summary>Field number for the "layer_epoch" field.</summary>
+	public const int LayerEpochFieldNumber = 2;
+	private readonly static int LayerEpochDefaultValue = 0;
 
-    private int layerEpoch_;
-    /// <summary>
-    /// epoch of this layer
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int LayerEpoch {
-      get { if ((_hasBits0 & 2) != 0) { return layerEpoch_; } else { return LayerEpochDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        layerEpoch_ = value;
-      }
-    }
-    /// <summary>Gets whether the "layer_epoch" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasLayerEpoch {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "layer_epoch" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearLayerEpoch() {
-      _hasBits0 &= ~2;
-    }
+	private int layerEpoch_;
+	/// <summary>
+	/// epoch of this layer
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int LayerEpoch {
+	  get { if ((_hasBits0 & 2) != 0) { return layerEpoch_; } else { return LayerEpochDefaultValue; } }
+	  set {
+		_hasBits0 |= 2;
+		layerEpoch_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "layer_epoch" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasLayerEpoch {
+	  get { return (_hasBits0 & 2) != 0; }
+	}
+	/// <summary>Clears the value of the "layer_epoch" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearLayerEpoch() {
+	  _hasBits0 &= ~2;
+	}
 
-    /// <summary>Field number for the "provider" field.</summary>
-    public const int ProviderFieldNumber = 3;
-    private readonly static int ProviderDefaultValue = 0;
+	/// <summary>Field number for the "provider" field.</summary>
+	public const int ProviderFieldNumber = 3;
+	private readonly static int ProviderDefaultValue = 0;
 
-    private int provider_;
-    /// <summary>
-    /// provider id for this layer
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Provider {
-      get { if ((_hasBits0 & 4) != 0) { return provider_; } else { return ProviderDefaultValue; } }
-      set {
-        _hasBits0 |= 4;
-        provider_ = value;
-      }
-    }
-    /// <summary>Gets whether the "provider" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasProvider {
-      get { return (_hasBits0 & 4) != 0; }
-    }
-    /// <summary>Clears the value of the "provider" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearProvider() {
-      _hasBits0 &= ~4;
-    }
+	private int provider_;
+	/// <summary>
+	/// provider id for this layer
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Provider {
+	  get { if ((_hasBits0 & 4) != 0) { return provider_; } else { return ProviderDefaultValue; } }
+	  set {
+		_hasBits0 |= 4;
+		provider_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "provider" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasProvider {
+	  get { return (_hasBits0 & 4) != 0; }
+	}
+	/// <summary>Clears the value of the "provider" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearProvider() {
+	  _hasBits0 &= ~4;
+	}
 
-    /// <summary>Field number for the "dates_layer" field.</summary>
-    public const int DatesLayerFieldNumber = 4;
-    private global::Keyhole.QuadtreeImageryDates datesLayer_;
-    /// <summary>
-    /// If there is additional information for a layer type, add it here:
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::Keyhole.QuadtreeImageryDates DatesLayer {
-      get { return datesLayer_; }
-      set {
-        datesLayer_ = value;
-      }
-    }
+	/// <summary>Field number for the "dates_layer" field.</summary>
+	public const int DatesLayerFieldNumber = 4;
+	private global::Keyhole.QuadtreeImageryDates datesLayer_;
+	/// <summary>
+	/// If there is additional information for a layer type, add it here:
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public global::Keyhole.QuadtreeImageryDates DatesLayer {
+	  get { return datesLayer_; }
+	  set {
+		datesLayer_ = value;
+	  }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreeLayer);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreeLayer);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreeLayer other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Type != other.Type) return false;
-      if (LayerEpoch != other.LayerEpoch) return false;
-      if (Provider != other.Provider) return false;
-      if (!object.Equals(DatesLayer, other.DatesLayer)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreeLayer other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if (Type != other.Type) return false;
+	  if (LayerEpoch != other.LayerEpoch) return false;
+	  if (Provider != other.Provider) return false;
+	  if (!object.Equals(DatesLayer, other.DatesLayer)) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasType) hash ^= Type.GetHashCode();
-      if (HasLayerEpoch) hash ^= LayerEpoch.GetHashCode();
-      if (HasProvider) hash ^= Provider.GetHashCode();
-      if (datesLayer_ != null) hash ^= DatesLayer.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  if (HasType) hash ^= Type.GetHashCode();
+	  if (HasLayerEpoch) hash ^= LayerEpoch.GetHashCode();
+	  if (HasProvider) hash ^= Provider.GetHashCode();
+	  if (datesLayer_ != null) hash ^= DatesLayer.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (HasType) {
-        output.WriteRawTag(8);
-        output.WriteEnum((int) Type);
-      }
-      if (HasLayerEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(LayerEpoch);
-      }
-      if (HasProvider) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Provider);
-      }
-      if (datesLayer_ != null) {
-        output.WriteRawTag(34);
-        output.WriteMessage(DatesLayer);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  if (HasType) {
+		output.WriteRawTag(8);
+		output.WriteEnum((int) Type);
+	  }
+	  if (HasLayerEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(LayerEpoch);
+	  }
+	  if (HasProvider) {
+		output.WriteRawTag(24);
+		output.WriteInt32(Provider);
+	  }
+	  if (datesLayer_ != null) {
+		output.WriteRawTag(34);
+		output.WriteMessage(DatesLayer);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (HasType) {
-        output.WriteRawTag(8);
-        output.WriteEnum((int) Type);
-      }
-      if (HasLayerEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(LayerEpoch);
-      }
-      if (HasProvider) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Provider);
-      }
-      if (datesLayer_ != null) {
-        output.WriteRawTag(34);
-        output.WriteMessage(DatesLayer);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  if (HasType) {
+		output.WriteRawTag(8);
+		output.WriteEnum((int) Type);
+	  }
+	  if (HasLayerEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(LayerEpoch);
+	  }
+	  if (HasProvider) {
+		output.WriteRawTag(24);
+		output.WriteInt32(Provider);
+	  }
+	  if (datesLayer_ != null) {
+		output.WriteRawTag(34);
+		output.WriteMessage(DatesLayer);
+	  }
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasType) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
-      }
-      if (HasLayerEpoch) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(LayerEpoch);
-      }
-      if (HasProvider) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Provider);
-      }
-      if (datesLayer_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(DatesLayer);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  if (HasType) {
+		size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
+	  }
+	  if (HasLayerEpoch) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(LayerEpoch);
+	  }
+	  if (HasProvider) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Provider);
+	  }
+	  if (datesLayer_ != null) {
+		size += 1 + pb::CodedOutputStream.ComputeMessageSize(DatesLayer);
+	  }
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreeLayer other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasType) {
-        Type = other.Type;
-      }
-      if (other.HasLayerEpoch) {
-        LayerEpoch = other.LayerEpoch;
-      }
-      if (other.HasProvider) {
-        Provider = other.Provider;
-      }
-      if (other.datesLayer_ != null) {
-        if (datesLayer_ == null) {
-          DatesLayer = new global::Keyhole.QuadtreeImageryDates();
-        }
-        DatesLayer.MergeFrom(other.DatesLayer);
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreeLayer other) {
+	  if (other == null) {
+		return;
+	  }
+	  if (other.HasType) {
+		Type = other.Type;
+	  }
+	  if (other.HasLayerEpoch) {
+		LayerEpoch = other.LayerEpoch;
+	  }
+	  if (other.HasProvider) {
+		Provider = other.Provider;
+	  }
+	  if (other.datesLayer_ != null) {
+		if (datesLayer_ == null) {
+		  DatesLayer = new global::Keyhole.QuadtreeImageryDates();
+		}
+		DatesLayer.MergeFrom(other.DatesLayer);
+	  }
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            Type = (global::Keyhole.QuadtreeLayer.Types.LayerType) input.ReadEnum();
-            break;
-          }
-          case 16: {
-            LayerEpoch = input.ReadInt32();
-            break;
-          }
-          case 24: {
-            Provider = input.ReadInt32();
-            break;
-          }
-          case 34: {
-            if (datesLayer_ == null) {
-              DatesLayer = new global::Keyhole.QuadtreeImageryDates();
-            }
-            input.ReadMessage(DatesLayer);
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 8: {
+			Type = (global::Keyhole.QuadtreeLayer.Types.LayerType) input.ReadEnum();
+			break;
+		  }
+		  case 16: {
+			LayerEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 24: {
+			Provider = input.ReadInt32();
+			break;
+		  }
+		  case 34: {
+			if (datesLayer_ == null) {
+			  DatesLayer = new global::Keyhole.QuadtreeImageryDates();
+			}
+			input.ReadMessage(DatesLayer);
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            Type = (global::Keyhole.QuadtreeLayer.Types.LayerType) input.ReadEnum();
-            break;
-          }
-          case 16: {
-            LayerEpoch = input.ReadInt32();
-            break;
-          }
-          case 24: {
-            Provider = input.ReadInt32();
-            break;
-          }
-          case 34: {
-            if (datesLayer_ == null) {
-              DatesLayer = new global::Keyhole.QuadtreeImageryDates();
-            }
-            input.ReadMessage(DatesLayer);
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 8: {
+			Type = (global::Keyhole.QuadtreeLayer.Types.LayerType) input.ReadEnum();
+			break;
+		  }
+		  case 16: {
+			LayerEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 24: {
+			Provider = input.ReadInt32();
+			break;
+		  }
+		  case 34: {
+			if (datesLayer_ == null) {
+			  DatesLayer = new global::Keyhole.QuadtreeImageryDates();
+			}
+			input.ReadMessage(DatesLayer);
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
-    #region Nested types
-    /// <summary>Container for nested types declared in the QuadtreeLayer message type.</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static partial class Types {
-      public enum LayerType {
-        [pbr::OriginalName("LAYER_TYPE_IMAGERY")] Imagery = 0,
-        [pbr::OriginalName("LAYER_TYPE_TERRAIN")] Terrain = 1,
-        [pbr::OriginalName("LAYER_TYPE_VECTOR")] Vector = 2,
-        [pbr::OriginalName("LAYER_TYPE_IMAGERY_HISTORY")] ImageryHistory = 3,
-      }
+	#region Nested types
+	/// <summary>Container for nested types declared in the QuadtreeLayer message type.</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static partial class Types {
+	  public enum LayerType {
+		[pbr::OriginalName("LAYER_TYPE_IMAGERY")] Imagery = 0,
+		[pbr::OriginalName("LAYER_TYPE_TERRAIN")] Terrain = 1,
+		[pbr::OriginalName("LAYER_TYPE_VECTOR")] Vector = 2,
+		[pbr::OriginalName("LAYER_TYPE_IMAGERY_HISTORY")] ImageryHistory = 3,
+	  }
 
-    }
-    #endregion
+	}
+	#endregion
 
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreeNode : pb::IMessage<QuadtreeNode>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreeNode> _parser = new pb::MessageParser<QuadtreeNode>(() => new QuadtreeNode());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreeNode> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreeNode> _parser = new pb::MessageParser<QuadtreeNode>(() => new QuadtreeNode());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreeNode> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[5]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[5]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeNode() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeNode() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeNode(QuadtreeNode other) : this() {
-      _hasBits0 = other._hasBits0;
-      flags_ = other.flags_;
-      cacheNodeEpoch_ = other.cacheNodeEpoch_;
-      layer_ = other.layer_.Clone();
-      channel_ = other.channel_.Clone();
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeNode(QuadtreeNode other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  flags_ = other.flags_;
+	  cacheNodeEpoch_ = other.cacheNodeEpoch_;
+	  layer_ = other.layer_.Clone();
+	  channel_ = other.channel_.Clone();
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreeNode Clone() {
-      return new QuadtreeNode(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreeNode Clone() {
+	  return new QuadtreeNode(this);
+	}
 
-    /// <summary>Field number for the "flags" field.</summary>
-    public const int FlagsFieldNumber = 1;
-    private readonly static int FlagsDefaultValue = 0;
+	/// <summary>Field number for the "flags" field.</summary>
+	public const int FlagsFieldNumber = 1;
+	private readonly static int FlagsDefaultValue = 0;
 
-    private int flags_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Flags {
-      get { if ((_hasBits0 & 1) != 0) { return flags_; } else { return FlagsDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        flags_ = value;
-      }
-    }
-    /// <summary>Gets whether the "flags" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasFlags {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "flags" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearFlags() {
-      _hasBits0 &= ~1;
-    }
+	private int flags_;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int Flags {
+	  get { if ((_hasBits0 & 1) != 0) { return flags_; } else { return FlagsDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		flags_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "flags" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasFlags {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "flags" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearFlags() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "cache_node_epoch" field.</summary>
-    public const int CacheNodeEpochFieldNumber = 2;
-    private readonly static int CacheNodeEpochDefaultValue = 0;
+	/// <summary>Field number for the "cache_node_epoch" field.</summary>
+	public const int CacheNodeEpochFieldNumber = 2;
+	private readonly static int CacheNodeEpochDefaultValue = 0;
 
-    private int cacheNodeEpoch_;
-    /// <summary>
-    /// The epoch when this node was generated.
-    /// Currently, all the nodes in a packet are generated at the same time,
-    /// so each node has the same version. This may change in the future if
-    /// we only generate the changed nodes. The client uses this to keep its
-    /// node cache fresh.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CacheNodeEpoch {
-      get { if ((_hasBits0 & 2) != 0) { return cacheNodeEpoch_; } else { return CacheNodeEpochDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        cacheNodeEpoch_ = value;
-      }
-    }
-    /// <summary>Gets whether the "cache_node_epoch" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasCacheNodeEpoch {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "cache_node_epoch" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearCacheNodeEpoch() {
-      _hasBits0 &= ~2;
-    }
+	private int cacheNodeEpoch_;
+	/// <summary>
+	/// The epoch when this node was generated.
+	/// Currently, all the nodes in a packet are generated at the same time,
+	/// so each node has the same version. This may change in the future if
+	/// we only generate the changed nodes. The client uses this to keep its
+	/// node cache fresh.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CacheNodeEpoch {
+	  get { if ((_hasBits0 & 2) != 0) { return cacheNodeEpoch_; } else { return CacheNodeEpochDefaultValue; } }
+	  set {
+		_hasBits0 |= 2;
+		cacheNodeEpoch_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "cache_node_epoch" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasCacheNodeEpoch {
+	  get { return (_hasBits0 & 2) != 0; }
+	}
+	/// <summary>Clears the value of the "cache_node_epoch" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearCacheNodeEpoch() {
+	  _hasBits0 &= ~2;
+	}
 
-    /// <summary>Field number for the "layer" field.</summary>
-    public const int LayerFieldNumber = 3;
-    private static readonly pb::FieldCodec<global::Keyhole.QuadtreeLayer> _repeated_layer_codec
-        = pb::FieldCodec.ForMessage(26, global::Keyhole.QuadtreeLayer.Parser);
-    private readonly pbc::RepeatedField<global::Keyhole.QuadtreeLayer> layer_ = new pbc::RepeatedField<global::Keyhole.QuadtreeLayer>();
-    /// <summary>
-    /// The layer data for this node.
-    /// Layers: image, vector, terrain, etc.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::Keyhole.QuadtreeLayer> Layer {
-      get { return layer_; }
-    }
+	/// <summary>Field number for the "layer" field.</summary>
+	public const int LayerFieldNumber = 3;
+	private static readonly pb::FieldCodec<global::Keyhole.QuadtreeLayer> _repeated_layer_codec
+		= pb::FieldCodec.ForMessage(26, global::Keyhole.QuadtreeLayer.Parser);
+	private readonly pbc::RepeatedField<global::Keyhole.QuadtreeLayer> layer_ = new pbc::RepeatedField<global::Keyhole.QuadtreeLayer>();
+	/// <summary>
+	/// The layer data for this node.
+	/// Layers: image, vector, terrain, etc.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public pbc::RepeatedField<global::Keyhole.QuadtreeLayer> Layer {
+	  get { return layer_; }
+	}
 
-    /// <summary>Field number for the "channel" field.</summary>
-    public const int ChannelFieldNumber = 4;
-    private static readonly pb::FieldCodec<global::Keyhole.QuadtreeChannel> _repeated_channel_codec
-        = pb::FieldCodec.ForMessage(34, global::Keyhole.QuadtreeChannel.Parser);
-    private readonly pbc::RepeatedField<global::Keyhole.QuadtreeChannel> channel_ = new pbc::RepeatedField<global::Keyhole.QuadtreeChannel>();
-    /// <summary>
-    /// The channel info for this node.
-    /// Channels are components of the vector layer and come
-    /// from the Fusion pipeline.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::Keyhole.QuadtreeChannel> Channel {
-      get { return channel_; }
-    }
+	/// <summary>Field number for the "channel" field.</summary>
+	public const int ChannelFieldNumber = 4;
+	private static readonly pb::FieldCodec<global::Keyhole.QuadtreeChannel> _repeated_channel_codec
+		= pb::FieldCodec.ForMessage(34, global::Keyhole.QuadtreeChannel.Parser);
+	private readonly pbc::RepeatedField<global::Keyhole.QuadtreeChannel> channel_ = new pbc::RepeatedField<global::Keyhole.QuadtreeChannel>();
+	/// <summary>
+	/// The channel info for this node.
+	/// Channels are components of the vector layer and come
+	/// from the Fusion pipeline.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public pbc::RepeatedField<global::Keyhole.QuadtreeChannel> Channel {
+	  get { return channel_; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreeNode);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreeNode);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreeNode other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Flags != other.Flags) return false;
-      if (CacheNodeEpoch != other.CacheNodeEpoch) return false;
-      if(!layer_.Equals(other.layer_)) return false;
-      if(!channel_.Equals(other.channel_)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreeNode other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if (Flags != other.Flags) return false;
+	  if (CacheNodeEpoch != other.CacheNodeEpoch) return false;
+	  if(!layer_.Equals(other.layer_)) return false;
+	  if(!channel_.Equals(other.channel_)) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasFlags) hash ^= Flags.GetHashCode();
-      if (HasCacheNodeEpoch) hash ^= CacheNodeEpoch.GetHashCode();
-      hash ^= layer_.GetHashCode();
-      hash ^= channel_.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  if (HasFlags) hash ^= Flags.GetHashCode();
+	  if (HasCacheNodeEpoch) hash ^= CacheNodeEpoch.GetHashCode();
+	  hash ^= layer_.GetHashCode();
+	  hash ^= channel_.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (HasFlags) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Flags);
-      }
-      if (HasCacheNodeEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(CacheNodeEpoch);
-      }
-      layer_.WriteTo(output, _repeated_layer_codec);
-      channel_.WriteTo(output, _repeated_channel_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  if (HasFlags) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Flags);
+	  }
+	  if (HasCacheNodeEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(CacheNodeEpoch);
+	  }
+	  layer_.WriteTo(output, _repeated_layer_codec);
+	  channel_.WriteTo(output, _repeated_channel_codec);
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (HasFlags) {
-        output.WriteRawTag(8);
-        output.WriteInt32(Flags);
-      }
-      if (HasCacheNodeEpoch) {
-        output.WriteRawTag(16);
-        output.WriteInt32(CacheNodeEpoch);
-      }
-      layer_.WriteTo(ref output, _repeated_layer_codec);
-      channel_.WriteTo(ref output, _repeated_channel_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  if (HasFlags) {
+		output.WriteRawTag(8);
+		output.WriteInt32(Flags);
+	  }
+	  if (HasCacheNodeEpoch) {
+		output.WriteRawTag(16);
+		output.WriteInt32(CacheNodeEpoch);
+	  }
+	  layer_.WriteTo(ref output, _repeated_layer_codec);
+	  channel_.WriteTo(ref output, _repeated_channel_codec);
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasFlags) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Flags);
-      }
-      if (HasCacheNodeEpoch) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(CacheNodeEpoch);
-      }
-      size += layer_.CalculateSize(_repeated_layer_codec);
-      size += channel_.CalculateSize(_repeated_channel_codec);
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  if (HasFlags) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(Flags);
+	  }
+	  if (HasCacheNodeEpoch) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(CacheNodeEpoch);
+	  }
+	  size += layer_.CalculateSize(_repeated_layer_codec);
+	  size += channel_.CalculateSize(_repeated_channel_codec);
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreeNode other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasFlags) {
-        Flags = other.Flags;
-      }
-      if (other.HasCacheNodeEpoch) {
-        CacheNodeEpoch = other.CacheNodeEpoch;
-      }
-      layer_.Add(other.layer_);
-      channel_.Add(other.channel_);
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreeNode other) {
+	  if (other == null) {
+		return;
+	  }
+	  if (other.HasFlags) {
+		Flags = other.Flags;
+	  }
+	  if (other.HasCacheNodeEpoch) {
+		CacheNodeEpoch = other.CacheNodeEpoch;
+	  }
+	  layer_.Add(other.layer_);
+	  channel_.Add(other.channel_);
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            Flags = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            CacheNodeEpoch = input.ReadInt32();
-            break;
-          }
-          case 26: {
-            layer_.AddEntriesFrom(input, _repeated_layer_codec);
-            break;
-          }
-          case 34: {
-            channel_.AddEntriesFrom(input, _repeated_channel_codec);
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 8: {
+			Flags = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			CacheNodeEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 26: {
+			layer_.AddEntriesFrom(input, _repeated_layer_codec);
+			break;
+		  }
+		  case 34: {
+			channel_.AddEntriesFrom(input, _repeated_channel_codec);
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            Flags = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            CacheNodeEpoch = input.ReadInt32();
-            break;
-          }
-          case 26: {
-            layer_.AddEntriesFrom(ref input, _repeated_layer_codec);
-            break;
-          }
-          case 34: {
-            channel_.AddEntriesFrom(ref input, _repeated_channel_codec);
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 8: {
+			Flags = input.ReadInt32();
+			break;
+		  }
+		  case 16: {
+			CacheNodeEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 26: {
+			layer_.AddEntriesFrom(ref input, _repeated_layer_codec);
+			break;
+		  }
+		  case 34: {
+			channel_.AddEntriesFrom(ref input, _repeated_channel_codec);
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
-    #region Nested types
-    /// <summary>Container for nested types declared in the QuadtreeNode message type.</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static partial class Types {
-      /// <summary>
-      /// A bitfield of flags for this node.
-      /// 0-3: presence bits for each interior child node.
-      /// 4: for leaf nodes, this indicates other quadtree sets are below this node
-      /// 5: vector data present in this node.
-      /// 6: imagery data present in this node.
-      /// 7: terrain data present in this node.
-      /// </summary>
-      public enum NodeFlags {
-        /// <summary>
-        /// interior node indication of child presence
-        /// </summary>
-        [pbr::OriginalName("NODE_FLAGS_CHILD_COUNT")] ChildCount = 4,
-        /// <summary>
-        /// there's data below leaf nodes
-        /// </summary>
-        [pbr::OriginalName("NODE_FLAGS_CACHE_BIT", PreferredAlias = false)] CacheBit = 4,
-        /// <summary>
-        /// there's vector data in this node
-        /// </summary>
-        [pbr::OriginalName("NODE_FLAGS_DRAWABLE_BIT")] DrawableBit = 5,
-        /// <summary>
-        /// there's image data in this node
-        /// </summary>
-        [pbr::OriginalName("NODE_FLAGS_IMAGE_BIT")] ImageBit = 6,
-        /// <summary>
-        /// there's terrain data in this node
-        /// </summary>
-        [pbr::OriginalName("NODE_FLAGS_TERRAIN_BIT")] TerrainBit = 7,
-      }
+	#region Nested types
+	/// <summary>Container for nested types declared in the QuadtreeNode message type.</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static partial class Types {
+	  /// <summary>
+	  /// A bitfield of flags for this node.
+	  /// 0-3: presence bits for each interior child node.
+	  /// 4: for leaf nodes, this indicates other quadtree sets are below this node
+	  /// 5: vector data present in this node.
+	  /// 6: imagery data present in this node.
+	  /// 7: terrain data present in this node.
+	  /// </summary>
+	  public enum NodeFlags {
+		/// <summary>
+		/// interior node indication of child presence
+		/// </summary>
+		[pbr::OriginalName("NODE_FLAGS_CHILD_COUNT")] ChildCount = 4,
+		/// <summary>
+		/// there's data below leaf nodes
+		/// </summary>
+		[pbr::OriginalName("NODE_FLAGS_CACHE_BIT", PreferredAlias = false)] CacheBit = 4,
+		/// <summary>
+		/// there's vector data in this node
+		/// </summary>
+		[pbr::OriginalName("NODE_FLAGS_DRAWABLE_BIT")] DrawableBit = 5,
+		/// <summary>
+		/// there's image data in this node
+		/// </summary>
+		[pbr::OriginalName("NODE_FLAGS_IMAGE_BIT")] ImageBit = 6,
+		/// <summary>
+		/// there's terrain data in this node
+		/// </summary>
+		[pbr::OriginalName("NODE_FLAGS_TERRAIN_BIT")] TerrainBit = 7,
+	  }
 
-    }
-    #endregion
+	}
+	#endregion
 
   }
 
@@ -2139,525 +2139,525 @@ namespace Keyhole {
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class QuadtreePacket : pb::IMessage<QuadtreePacket>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
+	  , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<QuadtreePacket> _parser = new pb::MessageParser<QuadtreePacket>(() => new QuadtreePacket());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<QuadtreePacket> Parser { get { return _parser; } }
+	private static readonly pb::MessageParser<QuadtreePacket> _parser = new pb::MessageParser<QuadtreePacket>(() => new QuadtreePacket());
+	private pb::UnknownFieldSet _unknownFields;
+	private int _hasBits0;
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pb::MessageParser<QuadtreePacket> Parser { get { return _parser; } }
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[6]; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static pbr::MessageDescriptor Descriptor {
+	  get { return global::Keyhole.QuadtreesetReflection.Descriptor.MessageTypes[6]; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	pbr::MessageDescriptor pb::IMessage.Descriptor {
+	  get { return Descriptor; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreePacket() {
-      OnConstruction();
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreePacket() {
+	  OnConstruction();
+	}
 
-    partial void OnConstruction();
+	partial void OnConstruction();
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreePacket(QuadtreePacket other) : this() {
-      _hasBits0 = other._hasBits0;
-      packetEpoch_ = other.packetEpoch_;
-      sparseQuadtreeNode_ = other.sparseQuadtreeNode_.Clone();
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreePacket(QuadtreePacket other) : this() {
+	  _hasBits0 = other._hasBits0;
+	  packetEpoch_ = other.packetEpoch_;
+	  sparseQuadtreeNode_ = other.sparseQuadtreeNode_.Clone();
+	  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public QuadtreePacket Clone() {
-      return new QuadtreePacket(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public QuadtreePacket Clone() {
+	  return new QuadtreePacket(this);
+	}
 
-    /// <summary>Field number for the "packet_epoch" field.</summary>
-    public const int PacketEpochFieldNumber = 1;
-    private readonly static int PacketEpochDefaultValue = 0;
+	/// <summary>Field number for the "packet_epoch" field.</summary>
+	public const int PacketEpochFieldNumber = 1;
+	private readonly static int PacketEpochDefaultValue = 0;
 
-    private int packetEpoch_;
-    /// <summary>
-    /// Epoch of when this quadtree packet was generated.
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int PacketEpoch {
-      get { if ((_hasBits0 & 1) != 0) { return packetEpoch_; } else { return PacketEpochDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        packetEpoch_ = value;
-      }
-    }
-    /// <summary>Gets whether the "packet_epoch" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool HasPacketEpoch {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "packet_epoch" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void ClearPacketEpoch() {
-      _hasBits0 &= ~1;
-    }
+	private int packetEpoch_;
+	/// <summary>
+	/// Epoch of when this quadtree packet was generated.
+	/// </summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int PacketEpoch {
+	  get { if ((_hasBits0 & 1) != 0) { return packetEpoch_; } else { return PacketEpochDefaultValue; } }
+	  set {
+		_hasBits0 |= 1;
+		packetEpoch_ = value;
+	  }
+	}
+	/// <summary>Gets whether the "packet_epoch" field is set</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool HasPacketEpoch {
+	  get { return (_hasBits0 & 1) != 0; }
+	}
+	/// <summary>Clears the value of the "packet_epoch" field</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void ClearPacketEpoch() {
+	  _hasBits0 &= ~1;
+	}
 
-    /// <summary>Field number for the "sparsequadtreenode" field.</summary>
-    public const int SparseQuadtreeNodeFieldNumber = 2;
-    private static readonly pb::FieldCodec<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode> _repeated_sparseQuadtreeNode_codec
-        = pb::FieldCodec.ForGroup(19, 20, global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode.Parser);
-    private readonly pbc::RepeatedField<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode> sparseQuadtreeNode_ = new pbc::RepeatedField<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode> SparseQuadtreeNode {
-      get { return sparseQuadtreeNode_; }
-    }
+	/// <summary>Field number for the "sparsequadtreenode" field.</summary>
+	public const int SparseQuadtreeNodeFieldNumber = 2;
+	private static readonly pb::FieldCodec<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode> _repeated_sparseQuadtreeNode_codec
+		= pb::FieldCodec.ForGroup(19, 20, global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode.Parser);
+	private readonly pbc::RepeatedField<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode> sparseQuadtreeNode_ = new pbc::RepeatedField<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode>();
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public pbc::RepeatedField<global::Keyhole.QuadtreePacket.Types.SparseQuadtreeNode> SparseQuadtreeNode {
+	  get { return sparseQuadtreeNode_; }
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as QuadtreePacket);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override bool Equals(object other) {
+	  return Equals(other as QuadtreePacket);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(QuadtreePacket other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (PacketEpoch != other.PacketEpoch) return false;
-      if(!sparseQuadtreeNode_.Equals(other.sparseQuadtreeNode_)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public bool Equals(QuadtreePacket other) {
+	  if (ReferenceEquals(other, null)) {
+		return false;
+	  }
+	  if (ReferenceEquals(other, this)) {
+		return true;
+	  }
+	  if (PacketEpoch != other.PacketEpoch) return false;
+	  if(!sparseQuadtreeNode_.Equals(other.sparseQuadtreeNode_)) return false;
+	  return Equals(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasPacketEpoch) hash ^= PacketEpoch.GetHashCode();
-      hash ^= sparseQuadtreeNode_.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override int GetHashCode() {
+	  int hash = 1;
+	  if (HasPacketEpoch) hash ^= PacketEpoch.GetHashCode();
+	  hash ^= sparseQuadtreeNode_.GetHashCode();
+	  if (_unknownFields != null) {
+		hash ^= _unknownFields.GetHashCode();
+	  }
+	  return hash;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public override string ToString() {
+	  return pb::JsonFormatter.ToDiagnosticString(this);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (HasPacketEpoch) {
-        output.WriteRawTag(8);
-        output.WriteInt32(PacketEpoch);
-      }
-      sparseQuadtreeNode_.WriteTo(output, _repeated_sparseQuadtreeNode_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void WriteTo(pb::CodedOutputStream output) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  output.WriteRawMessage(this);
+	#else
+	  if (HasPacketEpoch) {
+		output.WriteRawTag(8);
+		output.WriteInt32(PacketEpoch);
+	  }
+	  sparseQuadtreeNode_.WriteTo(output, _repeated_sparseQuadtreeNode_codec);
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(output);
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (HasPacketEpoch) {
-        output.WriteRawTag(8);
-        output.WriteInt32(PacketEpoch);
-      }
-      sparseQuadtreeNode_.WriteTo(ref output, _repeated_sparseQuadtreeNode_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+	  if (HasPacketEpoch) {
+		output.WriteRawTag(8);
+		output.WriteInt32(PacketEpoch);
+	  }
+	  sparseQuadtreeNode_.WriteTo(ref output, _repeated_sparseQuadtreeNode_codec);
+	  if (_unknownFields != null) {
+		_unknownFields.WriteTo(ref output);
+	  }
+	}
+	#endif
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasPacketEpoch) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PacketEpoch);
-      }
-      size += sparseQuadtreeNode_.CalculateSize(_repeated_sparseQuadtreeNode_codec);
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public int CalculateSize() {
+	  int size = 0;
+	  if (HasPacketEpoch) {
+		size += 1 + pb::CodedOutputStream.ComputeInt32Size(PacketEpoch);
+	  }
+	  size += sparseQuadtreeNode_.CalculateSize(_repeated_sparseQuadtreeNode_codec);
+	  if (_unknownFields != null) {
+		size += _unknownFields.CalculateSize();
+	  }
+	  return size;
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(QuadtreePacket other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasPacketEpoch) {
-        PacketEpoch = other.PacketEpoch;
-      }
-      sparseQuadtreeNode_.Add(other.sparseQuadtreeNode_);
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(QuadtreePacket other) {
+	  if (other == null) {
+		return;
+	  }
+	  if (other.HasPacketEpoch) {
+		PacketEpoch = other.PacketEpoch;
+	  }
+	  sparseQuadtreeNode_.Add(other.sparseQuadtreeNode_);
+	  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+	}
 
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            PacketEpoch = input.ReadInt32();
-            break;
-          }
-          case 19: {
-            sparseQuadtreeNode_.AddEntriesFrom(input, _repeated_sparseQuadtreeNode_codec);
-            break;
-          }
-        }
-      }
-    #endif
-    }
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public void MergeFrom(pb::CodedInputStream input) {
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	  input.ReadRawMessage(this);
+	#else
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+			break;
+		  case 8: {
+			PacketEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 19: {
+			sparseQuadtreeNode_.AddEntriesFrom(input, _repeated_sparseQuadtreeNode_codec);
+			break;
+		  }
+		}
+	  }
+	#endif
+	}
 
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            PacketEpoch = input.ReadInt32();
-            break;
-          }
-          case 19: {
-            sparseQuadtreeNode_.AddEntriesFrom(ref input, _repeated_sparseQuadtreeNode_codec);
-            break;
-          }
-        }
-      }
-    }
-    #endif
+	#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+	  uint tag;
+	  while ((tag = input.ReadTag()) != 0) {
+	  if ((tag & 7) == 4) {
+		// Abort on any end group tag.
+		return;
+	  }
+	  switch(tag) {
+		  default:
+			_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+			break;
+		  case 8: {
+			PacketEpoch = input.ReadInt32();
+			break;
+		  }
+		  case 19: {
+			sparseQuadtreeNode_.AddEntriesFrom(ref input, _repeated_sparseQuadtreeNode_codec);
+			break;
+		  }
+		}
+	  }
+	}
+	#endif
 
-    #region Nested types
-    /// <summary>Container for nested types declared in the QuadtreePacket message type.</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static partial class Types {
-      /// <summary>
-      /// All the quadtree nodes in this packet, with subindex indices.
-      /// </summary>
-      [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-      public sealed partial class SparseQuadtreeNode : pb::IMessage<SparseQuadtreeNode>
-      #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-          , pb::IBufferMessage
-      #endif
-      {
-        private static readonly pb::MessageParser<SparseQuadtreeNode> _parser = new pb::MessageParser<SparseQuadtreeNode>(() => new SparseQuadtreeNode());
-        private pb::UnknownFieldSet _unknownFields;
-        private int _hasBits0;
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public static pb::MessageParser<SparseQuadtreeNode> Parser { get { return _parser; } }
+	#region Nested types
+	/// <summary>Container for nested types declared in the QuadtreePacket message type.</summary>
+	[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+	public static partial class Types {
+	  /// <summary>
+	  /// All the quadtree nodes in this packet, with subindex indices.
+	  /// </summary>
+	  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+	  public sealed partial class SparseQuadtreeNode : pb::IMessage<SparseQuadtreeNode>
+	  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+		  , pb::IBufferMessage
+	  #endif
+	  {
+		private static readonly pb::MessageParser<SparseQuadtreeNode> _parser = new pb::MessageParser<SparseQuadtreeNode>(() => new SparseQuadtreeNode());
+		private pb::UnknownFieldSet _unknownFields;
+		private int _hasBits0;
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public static pb::MessageParser<SparseQuadtreeNode> Parser { get { return _parser; } }
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public static pbr::MessageDescriptor Descriptor {
-          get { return global::Keyhole.QuadtreePacket.Descriptor.NestedTypes[0]; }
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public static pbr::MessageDescriptor Descriptor {
+		  get { return global::Keyhole.QuadtreePacket.Descriptor.NestedTypes[0]; }
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        pbr::MessageDescriptor pb::IMessage.Descriptor {
-          get { return Descriptor; }
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		pbr::MessageDescriptor pb::IMessage.Descriptor {
+		  get { return Descriptor; }
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public SparseQuadtreeNode() {
-          OnConstruction();
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public SparseQuadtreeNode() {
+		  OnConstruction();
+		}
 
-        partial void OnConstruction();
+		partial void OnConstruction();
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public SparseQuadtreeNode(SparseQuadtreeNode other) : this() {
-          _hasBits0 = other._hasBits0;
-          index_ = other.index_;
-          node_ = other.node_ != null ? other.node_.Clone() : null;
-          _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public SparseQuadtreeNode(SparseQuadtreeNode other) : this() {
+		  _hasBits0 = other._hasBits0;
+		  index_ = other.index_;
+		  node_ = other.node_ != null ? other.node_.Clone() : null;
+		  _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public SparseQuadtreeNode Clone() {
-          return new SparseQuadtreeNode(this);
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public SparseQuadtreeNode Clone() {
+		  return new SparseQuadtreeNode(this);
+		}
 
-        /// <summary>Field number for the "index" field.</summary>
-        public const int IndexFieldNumber = 3;
-        private readonly static int IndexDefaultValue = 0;
+		/// <summary>Field number for the "index" field.</summary>
+		public const int IndexFieldNumber = 3;
+		private readonly static int IndexDefaultValue = 0;
 
-        private int index_;
-        /// <summary>
-        /// Index of this node within the quadtree packet.  The nodes within
-        /// a quadtree packet are numbered in subindex order and are sparse.
-        /// Note: the nodes are not currently guaranteed to be sorted
-        /// in any particular order.
-        /// </summary>
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public int Index {
-          get { if ((_hasBits0 & 1) != 0) { return index_; } else { return IndexDefaultValue; } }
-          set {
-            _hasBits0 |= 1;
-            index_ = value;
-          }
-        }
-        /// <summary>Gets whether the "index" field is set</summary>
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public bool HasIndex {
-          get { return (_hasBits0 & 1) != 0; }
-        }
-        /// <summary>Clears the value of the "index" field</summary>
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public void ClearIndex() {
-          _hasBits0 &= ~1;
-        }
+		private int index_;
+		/// <summary>
+		/// Index of this node within the quadtree packet.  The nodes within
+		/// a quadtree packet are numbered in subindex order and are sparse.
+		/// Note: the nodes are not currently guaranteed to be sorted
+		/// in any particular order.
+		/// </summary>
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public int Index {
+		  get { if ((_hasBits0 & 1) != 0) { return index_; } else { return IndexDefaultValue; } }
+		  set {
+			_hasBits0 |= 1;
+			index_ = value;
+		  }
+		}
+		/// <summary>Gets whether the "index" field is set</summary>
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public bool HasIndex {
+		  get { return (_hasBits0 & 1) != 0; }
+		}
+		/// <summary>Clears the value of the "index" field</summary>
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public void ClearIndex() {
+		  _hasBits0 &= ~1;
+		}
 
-        /// <summary>Field number for the "Node" field.</summary>
-        public const int NodeFieldNumber = 4;
-        private global::Keyhole.QuadtreeNode node_;
-        /// <summary>
-        /// the node itself
-        /// </summary>
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public global::Keyhole.QuadtreeNode Node {
-          get { return node_; }
-          set {
-            node_ = value;
-          }
-        }
+		/// <summary>Field number for the "Node" field.</summary>
+		public const int NodeFieldNumber = 4;
+		private global::Keyhole.QuadtreeNode node_;
+		/// <summary>
+		/// the node itself
+		/// </summary>
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public global::Keyhole.QuadtreeNode Node {
+		  get { return node_; }
+		  set {
+			node_ = value;
+		  }
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public override bool Equals(object other) {
-          return Equals(other as SparseQuadtreeNode);
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public override bool Equals(object other) {
+		  return Equals(other as SparseQuadtreeNode);
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public bool Equals(SparseQuadtreeNode other) {
-          if (ReferenceEquals(other, null)) {
-            return false;
-          }
-          if (ReferenceEquals(other, this)) {
-            return true;
-          }
-          if (Index != other.Index) return false;
-          if (!object.Equals(Node, other.Node)) return false;
-          return Equals(_unknownFields, other._unknownFields);
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public bool Equals(SparseQuadtreeNode other) {
+		  if (ReferenceEquals(other, null)) {
+			return false;
+		  }
+		  if (ReferenceEquals(other, this)) {
+			return true;
+		  }
+		  if (Index != other.Index) return false;
+		  if (!object.Equals(Node, other.Node)) return false;
+		  return Equals(_unknownFields, other._unknownFields);
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public override int GetHashCode() {
-          int hash = 1;
-          if (HasIndex) hash ^= Index.GetHashCode();
-          if (node_ != null) hash ^= Node.GetHashCode();
-          if (_unknownFields != null) {
-            hash ^= _unknownFields.GetHashCode();
-          }
-          return hash;
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public override int GetHashCode() {
+		  int hash = 1;
+		  if (HasIndex) hash ^= Index.GetHashCode();
+		  if (node_ != null) hash ^= Node.GetHashCode();
+		  if (_unknownFields != null) {
+			hash ^= _unknownFields.GetHashCode();
+		  }
+		  return hash;
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public override string ToString() {
-          return pb::JsonFormatter.ToDiagnosticString(this);
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public override string ToString() {
+		  return pb::JsonFormatter.ToDiagnosticString(this);
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public void WriteTo(pb::CodedOutputStream output) {
-        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-          output.WriteRawMessage(this);
-        #else
-          if (HasIndex) {
-            output.WriteRawTag(24);
-            output.WriteInt32(Index);
-          }
-          if (node_ != null) {
-            output.WriteRawTag(34);
-            output.WriteMessage(Node);
-          }
-          if (_unknownFields != null) {
-            _unknownFields.WriteTo(output);
-          }
-        #endif
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public void WriteTo(pb::CodedOutputStream output) {
+		#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+		  output.WriteRawMessage(this);
+		#else
+		  if (HasIndex) {
+			output.WriteRawTag(24);
+			output.WriteInt32(Index);
+		  }
+		  if (node_ != null) {
+			output.WriteRawTag(34);
+			output.WriteMessage(Node);
+		  }
+		  if (_unknownFields != null) {
+			_unknownFields.WriteTo(output);
+		  }
+		#endif
+		}
 
-        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-          if (HasIndex) {
-            output.WriteRawTag(24);
-            output.WriteInt32(Index);
-          }
-          if (node_ != null) {
-            output.WriteRawTag(34);
-            output.WriteMessage(Node);
-          }
-          if (_unknownFields != null) {
-            _unknownFields.WriteTo(ref output);
-          }
-        }
-        #endif
+		#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+		  if (HasIndex) {
+			output.WriteRawTag(24);
+			output.WriteInt32(Index);
+		  }
+		  if (node_ != null) {
+			output.WriteRawTag(34);
+			output.WriteMessage(Node);
+		  }
+		  if (_unknownFields != null) {
+			_unknownFields.WriteTo(ref output);
+		  }
+		}
+		#endif
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public int CalculateSize() {
-          int size = 0;
-          if (HasIndex) {
-            size += 1 + pb::CodedOutputStream.ComputeInt32Size(Index);
-          }
-          if (node_ != null) {
-            size += 1 + pb::CodedOutputStream.ComputeMessageSize(Node);
-          }
-          if (_unknownFields != null) {
-            size += _unknownFields.CalculateSize();
-          }
-          return size;
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public int CalculateSize() {
+		  int size = 0;
+		  if (HasIndex) {
+			size += 1 + pb::CodedOutputStream.ComputeInt32Size(Index);
+		  }
+		  if (node_ != null) {
+			size += 1 + pb::CodedOutputStream.ComputeMessageSize(Node);
+		  }
+		  if (_unknownFields != null) {
+			size += _unknownFields.CalculateSize();
+		  }
+		  return size;
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public void MergeFrom(SparseQuadtreeNode other) {
-          if (other == null) {
-            return;
-          }
-          if (other.HasIndex) {
-            Index = other.Index;
-          }
-          if (other.node_ != null) {
-            if (node_ == null) {
-              Node = new global::Keyhole.QuadtreeNode();
-            }
-            Node.MergeFrom(other.Node);
-          }
-          _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public void MergeFrom(SparseQuadtreeNode other) {
+		  if (other == null) {
+			return;
+		  }
+		  if (other.HasIndex) {
+			Index = other.Index;
+		  }
+		  if (other.node_ != null) {
+			if (node_ == null) {
+			  Node = new global::Keyhole.QuadtreeNode();
+			}
+			Node.MergeFrom(other.Node);
+		  }
+		  _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+		}
 
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public void MergeFrom(pb::CodedInputStream input) {
-        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-          input.ReadRawMessage(this);
-        #else
-          uint tag;
-          while ((tag = input.ReadTag()) != 0) {
-          if ((tag & 7) == 4) {
-            // Abort on any end group tag.
-            return;
-          }
-          switch(tag) {
-              default:
-                _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-                break;
-              case 24: {
-                Index = input.ReadInt32();
-                break;
-              }
-              case 34: {
-                if (node_ == null) {
-                  Node = new global::Keyhole.QuadtreeNode();
-                }
-                input.ReadMessage(Node);
-                break;
-              }
-            }
-          }
-        #endif
-        }
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		public void MergeFrom(pb::CodedInputStream input) {
+		#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+		  input.ReadRawMessage(this);
+		#else
+		  uint tag;
+		  while ((tag = input.ReadTag()) != 0) {
+		  if ((tag & 7) == 4) {
+			// Abort on any end group tag.
+			return;
+		  }
+		  switch(tag) {
+			  default:
+				_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+				break;
+			  case 24: {
+				Index = input.ReadInt32();
+				break;
+			  }
+			  case 34: {
+				if (node_ == null) {
+				  Node = new global::Keyhole.QuadtreeNode();
+				}
+				input.ReadMessage(Node);
+				break;
+			  }
+			}
+		  }
+		#endif
+		}
 
-        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-          uint tag;
-          while ((tag = input.ReadTag()) != 0) {
-          if ((tag & 7) == 4) {
-            // Abort on any end group tag.
-            return;
-          }
-          switch(tag) {
-              default:
-                _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-                break;
-              case 24: {
-                Index = input.ReadInt32();
-                break;
-              }
-              case 34: {
-                if (node_ == null) {
-                  Node = new global::Keyhole.QuadtreeNode();
-                }
-                input.ReadMessage(Node);
-                break;
-              }
-            }
-          }
-        }
-        #endif
+		#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+		[global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+		[global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+		void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+		  uint tag;
+		  while ((tag = input.ReadTag()) != 0) {
+		  if ((tag & 7) == 4) {
+			// Abort on any end group tag.
+			return;
+		  }
+		  switch(tag) {
+			  default:
+				_unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+				break;
+			  case 24: {
+				Index = input.ReadInt32();
+				break;
+			  }
+			  case 34: {
+				if (node_ == null) {
+				  Node = new global::Keyhole.QuadtreeNode();
+				}
+				input.ReadMessage(Node);
+				break;
+			  }
+			}
+		  }
+		}
+		#endif
 
-      }
+	  }
 
-    }
-    #endregion
+	}
+	#endregion
 
   }
 

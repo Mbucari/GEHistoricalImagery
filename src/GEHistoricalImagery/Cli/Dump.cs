@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using LibGoogleEarth;
+using System.IO;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -50,18 +51,17 @@ internal class Dump : AoiVerb
 			hasError = true;
 		}
 
-		if (string.IsNullOrEmpty(Formatter))
-		{
-			Formatter = "{Z}_{C}_{R}.jpg";
+        if (string.IsNullOrEmpty(Formatter))
+        {
+			Console.Error.WriteLine($"Invalid filename formatter");
+			hasError = true;
 		}
-
-		if (Formatter.FirstOrDefault(c => Path.GetInvalidFileNameChars().Any(i => i == c)) is char fileChar && fileChar != default)
+        else if (Formatter.FirstOrDefault(c => Path.GetInvalidFileNameChars().Any(i => i == c)) is char fileChar && fileChar != default)
 		{
 			Console.Error.WriteLine($"Invalid filename character: {fileChar}");
 			hasError = true;
-		}
-
-		if (!(Formatter.Contains("{C}") || Formatter.Contains("{c}")) ||
+		} 
+		else if (!(Formatter.Contains("{C}") || Formatter.Contains("{c}")) ||
 			!(Formatter.Contains("{R}") || Formatter.Contains("{r}")))
 		{
 			Console.Error.WriteLine(

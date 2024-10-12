@@ -5,7 +5,7 @@ GEHistoricalImagery is a utility for downloading historical aerial imagery from 
 - Find historical imagery availability at any location and zoom level
 - Always uses the most recent Google Earth data
 - Automatically substitutes unavailable tiles with temporally closest available tile
-- Outputs a georeferenced GeoTiff
+- Outputs a georeferenced GeoTiff or dumps image tiles to a folder
 - Supports warping to new coordinate systems
 - Fast! Parallel downloading and local caching
 

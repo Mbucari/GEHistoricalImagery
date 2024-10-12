@@ -18,7 +18,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
   -d yyyy/MM/dd, --date=yyyy/MM/dd                  Required. Imagery Date
 
-  -o [Directory], --output=[Directory]              Required. Output GeoTiff save location
+  -o [Directory], --output=[Directory]              Required. Output image tile save directory
 
   -f [FilenameFormat], --format=[FilenameFormat]    (Default: z={Z}-Col={c}-Row={r}.jpg)
                                                     Filename formatter:
@@ -78,4 +78,4 @@ There are `2^zoom` number of global rows, beginning with row 0 at -180 degrees l
    ...
    Zoom=20, Global Column=218963, Global Row=639743.jpg
    ```
-<p align="center"><i>Updated 2024/10/11</i></p>
+<p align="center"><i>Updated 2024/10/14</i></p>

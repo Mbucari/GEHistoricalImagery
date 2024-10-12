@@ -20,7 +20,7 @@ internal class Dump : AoiVerb
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
 	public DateOnly? Date { get; set; }
 
-	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "[Directory]", Required = true)]
+	[Option('o', "output", HelpText = "Output image tile save directory", MetaValue = "[Directory]", Required = true)]
 	public string? SavePath { get; set; }
 
 	[Option('f', "format", HelpText = formatHelpText, Default = "z={Z}-Col={c}-Row={r}.jpg", MetaValue = "[FilenameFormat]")]

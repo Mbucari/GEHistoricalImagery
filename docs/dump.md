@@ -31,6 +31,14 @@ If imagery is not available for the specified date, the downloader will use the 
   -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
   
 ```
+### Convert Between Lat/Long and Row/Column numbers
+**Global** row/column numbers can be related to latitude/longitude using the following formulae:
+
+$$G=\frac{360}{2^{Z}}N-180$$ or $$N=\left\lfloor \frac{G+180}{360}2^{Z} \right\rfloor$$
+
+Where $G$ is the geographic latitude/longitude<br>
+$N$ is the row/column<br>
+$Z$ is the zoom level.<br>
 
 ## Examples
 Download historical imagery tiles at zoom level `20` from within the region defined by the lower-left (southwest) corner `39.619819,-104.856121` and upper-right (northeast) corner `39.638393,-104.824990`.
@@ -78,4 +86,4 @@ There are `2^zoom` number of global rows, beginning with row 0 at -180 degrees l
    ...
    Zoom=20, Global Column=218963, Global Row=639743.jpg
    ```
-<p align="center"><i>Updated 2024/10/14</i></p>
+<p align="center"><i>Updated 2024/12/4</i></p>

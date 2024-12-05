@@ -22,7 +22,7 @@ internal class EarthImage : IDisposable
 	static EarthImage()
 	{
 		GdalConfiguration.ConfigureGdal();
-		Gdal.SetCacheMax(1024 * 1024 * 100);
+		Gdal.SetCacheMax(1024 * 1024 * 500);
 	}
 
 	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)
@@ -120,6 +120,7 @@ internal class EarthImage : IDisposable
 				"-wo", "OPTIMIZE_SIZE=TRUE",
 				"-co", "COMPRESS=JPEG",
 				"-co", "PHOTOMETRIC=YCBCR",
+				"-co", "TILED=TRUE",
 				"-r", "bilinear",
 				"-s_srs", WGS_1984_WKT,
 				"-t_srs", outSR
@@ -133,6 +134,7 @@ internal class EarthImage : IDisposable
 			[
 				"COMPRESS=JPEG",
 				"PHOTOMETRIC=YCBCR",
+				"TILED=TRUE",
 				$"NUM_THREADS={cpuCount}"
 			];
 			using var tifDriver = Gdal.GetDriverByName("GTiff");

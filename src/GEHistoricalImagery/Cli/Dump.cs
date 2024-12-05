@@ -104,8 +104,7 @@ internal class Dump : AoiVerb
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
-
-		var filenameFormatter = new FilenameFormatter(Formatter, Aoi, ZoomLevel);
+		var filenameFormatter = new FilenameFormatter(Formatter!, Aoi, ZoomLevel);
 
 		await foreach (var tds in processor.EnumerateResults(generateWork()))
 		{

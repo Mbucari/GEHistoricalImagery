@@ -138,25 +138,30 @@ internal class Download : AoiVerb
 		if (await root.GetNodeAsync(tile) is not TileNode node)
 			return emptyDataset();
 
-		var tempFilename = Path.GetTempFileName();
-
 		foreach (var dt in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
 		{
 			try
 			{
-				var imageBts = await root.GetEarthAssetAsync(dt);
+				byte[]? imageBts = await root.GetEarthAssetAsync(dt);
 				if (imageBts == null)
 					continue;
 
-				await File.WriteAllBytesAsync(tempFilename, imageBts);
-
-				return new()
+				string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
+				try
 				{
-					Tile = tile,
-					Dataset = Gdal.OpenEx(tempFilename, (uint)openOptions, null, null, []),
-					FileName = tempFilename,
-					Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
-				};
+					Gdal.FileFromMemBuffer(memFile, imageBts);
+
+					return new()
+					{
+						Tile = tile,
+						Dataset = Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, []),
+						Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
+					};
+				}
+				finally
+				{
+					Gdal.Unlink(memFile);
+				}
 			}
 			catch (HttpRequestException)
 			{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
@@ -175,14 +180,11 @@ internal class Download : AoiVerb
 	{
 		public required Tile Tile { get; init; }
 		public Dataset? Dataset { get; init; }
-		public string? FileName { get; init; }
 		public required string? Message { get; init; }
 
 		public void Dispose()
 		{
 			Dataset?.Dispose();
-			if (File.Exists(FileName))
-				File.Delete(FileName);
 		}
 	}
 }

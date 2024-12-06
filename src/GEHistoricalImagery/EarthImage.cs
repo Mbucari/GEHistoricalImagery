@@ -22,7 +22,7 @@ internal class EarthImage : IDisposable
 	static EarthImage()
 	{
 		GdalConfiguration.ConfigureGdal();
-		Gdal.SetCacheMax(1024 * 1024 * 500);
+		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 
 	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)

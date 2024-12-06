@@ -35,6 +35,10 @@ public abstract class DbRoot
 	private ReadOnlyMemory<byte> EncryptionData { get; }
 	private MemoryCache PacketCache { get; } = new MemoryCache(new MemoryCacheOptions());
 
+	private static readonly TimeSpan CacheCompactInterval = TimeSpan.FromSeconds(2);
+	private static readonly MemoryCacheEntryOptions Options = new() { SlidingExpiration = CacheCompactInterval };
+	private DateTime LastCacheComact;
+
 	protected DbRoot(DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
 	{
 		CacheDir = cacheDir;
@@ -125,7 +129,6 @@ public abstract class DbRoot
 		return terrainTile.Decode(rawAsset);
 	}
 
-
 	/// <summary>
 	/// Gets a <see cref="QuadtreePacket"/> which references a specified <see cref="Tile"/>
 	/// </summary>
@@ -133,6 +136,15 @@ public abstract class DbRoot
 	/// <returns>The <see cref="QuadtreePacket"/> which references the <see cref="TileNode"/></returns>
 	private async Task<IQuadtreePacket?> GetQuadtreePacketAsync(Tile tile)
 	{
+		if ((DateTime.UtcNow - LastCacheComact) > CacheCompactInterval)
+		{
+			lock (PacketCache)
+			{
+				//0% will remove all expired entries and nothing else.
+				PacketCache.Compact(0);
+				LastCacheComact = DateTime.UtcNow;
+			}
+		}
 		var packet = await GetRootCachedAsync();
 
 		if (packet == null)
@@ -149,7 +161,7 @@ public abstract class DbRoot
 
 	private async Task<IQuadtreePacket?> GetRootCachedAsync()
 	{
-		return await PacketCache.GetOrCreateAsync(Tile.Root, loadRootPacketAsync);
+		return await PacketCache.GetOrCreateAsync(Tile.Root, loadRootPacketAsync, Options);
 
 		async Task<IQuadtreePacket> loadRootPacketAsync(ICacheEntry _)
 			=> await GetPacketAsync(Tile.Root, (int)DbRootBuffer.DatabaseVersion.QuadtreeVersion);
@@ -157,7 +169,7 @@ public abstract class DbRoot
 
 	private async Task<IQuadtreePacket?> GetChildCachedAsync(IQuadtreePacket parentPacket, Tile path)
 	{
-		return await PacketCache.GetOrCreateAsync(path, loadChildPacketAsync);
+		return await PacketCache.GetOrCreateAsync(path, loadChildPacketAsync, Options);
 
 		async Task<IQuadtreePacket?> loadChildPacketAsync(ICacheEntry _)
 		{

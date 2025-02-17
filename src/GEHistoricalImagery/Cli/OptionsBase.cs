@@ -1,8 +1,14 @@
-﻿namespace GEHistoricalImagery.Cli;
+﻿using CommandLine;
+
+namespace GEHistoricalImagery.Cli;
 
 internal abstract class OptionsBase
 {
+	[Option("no-cache", HelpText = "Disable local caching", Default = false)]
+	public bool DisableCache { get; set; }
 	public abstract Task RunAsync();
+
+	protected string? CacheDir => DisableCache ? null : "./cache";
 
 	public double Progress { get; set; }
 

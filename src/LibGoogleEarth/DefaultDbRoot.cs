@@ -8,7 +8,7 @@ internal class DefaultDbRoot : DbRoot
 	public override Database Database => Database.Default;
 	public static string DatabaseUrl => "https://khmdb.google.com/dbRoot.v5?&hl=en&gl=us&output=proto";
 
-	internal DefaultDbRoot(DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
+	internal DefaultDbRoot(DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
 		: base(cacheDir, dbRootEnc) { }
 
 	protected override async Task<IQuadtreePacket> GetPacketAsync(Tile tile, int epoch)

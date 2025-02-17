@@ -98,7 +98,7 @@ internal class Dump : AoiVerb
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
 
-		var root = await DbRoot.CreateAsync(Database.TimeMachine);
+		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var desiredDate = Date!.Value;
 		int tileCount = Aoi.GetTileCount(ZoomLevel);
 		int numTilesProcessed = 0;

@@ -76,7 +76,7 @@ internal class Download : AoiVerb
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
 
-		var root = await DbRoot.CreateAsync(Database.TimeMachine);
+		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var desiredDate = Date!.Value;
 		var tempFile = Path.GetTempFileName();
 		int tileCount = Aoi.GetTileCount(ZoomLevel);

@@ -18,7 +18,7 @@ public readonly record struct KhQuadTreePacketHeader
 
     public unsafe static KhQuadTreePacketHeader ParseFrom(Span<byte> bytes)
     {
-        if (bytes == null || bytes.Length < sizeof(KhQuadTreePacket16))
+        if (bytes.Length < sizeof(KhQuadTreePacket16))
             throw new ArgumentException("buffer is too small", nameof(bytes));
 
         var h = MemoryMarshal.Cast<byte, KhQuadTreePacketHeader>(bytes)[0];

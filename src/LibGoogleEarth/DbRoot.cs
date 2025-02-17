@@ -27,7 +27,7 @@ public abstract class DbRoot
 	private static readonly HttpClient HttpClient = new();
 
 	/// <summary> The database's local cache directory </summary>
-	public DirectoryInfo CacheDir { get; }
+	public DirectoryInfo? CacheDir { get; }
 	/// <summary>  The keyhole DbRoot protocol buffer  </summary>
 	public DbRootProto DbRootBuffer { get; }
 	/// <summary> The google earth database </summary>
@@ -39,7 +39,7 @@ public abstract class DbRoot
 	private static readonly MemoryCacheEntryOptions Options = new() { SlidingExpiration = CacheCompactInterval };
 	private DateTime LastCacheComact;
 
-	protected DbRoot(DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
+	protected DbRoot(DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
 	{
 		CacheDir = cacheDir;
 		EncryptionData = dbRootEnc.EncryptionData.Memory;
@@ -54,17 +54,20 @@ public abstract class DbRoot
 	/// </summary>
 	/// <param name="cacheDir">path to the cache directory. (default is .\cache\</param>
 	/// <returns>A new instance of the Google Earth database</returns>
-	public static async Task<DbRoot> CreateAsync(Database database, string cacheDir = "./cache")
+	public static async Task<DbRoot> CreateAsync(Database database, string? cacheDir)
 	{
 		var url = database is Database.Default ? DefaultDbRoot.DatabaseUrl : NamedDbRoot.DatabaseUrl(database);
 
 		var uri = new Uri(url);
 
-		var cacheDirInfo = new DirectoryInfo(cacheDir);
-		cacheDirInfo.Create();
+
+		var cacheDirInfo = cacheDir is null ? null : new DirectoryInfo(cacheDir);
+		cacheDirInfo?.Create();
+
+		var dbRootDir = cacheDirInfo?.FullName ?? Path.GetTempPath();
 
 		using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-		var dbRootFile = new FileInfo(Path.Combine(cacheDirInfo.FullName, Path.GetFileName(uri.AbsolutePath) + "_" + database.ToString()));
+		var dbRootFile = new FileInfo(Path.Combine(dbRootDir, Path.GetFileName(uri.AbsolutePath) + "_" + database.ToString()));
 
 		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(dbRootFile.FullName));
 
@@ -195,29 +198,43 @@ public abstract class DbRoot
 	protected async Task<byte[]> DownloadBytesAsync(string url)
 	{
 		var uri = new Uri(url);
-		var fileName = Path.Combine(CacheDir.FullName, Path.GetFileName(uri.PathAndQuery.Replace('?', '-')));
-		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(fileName));
 
-		if (File.Exists(fileName) && File.ReadAllBytes(fileName) is byte[] b && b.Length > 0)
-			return b;
+		if (CacheDir?.Exists is true)
+		{
+			var fileName = Path.Combine(CacheDir.FullName, Path.GetFileName(uri.PathAndQuery.Replace('?', '-')));
+			await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(fileName));
+
+			if (File.Exists(fileName) && File.ReadAllBytes(fileName) is byte[] b && b.Length > 0)
+				return b;
+			else
+			{
+				var data = await downloadAndDecrypt();
+
+				try
+				{
+					File.WriteAllBytes(fileName, data);
+				}
+				catch (Exception ex)
+				{
+					Console.Error.WriteLine($"Failed to Cache {uri.PathAndQuery}.");
+					Console.Error.WriteLine(ex.Message);
+				}
+
+				return data;
+			}
+		}
 		else
 		{
-			var data = await HttpClient.GetByteArrayAsync(uri);
-			bool decrypt = true;
-			if (decrypt)
-				Decrypt(data);
+			return await downloadAndDecrypt();
+		}
 
-			try
-			{
-				File.WriteAllBytes(fileName, data);
-			}
-			catch (Exception ex)
-			{
-				Console.Error.WriteLine($"Failed to Cache {uri.PathAndQuery}.");
-				Console.Error.WriteLine(ex.Message);
-			}
+		async Task<byte[]> downloadAndDecrypt()
+		{
+			var data = await HttpClient.GetByteArrayAsync(uri);
+			Decrypt(data);
 			return data;
 		}
+		
 	}
 
 	private void Decrypt(Span<byte> cipherText)

@@ -8,7 +8,7 @@ internal class NamedDbRoot : DbRoot
 	public override Database Database => _database;
 	private readonly Database _database;
 
-	internal NamedDbRoot(Database database, DirectoryInfo cacheDir, EncryptedDbRootProto dbRootEnc)
+	internal NamedDbRoot(Database database, DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
 		: base(cacheDir, dbRootEnc)
 	{
 		_database = database;		

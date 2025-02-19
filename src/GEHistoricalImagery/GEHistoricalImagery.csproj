@@ -25,6 +25,7 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <ProjectReference Include="..\LibEsri\LibEsri.csproj" />
     <ProjectReference Include="..\LibGoogleEarth\LibGoogleEarth.csproj" />
 	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 	  <_Parameter1>GEHistoricalImageryTest</_Parameter1>

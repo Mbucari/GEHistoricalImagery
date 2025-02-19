@@ -12,15 +12,15 @@ internal abstract class AoiVerb : OptionsBase
 	[Option("upper-right", Required = true, HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
 	public Coordinate? UpperRight { get; set; }
 
-	[Option('z', "zoom", HelpText = "Zoom level [1-24]", MetaValue = "N", Required = true)]
+	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "N", Required = true)]
 	public int ZoomLevel { get; set; }
 
 	protected Rectangle Aoi { get; private set; }
 
 	protected IEnumerable<string> GetAoiErrors()
 	{
-		if (ZoomLevel > 24)
-			yield return $"Zoom level: {ZoomLevel} is too large. Max zoom is 24";
+		if (ZoomLevel > 23)
+			yield return $"Zoom level: {ZoomLevel} is too large. Max zoom is 23";
 		else if (ZoomLevel < 1)
 			yield return $"Zoom level: {ZoomLevel} is too small. Min zoom is 1";
 

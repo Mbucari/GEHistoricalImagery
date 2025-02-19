@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
 using OSGeo.GDAL;
@@ -31,7 +32,6 @@ internal class Download : AoiVerb
 
 	[Option("scale-first", HelpText = "Perform scaling before offsetting X and Y", Default = false)]
 	public bool ScaleFirst { get; set; }
-
 
 	public override async Task RunAsync()
 	{
@@ -74,11 +74,118 @@ internal class Download : AoiVerb
 			return;
 		}
 
+		var desiredDate = Date!.Value;
+
+		var task = Provider is Provider.Wayback ? Run_Esri(saveFile, desiredDate)
+			: Run_Keyhole(saveFile, desiredDate);
+
+		await task;
+	}
+
+	#region Esri
+
+	private async Task Run_Esri(FileInfo saveFile, DateOnly desiredDate)
+	{
+		var wayBack = await WayBack.CreateAsync(CacheDir);
+		var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
+
+		Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
+		ReportProgress(0);
+
+		var tempFile = Path.GetTempFileName();
+		int tileCount = Aoi.GetTileCount<EsriTile>(ZoomLevel);
+		int numTilesProcessed = 0;
+		int numTilesDownload = 0;
+		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+
+		try
+		{
+			using var image = new EsriImage(Aoi, ZoomLevel, tempFile);
+
+			await foreach (var tds in processor.EnumerateResults(generateWork()))
+				using (tds)
+				{
+					if (tds.Dataset is not null)
+					{
+						image.AddTile((EsriTile)tds.Tile, tds.Dataset);
+						numTilesDownload++;
+					}
+
+					if (tds.Message is not null)
+						Console.Error.WriteLine($"\r\n{tds.Message}");
+
+					ReportProgress(++numTilesProcessed / (double)tileCount);
+				}
+
+			ReplaceProgress("Done!\r\n");
+			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+
+			if (numTilesDownload == 0)
+			{
+				if (saveFile.Exists)
+					saveFile.Delete();
+				return;
+			}
+
+			Console.Write("Saving Image: ");
+			Progress = 0;
+
+			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
+			ReplaceProgress("Done!\r\n");
+		}
+		finally
+		{
+			if (File.Exists(tempFile))
+				File.Delete(tempFile);
+		}
+
+
+		IEnumerable<Task<TileDataset>> generateWork()
+			=> Aoi
+			.GetTiles<EsriTile>(ZoomLevel)
+			.Select(t => Task.Run(() => DownloadTile(wayBack, t, layer)));
+	}
+
+	private static async Task<TileDataset> DownloadTile(WayBack wayBack, EsriTile tile, Layer layer)
+	{
+		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
+
+		try
+		{
+			var bytes = await wayBack.DownloadTileAsync(layer, tile);
+
+			string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
+			try
+			{
+				Gdal.FileFromMemBuffer(memFile, bytes);
+
+				return new()
+				{
+					Tile = tile,
+					Message = null,
+					Dataset = Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, [])
+				};
+			}
+			finally
+			{
+				Gdal.Unlink(memFile);
+			}
+		}
+		catch (HttpRequestException)
+		{ /* Failed to get a dated tile image. This wile will be black in the final image. */ }
+
+		return EmptyDataset(tile);
+	}
+	#endregion
+
+	#region Keyhole
+
+	private async Task Run_Keyhole(FileInfo saveFile, DateOnly desiredDate)
+	{
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
 
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var desiredDate = Date!.Value;
 		var tempFile = Path.GetTempFileName();
 		int tileCount = Aoi.GetTileCount<KeyholeTile>(ZoomLevel);
 		int numTilesProcessed = 0;
@@ -87,7 +194,7 @@ internal class Download : AoiVerb
 
 		try
 		{
-			using EarthImage image = new KeyholeImage(Aoi, ZoomLevel, tempFile);
+			using var image = new KeyholeImage(Aoi, ZoomLevel, tempFile);
 
 			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
@@ -137,7 +244,7 @@ internal class Download : AoiVerb
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
 
 		if (await root.GetNodeAsync(tile) is not TileNode node)
-			return emptyDataset();
+			return EmptyDataset(tile);
 
 		foreach (var dt in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
 		{
@@ -168,14 +275,18 @@ internal class Download : AoiVerb
 			{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
 		}
 
-		return emptyDataset();
-
-		TileDataset emptyDataset() => new()
-		{
-			Tile = tile,
-			Message = $"No imagery available for tile at {tile.Center}"
-		};
+		return EmptyDataset(tile);
 	}
+
+	#endregion
+
+	#region Common
+
+	private static TileDataset EmptyDataset(ITile tile) => new()
+	{
+		Tile = tile,
+		Message = $"No imagery available for tile at {tile.Center}"
+	};
 
 	private class TileDataset : IDisposable
 	{
@@ -188,4 +299,5 @@ internal class Download : AoiVerb
 			Dataset?.Dispose();
 		}
 	}
+	#endregion
 }

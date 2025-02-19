@@ -19,6 +19,7 @@ internal class Program
 		settings.AutoVersion = true;
 		settings.AutoHelp = true;
 		settings.HelpWriter = Console.Error;
+		settings.CaseInsensitiveEnumValues = true;
 	}
 
 	[STAThread]

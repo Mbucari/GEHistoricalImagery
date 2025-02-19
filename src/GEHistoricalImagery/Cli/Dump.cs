@@ -1,12 +1,12 @@
 ﻿using CommandLine;
+using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
-using System.IO;
 
 namespace GEHistoricalImagery.Cli;
 
 [Verb("dump", HelpText = "Dump historical image tiles into a folder")]
-internal class Dump : AoiVerb
+internal partial class Dump : AoiVerb
 {
 	private const string formatHelpText = """
 				
@@ -52,16 +52,16 @@ internal class Dump : AoiVerb
 			hasError = true;
 		}
 
-        if (string.IsNullOrEmpty(Formatter))
-        {
+		if (string.IsNullOrEmpty(Formatter))
+		{
 			Console.Error.WriteLine($"Invalid filename formatter");
 			hasError = true;
 		}
-        else if (Formatter.FirstOrDefault(c => Path.GetInvalidFileNameChars().Any(i => i == c)) is char fileChar && fileChar != default)
+		else if (Formatter.FirstOrDefault(c => Path.GetInvalidFileNameChars().Any(i => i == c)) is char fileChar && fileChar != default)
 		{
 			Console.Error.WriteLine($"Invalid filename character: {fileChar}");
 			hasError = true;
-		} 
+		}
 		else if (!(Formatter.Contains("{C}") || Formatter.Contains("{c}")) ||
 			!(Formatter.Contains("{R}") || Formatter.Contains("{r}")))
 		{
@@ -96,16 +96,92 @@ internal class Dump : AoiVerb
 		if (ConcurrentDownload <= 0)
 			ConcurrentDownload = Environment.ProcessorCount;
 
+		var desiredDate = Date!.Value;
+
+		var task = Provider is Provider.Wayback ? Run_Esri(saveFolder, desiredDate)
+		: Run_Keyhole(saveFolder, desiredDate);
+
+		await task;
+	}
+
+	#region Esri
+
+	private async Task Run_Esri(DirectoryInfo saveFolder, DateOnly desiredDate)
+	{
+		var wayBack = await WayBack.CreateAsync(CacheDir);
+		var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
+
+		Console.Write("Grabbing Image Tiles: ");
+		ReportProgress(0);
+
+		int tileCount = Aoi.GetTileCount<EsriTile>(ZoomLevel);
+		int numTilesProcessed = 0;
+		int numTilesDownload = 0;
+		var filenameFormatter = new FilenameFormatter<EsriTile>(Formatter!, Aoi, ZoomLevel);
+		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+
+		await foreach (var tds in processor.EnumerateResults(generateWork()))
+		{
+			if (tds.Message is not null)
+				Console.Error.WriteLine($"\r\n{tds.Message}");
+
+			if (tds.Dataset is null)
+				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
+			else
+			{
+				var saveFile = filenameFormatter.GetString(tds.Tile);
+				var savePath = Path.Combine(saveFolder.FullName, saveFile);
+				File.WriteAllBytes(savePath, tds.Dataset);
+				numTilesDownload++;
+			}
+
+			ReportProgress(++numTilesProcessed / (double)tileCount);
+		}
+
+		ReplaceProgress("Done!\r\n");
+		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+
+		IEnumerable<Task<TileDataset>> generateWork()
+			=> Aoi
+			.GetTiles<EsriTile>(ZoomLevel)
+			.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer)));
+	}
+
+	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer)
+	{
+		try
+		{
+			var imageBts = await wayBack.DownloadTileAsync(layer, tile);
+
+			return new()
+			{
+				Tile = tile,
+				Dataset = imageBts,
+				Message = null
+			};
+		}
+		catch (HttpRequestException)
+		{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
+
+		return EmptyDataset(tile);
+
+	}
+
+	#endregion
+
+	#region Keyhole
+
+	private async Task Run_Keyhole(DirectoryInfo saveFolder, DateOnly desiredDate)
+	{
 		Console.Write("Grabbing Image Tiles: ");
 		ReportProgress(0);
 
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var desiredDate = Date!.Value;
 		int tileCount = Aoi.GetTileCount<KeyholeTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
-		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 		var filenameFormatter = new FilenameFormatter<KeyholeTile>(Formatter!, Aoi, ZoomLevel);
+		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		await foreach (var tds in processor.EnumerateResults(generateWork()))
 		{
@@ -137,7 +213,7 @@ internal class Dump : AoiVerb
 	private static async Task<TileDataset> DownloadTile(DbRoot root, KeyholeTile tile, DateOnly desiredDate)
 	{
 		if (await root.GetNodeAsync(tile) is not TileNode node)
-			return emptyDataset();
+			return EmptyDataset(tile);
 
 		foreach (var dt in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
 		{
@@ -158,14 +234,15 @@ internal class Dump : AoiVerb
 			{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
 		}
 
-		return emptyDataset();
+		return EmptyDataset(tile);
 
-		TileDataset emptyDataset() => new()
-		{
-			Tile = tile,
-			Message = $"No imagery available for tile at {tile.Center}"
-		};
 	}
+
+	private static TileDataset EmptyDataset(ITile tile) => new()
+	{
+		Tile = tile,
+		Message = $"No imagery available for tile at {tile.Center}"
+	};
 
 	private class TileDataset
 	{
@@ -173,6 +250,10 @@ internal class Dump : AoiVerb
 		public byte[]? Dataset { get; init; }
 		public required string? Message { get; init; }
 	}
+
+	#endregion
+
+	#region Common
 
 	private class FilenameFormatter<T> where T : ITile<T>
 	{
@@ -248,4 +329,5 @@ internal class Dump : AoiVerb
 			return "D" + maxNumDigits;
 		}
 	}
+	#endregion
 }

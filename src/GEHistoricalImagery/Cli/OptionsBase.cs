@@ -2,8 +2,17 @@
 
 namespace GEHistoricalImagery.Cli;
 
+public enum Provider
+{
+	TM,
+	Wayback
+}
+
 internal abstract class OptionsBase
 {
+	[Option("provider", MetaValue = "TM", HelpText = "Aerial imagery provider\r\n [TM]      Google Earth Time Machine\r\n [Wayback] ESRI World Imagery Wayback", Default = Provider.TM)]
+	public Provider Provider { get; set; }
+
 	[Option("no-cache", HelpText = "Disable local caching", Default = false)]
 	public bool DisableCache { get; set; }
 	public abstract Task RunAsync();

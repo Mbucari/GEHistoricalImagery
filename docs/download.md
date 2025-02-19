@@ -6,7 +6,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
 ## Usage
 ```Console
- GEHistoricalImagery download --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]] [--scale [S]] [--offset-x [X]] [--offset-y [Y]] [--scale-first]
+ GEHistoricalImagery download --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]] [--scale [S]] [--offset-x [X]] [--offset-y [Y]] [--scale-first] [--provider [P]] [--no-cache]
 
   --lower-left=LAT,LONG                   Required. Geographic coordinate of the lower-left (southwest) corner of the
                                           rectangular area of interest.
@@ -31,6 +31,39 @@ If imagery is not available for the specified date, the downloader will use the 
   --offset-y=Y                            (Default: 0) Geo transform Y offset
 
   --scale-first                           (Default: false) Perform scaling before offsetting X and Y
+
+
+
+
+  --lower-left=LAT,LONG                   Required. Geographic coordinate of the lower-left (southwest) corner of the
+                                          rectangular area of interest.
+
+  --upper-right=LAT,LONG                  Required. Geographic coordinate of the upper-right (northeast) corner of the
+                                          rectangular area of interest.
+
+  -z N, --zoom=N                          Required. Zoom level [1-23]
+
+  -d yyyy/MM/dd, --date=yyyy/MM/dd        Required. Imagery Date
+
+  -o out.tif, --output=out.tif            Required. Output GeoTiff save location
+
+  -p N, --parallel=N                      (Default: ALL_CPUS) Number of concurrent downloads
+
+  --target-sr=https://epsg.io/1234.wkt    Warp image to Spatial Reference
+
+  --scale=S                               (Default: 1) Geo transform scale factor
+
+  --offset-x=X                            (Default: 0) Geo transform X offset
+
+  --offset-y=Y                            (Default: 0) Geo transform Y offset
+
+  --scale-first                           (Default: false) Perform scaling before offsetting X and Y
+
+  --provider=TM                           (Default: TM) Aerial imagery provider
+                                           [TM]      Google Earth Time Machine
+                                           [Wayback] ESRI World Imagery Wayback
+
+  --no-cache                              (Default: false) Disable local caching
 ```
 
 ## Examples
@@ -70,5 +103,17 @@ Download historical imagery at zoom level `20` from within the region defined by
    ![Cherry Creek 3-Small.jpg](assets/Cherry%20Creek%203-Small.jpg)
    [click here to download the original file](../../../raw/master/docs/assets/Cherry%20Creek%203.tif)
 
+### Example 4 -  Get imagery from Esri Wayback on 2023/04/16
+
+   **Command:**
+   ```Console
+   GEHistoricalImagery download --provider wayback --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 19 --date 2023/04/16 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek 4.tif"
+   ```
+
+   **Output:**
+   ![Cherry Creek 4-Small.jpg](assets/Cherry%20Creek%204-Small.jpg)
+   [click here to download the original file](../../../raw/master/docs/assets/Cherry%20Creek%204.tif)
+
+
 ************************
-<p align="center"><i>Updated 2024/10/11</i></p>
+<p align="center"><i>Updated 2025/02/19</i></p>

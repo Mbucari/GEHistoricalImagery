@@ -4,11 +4,17 @@ _Get imagery info at a specified location._
 This command prints out all arial imagery dates at a specified location.
 ## Usage
 ```Console
-GEHistoricalImagery info --location [LAT,LONG] [--zoom [N]]
+GEHistoricalImagery info --location [LAT,LONG] [--zoom [N]] [--provider [P]] [--no-cache]
 
   -l LAT,LONG, --location=LAT,LONG    Required. Geographic location
   
   -z N, --zoom=N                      Zoom level (Optional, [0-24])
+
+  --provider=TM                       (Default: TM) Aerial imagery provider
+                                       [TM]      Google Earth Time Machine
+                                       [Wayback] ESRI World Imagery Wayback
+
+  --no-cache                          (Default: false) Disable local caching
 ```
 ## Example 1 - Get imagery into at a location for a single zoom level
 **Command:**

@@ -6,7 +6,7 @@ Tiles that are available from a specific date are shaded, and unavailable tiles 
 
 ## Usage
 ```Console
-GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG] --zoom [N] [--parallel [N]]
+GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG] --zoom [N] [--parallel [N]] [--provider [P]] [--no-cache]
 
   --lower-left=LAT,LONG     Required. Geographic coordinate of the lower-left (southwest) corner of the rectangular area
                             of interest.
@@ -14,9 +14,15 @@ GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG
   --upper-right=LAT,LONG    Required. Geographic coordinate of the upper-right (northeast) corner of the rectangular
                             area of interest.
 
-  -z N, --zoom=N            Required. Zoom level [1-24]
+  -z N, --zoom=N            Required. Zoom level [1-23]
   
   -p N, --parallel=N        (Default: 20) Number of concurrent downloads
+
+  --provider=TM             (Default: TM) Aerial imagery provider
+                             [TM]      Google Earth Time Machine
+                             [Wayback] ESRI World Imagery Wayback
+
+  --no-cache                (Default: false) Disable local caching
 ```
 
 ## Example
@@ -108,7 +114,7 @@ Tile availability on 2023/04/29
 ::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
 ::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
 ::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
-::::::::::::::::::::::::::::▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 ```
 ### Availability Map 3 - Imagery from 2021/05/17
 This diagram, shown by pressing `5` in the console, shows the tiles with available imagery from 2021/08/17. The shaded areas represent tiles which contain imagery for the selected date, and the dots represent tiles which have no imagery for the selected date. Only a narrow L-shaped region is shaded, so the majority of this region has no imagery from 2021/08/17.
@@ -144,8 +150,8 @@ Tile availability on 2021/05/17
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙
 ```
 
 ************************
-<p align="center"><i>Updated 2024/10/11</i></p>
+<p align="center"><i>Updated 2025/02/19</i></p>

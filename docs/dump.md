@@ -6,7 +6,7 @@ If imagery is not available for the specified date, the downloader will use the 
 
 ## Usage
 ```Console
- GEHistoricalImagery dump --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]]
+ GEHistoricalImagery dump --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache]
 
   --lower-left=LAT,LONG                             Required. Geographic coordinate of the lower-left (southwest) corner
                                                     of the rectangular area of interest.
@@ -29,7 +29,12 @@ If imagery is not available for the specified date, the downloader will use the 
                                                       "{r}" = tile's row number within the rectangle
 
   -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
-  
+
+  --provider=TM                       (Default: TM) Aerial imagery provider
+                                       [TM]      Google Earth Time Machine
+                                       [Wayback] ESRI World Imagery Wayback
+
+  --no-cache                          (Default: false) Disable local caching  
 ```
 ## Examples
 Download historical imagery tiles at zoom level `20` from within the region defined by the lower-left (southwest) corner `39.619819,-104.856121` and upper-right (northeast) corner `39.638393,-104.824990`.
@@ -78,8 +83,9 @@ There are `2^zoom` number of global rows, beginning with row 0 at -180 degrees l
    Zoom=20, Global Column=218963, Global Row=639743.jpg
    ```
 ## Convert Between Lat/Long and Row/Column numbers
-**Global** row/column numbers can be related to latitude/longitude using the following formulae:
 
+**Global** row/column numbers can be related to latitude/longitude using the following formulae:
+### Google Earth Tiles
 $$G=\frac{360}{2^{Z}}N-180$$ or $$N=\left\lfloor \frac{G+180}{360}2^{Z} \right\rfloor$$
 
 Where:
@@ -87,6 +93,16 @@ Where:
 $G$ is the geographic latitude/longitude<br>
 $N$ is the row/column<br>
 $Z$ is the zoom level.<br>
+### Esri Tiles
+
+$$Longitude = 360\frac{Column}{2^{Z}}-180$$
+$$Latitude = \arctan(\sinh(\pi (1-2\frac{Row}{2^{Z}}))) \frac{180}{\pi}$$
+or
+$$Column = 2^{Z}\frac{Longitude + 180}{360}$$
+$$Row = \frac{2^{Z}}{2}(1 - \frac{1}{\pi}\ln(\tan(\frac{\pi\cdot Latitude}{180}) + \sec(\frac{\pi\cdot Latitude}{180})) $$
+Where:
+
+$Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2024/12/4</i></p>
+<p align="center"><i>Updated 2025/02/19</i></p>

@@ -5,7 +5,7 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<Version>0.1.8.0</Version>
+	<Version>0.1.9.0</Version>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	<SelfContained>true</SelfContained>
 	<PublishAot>true</PublishAot>

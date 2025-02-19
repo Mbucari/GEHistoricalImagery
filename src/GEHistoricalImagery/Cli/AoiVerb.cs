@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using Google.Protobuf.WellKnownTypes;
-using LibGoogleEarth;
+using LibMapCommon;
 
 namespace GEHistoricalImagery.Cli;
 

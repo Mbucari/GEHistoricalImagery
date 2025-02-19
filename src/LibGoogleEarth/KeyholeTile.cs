@@ -1,12 +1,11 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using LibMapCommon;
 
 namespace LibGoogleEarth;
 
 /// <summary>
 /// A square tile on earth's surface at a particular zoom level.
 /// </summary>
-public class Tile
+public class KeyholeTile : ITile<KeyholeTile>
 {
 	/// <summary> The quadtree path string </summary>
 	public string Path { get; }
@@ -15,7 +14,7 @@ public class Tile
 	/// <summary> Indicates if this instances represents the root quadtree node. </summary>
 	public bool IsRoot => Path == Root.Path;
 	/// <summary> Enumerates all quad tree indices after the root node. </summary>
-	public IEnumerable<Tile> Indices => EnumerateIndices();
+	public IEnumerable<KeyholeTile> Indices => EnumerateIndices();
 
 	/*
 	   c0    c1
@@ -25,23 +24,21 @@ r1	|  3  |  2  |
 r0	|  0  |  1  |
 	|-----|-----|
 	*/
-	/// <summary> The <see cref="Tile"/>'s zoom level. </summary>
 	public int Level { get; }
-	/// <summary> The number of <see cref="Tile"/> rows from the bottom-most (south-most) edge of the map. </summary>
+	/// <summary> The number of <see cref="KeyholeTile"/> rows from the bottom-most (south-most) edge of the map. </summary>
 	public int Row { get; }
-	/// <summary> The number of <see cref="Tile"/> columns from the left-most (west-most) edge of the map. </summary>
 	public int Column { get; }
 	/// <summary>  The roo quadtree node </summary>
-	public static readonly Tile Root = new("0");
+	public static readonly KeyholeTile Root = new("0");
 	public const int MaxLevel = 30;
 	private const int SUBINDEX_MAX_SZ = 4;
 
 	#region Constructors
 	/// <summary>
-	/// Initializes a new instance of a <see cref="Tile"/> from a quadtree path string
+	/// Initializes a new instance of a <see cref="KeyholeTile"/> from a quadtree path string
 	/// </summary>
 	/// <param name="quadTreePath">The rooted quadtree path string.</param>
-	public Tile(string quadTreePath)
+	public KeyholeTile(string quadTreePath)
 	{
 		Util.ValidateQuadTreePath(quadTreePath);
 
@@ -61,12 +58,12 @@ r0	|  0  |  1  |
 	}
 
 	/// <summary>
-	/// Initializes a new instance of a <see cref="Tile"/> by row, column, and zoom level
+	/// Initializes a new instance of a <see cref="KeyholeTile"/> by row, column, and zoom level
 	/// </summary>
-	/// <param name="rowIndex">The row containing the <see cref="Tile"/></param>
-	/// <param name="colIndex">The column containing the <see cref="Tile"/></param>
-	/// <param name="level">The <see cref="Tile"/>'s zoom level</param>
-	public Tile(int rowIndex, int colIndex, int level)
+	/// <param name="rowIndex">The row containing the <see cref="KeyholeTile"/></param>
+	/// <param name="colIndex">The column containing the <see cref="KeyholeTile"/></param>
+	/// <param name="level">The <see cref="KeyholeTile"/>'s zoom level</param>
+	public KeyholeTile(int rowIndex, int colIndex, int level)
 	{
 		var numTiles = Util.ValidateLevel(level);
 		ArgumentOutOfRangeException.ThrowIfNegative(rowIndex, nameof(rowIndex));
@@ -95,46 +92,47 @@ r0	|  0  |  1  |
 	}
 	#endregion
 
+	public static KeyholeTile GetTile(Coordinate coordinate, int level)
+	{
+		return new(Util.LatLongToRowCol(coordinate.Latitude, level), Util.LatLongToRowCol(coordinate.Longitude, level), level);
+	}
+
+	public static KeyholeTile GetMinimumCorner(Coordinate c1, Coordinate c2, int level)
+	{
+		var lowerMost = Math.Min(c1.Latitude, c2.Latitude);
+		var leftMost = Math.Min(c1.Longitude, c2.Longitude);
+		return GetTile(new Coordinate(lowerMost, leftMost), level);
+	}
+
+	public static KeyholeTile Create(int row, int col, int level)
+		=> new KeyholeTile(row, col, level);
+
 	#region Coordinates
 	private double RowColToLatLong(double rowCol)
 		=> Util.RowColToLatLong(Level, rowCol);
 
-	/// <summary> The lower-left (southwest) <see cref="Coordinate"/> of this <see cref="Tile"/> </summary>
+	/// <summary> The lower-left (southwest) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
 	public Coordinate LowerLeft => new(RowColToLatLong(Row), RowColToLatLong(Column));
-	/// <summary> The lower-right (southeast) <see cref="Coordinate"/> of this <see cref="Tile"/> </summary>
+	/// <summary> The lower-right (southeast) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
 	public Coordinate LowerRight => new(RowColToLatLong(Row), RowColToLatLong(Column + 1));
-	/// <summary> The upper-left (northwest) <see cref="Coordinate"/> of this <see cref="Tile"/> </summary>
+	/// <summary> The upper-left (northwest) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
 	public Coordinate UpperLeft => new(RowColToLatLong(Row + 1), RowColToLatLong(Column));
-	/// <summary> The upper-right (northeast) <see cref="Coordinate"/> of this <see cref="Tile"/> </summary>
+	/// <summary> The upper-right (northeast) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
 	public Coordinate UpperRight => new(RowColToLatLong(Row + 1), RowColToLatLong(Column + 1));
-	/// <summary> <see cref="Coordinate"/> of the center of this <see cref="Tile"/> </summary>
+	/// <summary> <see cref="Coordinate"/> of the center of this <see cref="KeyholeTile"/> </summary>
 	public Coordinate Center => new(RowColToLatLong(Row + 0.5), RowColToLatLong(Column + 0.5));
 	#endregion
 
 	#region Helpers
-	private IEnumerable<Tile> EnumerateIndices()
+	private IEnumerable<KeyholeTile> EnumerateIndices()
 	{
 		for (int end = SUBINDEX_MAX_SZ; end < Path.Length; end += SUBINDEX_MAX_SZ)
-			yield return new Tile(Path[..end]);
+			yield return new KeyholeTile(Path[..end]);
 	}
 	public override string ToString() => Path;
 	public override int GetHashCode() => Path.GetHashCode();
-	public override bool Equals(object? obj) => obj is Tile other && other.Path == Path;
+	public override bool Equals(object? obj) => obj is KeyholeTile other && other.Path == Path;
 
-	/// <summary>
-	/// Gets the number of columns between teo <see cref="Tile"/>s. May span 180/-180
-	/// </summary>
-	/// <param name="leftTile">The left (western) <see cref="Tile"/> of the region</param>
-	/// <param name="rightTile">The right (eastern) <see cref="Tile"/> of the region</param>
-	/// <returns>The column span</returns>
-	/// <exception cref="ArgumentException">thrown if boh <see cref="Tile"/>s do not have the same <see cref="Tile.Level"/></exception>
-	public static int ColumnSpan(Tile leftTile, Tile rightTile)
-	{
-		if (leftTile.Level != rightTile.Level)
-			throw new ArgumentException("Tile levels do not match", nameof(rightTile));
-
-		return Util.Mod(rightTile.Column - leftTile.Column, 1 << rightTile.Level);
-	}
 	#endregion
 
 	#region Subindex Calculation

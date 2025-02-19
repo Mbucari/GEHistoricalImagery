@@ -11,7 +11,7 @@ internal class DefaultDbRoot : DbRoot
 	internal DefaultDbRoot(DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
 		: base(cacheDir, dbRootEnc) { }
 
-	protected override async Task<IQuadtreePacket> GetPacketAsync(Tile tile, int epoch)
+	protected override async Task<IQuadtreePacket> GetPacketAsync(KeyholeTile tile, int epoch)
 	{
 		const string QP2 = "https://kh.google.com/flatfile?q2-{0}-q.{1}";
 

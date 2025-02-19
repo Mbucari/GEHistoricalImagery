@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using LibGoogleEarth;
+using LibMapCommon;
 using OSGeo.GDAL;
 
 namespace GEHistoricalImagery.Cli;
@@ -79,14 +80,14 @@ internal class Download : AoiVerb
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var desiredDate = Date!.Value;
 		var tempFile = Path.GetTempFileName();
-		int tileCount = Aoi.GetTileCount(ZoomLevel);
+		int tileCount = Aoi.GetTileCount<KeyholeTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		try
 		{
-			using EarthImage image = new(Aoi, ZoomLevel, tempFile);
+			using EarthImage image = new KeyholeImage(Aoi, ZoomLevel, tempFile);
 
 			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
@@ -127,11 +128,11 @@ internal class Download : AoiVerb
 
 		IEnumerable<Task<TileDataset>> generateWork()
 			=> Aoi
-			.GetTiles(ZoomLevel)
+			.GetTiles<KeyholeTile>(ZoomLevel)
 			.Select(t => Task.Run(() => DownloadTile(root, t, desiredDate)));
 	}
 
-	private static async Task<TileDataset> DownloadTile(DbRoot root, Tile tile, DateOnly desiredDate)
+	private static async Task<TileDataset> DownloadTile(DbRoot root, KeyholeTile tile, DateOnly desiredDate)
 	{
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
 
@@ -178,7 +179,7 @@ internal class Download : AoiVerb
 
 	private class TileDataset : IDisposable
 	{
-		public required Tile Tile { get; init; }
+		public required ITile Tile { get; init; }
 		public Dataset? Dataset { get; init; }
 		public required string? Message { get; init; }
 

@@ -3,9 +3,9 @@
 namespace LibGoogleEarthTest;
 
 [TestClass]
-public class TileTests
+public class KeyholeTileTests
 {
-	private const int MAX_ROX_COL_SZ = (1 << Tile.MaxLevel) - 1;
+	private const int MAX_ROX_COL_SZ = (1 << KeyholeTile.MaxLevel) - 1;
 
 	[DataTestMethod]
 	[DataRow(0, 0, 0, "0")]
@@ -17,9 +17,9 @@ public class TileTests
 	[DataRow((1 << 10) - 1, 0, 10, "03333333333")]
 	[DataRow(0, (1 << 10) - 1, 10, "01111111111")]
 	[DataRow((1 << 10) - 1, (1 << 10) - 1, 10, "02222222222")]
-	[DataRow(MAX_ROX_COL_SZ, 0, Tile.MaxLevel, "0333333333333333333333333333333")]
-	[DataRow(0, MAX_ROX_COL_SZ, Tile.MaxLevel, "0111111111111111111111111111111")]
-	[DataRow(MAX_ROX_COL_SZ, MAX_ROX_COL_SZ, Tile.MaxLevel, "0222222222222222222222222222222")]
+	[DataRow(MAX_ROX_COL_SZ, 0, KeyholeTile.MaxLevel, "0333333333333333333333333333333")]
+	[DataRow(0, MAX_ROX_COL_SZ, KeyholeTile.MaxLevel, "0111111111111111111111111111111")]
+	[DataRow(MAX_ROX_COL_SZ, MAX_ROX_COL_SZ, KeyholeTile.MaxLevel, "0222222222222222222222222222222")]
 
 	/*
 	   c0    c1
@@ -33,7 +33,7 @@ r0	|  0  |  1  |
 
 	public void ValidTiles(int row, int col, int zoom, string qtp)
 	{
-		var tile = new Tile(row, col, zoom);
+		var tile = new KeyholeTile(row, col, zoom);
 		Assert.AreEqual(qtp, tile.Path);
 		Assert.AreEqual(zoom, tile.Level);
 	}
@@ -50,6 +50,6 @@ r0	|  0  |  1  |
 
 	public void TilesOutOfRange(int row, int col, int zoom)
 	{
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Tile(row, col, zoom));
+		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new KeyholeTile(row, col, zoom));
 	}
 }

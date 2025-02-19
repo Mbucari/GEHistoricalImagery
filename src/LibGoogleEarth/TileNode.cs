@@ -3,17 +3,17 @@
 namespace LibGoogleEarth;
 
 /// <summary>
-/// Relates a <see cref="Keyhole.QuadtreeNode"/> to a <see cref="LibGoogleEarth.Tile"/>
+/// Relates a <see cref="Keyhole.QuadtreeNode"/> to a <see cref="KeyholeTile"/>
 /// </summary>
 public class TileNode
 {
 	private const int MIN_JPEG_DATE = 545;
 	/// <summary> The Google Earth quadtree node </summary>
 	public IQuadtreeNode QuadtreeNode { get; }
-	/// <summary> The <see cref="LibGoogleEarth.Tile"/> associated with the <see cref="QuadtreeNode"/> </summary>
-	public Tile Tile { get; }
+	/// <summary> The <see cref="KeyholeTile"/> associated with the <see cref="QuadtreeNode"/> </summary>
+	public KeyholeTile Tile { get; }
 
-	internal TileNode(Tile tile, IQuadtreeNode quadtreeNode)
+	internal TileNode(KeyholeTile tile, IQuadtreeNode quadtreeNode)
 	{
 		QuadtreeNode = quadtreeNode;
 		Tile = tile;

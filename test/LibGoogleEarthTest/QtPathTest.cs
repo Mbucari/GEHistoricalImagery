@@ -35,28 +35,28 @@ public class QtPathTest
 		{
 			var iStr = i.ToString();
 			var qtPath = qtIndex + iStr;
-			var p = new Tile(qtPath);
+			var p = new KeyholeTile(qtPath);
 			Assert.AreEqual(SubIndexDict[iStr], p.SubIndex);
 			Assert.AreEqual(qtPath, p.Path);
 			for (int j = 0; j < 4; j++)
 			{
 				var jStr = iStr + j;
 				qtPath = qtIndex + jStr;
-				p = new Tile(qtPath);
+				p = new KeyholeTile(qtPath);
 				Assert.AreEqual(SubIndexDict[jStr], p.SubIndex);
 				Assert.AreEqual(qtPath, p.Path);
 				for (int k = 0; k < 4; k++)
 				{
 					var kStr = jStr + k;
 					qtPath = qtIndex + kStr;
-					p = new Tile(qtPath);
+					p = new KeyholeTile(qtPath);
 					Assert.AreEqual(SubIndexDict[kStr], p.SubIndex);
 					Assert.AreEqual(qtPath, p.Path);
 					for (int l = 0; l < 4; l++)
 					{
 						var lStr = kStr + l;
 						qtPath = qtIndex + lStr;
-						p = new Tile(qtPath);
+						p = new KeyholeTile(qtPath);
 						Assert.AreEqual(SubIndexDict[lStr], p.SubIndex);
 						Assert.AreEqual(qtPath, p.Path);
 					}
@@ -72,19 +72,19 @@ public class QtPathTest
 		for (int i = 0; i < 4; i++)
 		{
 			var iStr = "0" + i.ToString();
-			var p = new Tile(iStr);
+			var p = new KeyholeTile(iStr);
 			Assert.AreEqual(RootIndexDict[iStr], p.SubIndex);
 			Assert.AreEqual(iStr, p.Path);
 			for (int j = 0; j < 4; j++)
 			{
 				var jStr = iStr + j;
-				p = new Tile(jStr);
+				p = new KeyholeTile(jStr);
 				Assert.AreEqual(RootIndexDict[jStr], p.SubIndex);
 				Assert.AreEqual(jStr, p.Path);
 				for (int k = 0; k < 4; k++)
 				{
 					var kStr = jStr + k;
-					p = new Tile(kStr);
+					p = new KeyholeTile(kStr);
 					Assert.AreEqual(RootIndexDict[kStr], p.SubIndex);
 					Assert.AreEqual(kStr, p.Path);
 				}
@@ -95,7 +95,7 @@ public class QtPathTest
 	[TestMethod]
 	public void RootIndex2()
 	{
-		var p = new Tile("0");
+		var p = new KeyholeTile("0");
 		Assert.IsTrue(p.IsRoot);
 		Assert.AreEqual(0, p.SubIndex);
 		Assert.AreEqual(p.Level, 0);
@@ -113,21 +113,21 @@ public class QtPathTest
 	[DataRow("")]
 	public void BadPaths(string quadTreePath)
 	{
-		Assert.ThrowsException<ArgumentException>(() => new Tile(quadTreePath));
+		Assert.ThrowsException<ArgumentException>(() => new KeyholeTile(quadTreePath));
 	}
 
 	[TestMethod]
 	public void NullPath()
-		=> Assert.ThrowsException<ArgumentNullException>(() => new Tile(null!));
+		=> Assert.ThrowsException<ArgumentNullException>(() => new KeyholeTile(null!));
 
 	[TestMethod]
 	public void EnumerateIndices()
 	{
-		for (int level = 0; level <= Tile.MaxLevel; level++)
+		for (int level = 0; level <= KeyholeTile.MaxLevel; level++)
 		{
 			var qtp = RandomQuadTreePath(level + 1);
 
-			var p = new Tile(qtp);
+			var p = new KeyholeTile(qtp);
 			Assert.AreEqual(qtp, p.Path);
 			Assert.AreEqual(level, p.Level);
 

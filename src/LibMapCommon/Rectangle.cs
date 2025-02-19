@@ -1,16 +1,20 @@
-﻿using LibGoogleEarth;
-
-namespace GEHistoricalImagery;
+﻿namespace LibMapCommon;
 
 /// <summary>
 /// A region of space on earth defined by the lower-left and upper-right geographic coordinates.
 /// </summary>
-internal readonly struct Rectangle
+public readonly struct Rectangle
 {
 	/// <summary> The lower-left (southwest) corner of the <see cref="Rectangle"/> </summary>
 	public readonly Coordinate LowerLeft;
 	/// <summary> The upper-right (northeast) corner of the <see cref="Rectangle"/> </summary>
 	public readonly Coordinate UpperRight;
+
+	/// <summary> Gets the upper-left (northwest) corner of the <see cref="Rectangle"/> </summary>
+	public Coordinate GetUpperLeft() => new Coordinate(UpperRight.Latitude, LowerLeft.Longitude);
+
+	/// <summary> Gets the lower-right (southeast) corner of the <see cref="Rectangle"/> </summary>
+	public Coordinate GetLowerRight() => new Coordinate(LowerLeft.Latitude, UpperRight.Longitude);
 
 	/// <summary>
 	/// Initializes a new instance of a <see cref="Rectangle"/> area on earth's surface by the lower-left and upper-right coordinates. 
@@ -38,13 +42,13 @@ internal readonly struct Rectangle
 	/// <param name="level"></param>
 	/// <param name="nRows">The number of rows from the lower (south) tile to the upper tile (inclusive)</param>
 	/// <param name="nColumns">The number of columns from the left tile to the upper tile (inclusive)</param>
-	public void GetNumRowsAndColumns(int level, out int nRows, out int nColumns)
+	public void GetNumRowsAndColumns<T>(int level, out int nRows, out int nColumns) where T : ITile<T>
 	{
-		var ll = LowerLeft.GetTile(level);
-		var ur = UpperRight.GetTile(level);
+		var ll = LowerLeft.GetTile<T>(level);
+		var ur = UpperRight.GetTile<T>(level);
 
-		nColumns = Tile.ColumnSpan(ll, ur) + 1;
-		nRows = ur.Row - ll.Row + 1;
+		nColumns = Util.Mod(ur.Column - ll.Column, 1 << level) + 1;
+		nRows = int.Abs(ur.Row - ll.Row) + 1;
 	}
 
 	/// <summary>
@@ -52,9 +56,9 @@ internal readonly struct Rectangle
 	/// </summary>
 	/// <param name="level">The zoom level of the tiles</param>
 	/// <returns>The number of tiles required to tile the <see cref="Rectangle"></returns>
-	public int GetTileCount(int level)
+	public int GetTileCount<T>(int level) where T : ITile<T>
 	{
-		GetNumRowsAndColumns(level, out var nRows, out var nColumns);
+		GetNumRowsAndColumns<T>(level, out var nRows, out var nColumns);
 		return nRows * nColumns;
 	}
 
@@ -64,11 +68,11 @@ internal readonly struct Rectangle
 	/// The enumeration starts at the lower-left corner, procedes left-to-right, then bottom-to-top.
 	/// </summary>
 	/// <param name="level">The zoom level of the tiles</param>
-	/// <returns>The <see cref="Tile"/> enumeration</returns>
-	public IEnumerable<Tile> GetTiles(int level)
+	/// <returns>The <see cref="KeyholeTile"/> enumeration</returns>
+	public IEnumerable<T> GetTiles<T>(int level) where T : ITile<T>
 	{
-		var ll = LowerLeft.GetTile(level);
-		GetNumRowsAndColumns(level, out var nRows, out var nColumns);
+		var minCorner = T.GetMinimumCorner(LowerLeft, UpperRight, level);
+		GetNumRowsAndColumns<T>(level, out var nRows, out var nColumns);
 
 		int numTiles = 1 << level;
 
@@ -76,9 +80,9 @@ internal readonly struct Rectangle
 		{
 			for (int c = 0; c < nColumns; c++)
 			{
-				var row = (ll.Row + r) % numTiles;
-				var col = (ll.Column + c) % numTiles;
-				yield return new Tile(row, col, level);
+				var row = (minCorner.Row + r) % numTiles;
+				var col = (minCorner.Column + c) % numTiles;
+				yield return T.Create(row, col, level);
 			}
 		}
 	}

@@ -1,23 +1,23 @@
-﻿using LibGoogleEarth;
+﻿using LibMapCommon;
 using OSGeo.GDAL;
 using OSGeo.OSR;
 
 namespace GEHistoricalImagery;
 
-internal class EarthImage : IDisposable
+internal abstract class EarthImage : IDisposable
 {
-	private const int TILE_SZ = 256;
-	private const string WGS_1984_WKT = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-	public int Width { get; }
-	public int Height { get; }
+	public const int TILE_SZ = 256;
+	protected int Width { get; init; }
+	protected int Height { get; init; }
 
-	private readonly Dataset TempDataset;
+	protected Dataset? TempDataset { get; init; }
 
 	/// <summary> The x-coordinate of the output dataset's top-left corner relative to global pixel space </summary>
-	private readonly int RasterX;
+	protected int RasterX { get; init; }
 
 	/// <summary> The y-coordinate of the output dataset's top-left corner relative to global pixel space  </summary>
-	private readonly int RasterY;
+	protected int RasterY { get; init; }
+	protected abstract int EpsgNumber { get; }
 
 	static EarthImage()
 	{
@@ -25,56 +25,34 @@ internal class EarthImage : IDisposable
 		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 
-	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)
+	protected Dataset CreateEmptyDataset(string? fileName, GeoTransform geoTransform)
 	{
-		var pixelScale = 360d / (1 << level) / TILE_SZ;
-
-		RasterX = (int)double.Round((rectangle.LowerLeft.Longitude + 180) / pixelScale);
-		//Web Mercater is a square of 360d x 360d, but only the middle 180d height is used.
-		RasterY = (int)double.Round((180 - rectangle.UpperRight.Latitude) / pixelScale);
-
-		var heightDeg = rectangle.UpperRight.Latitude - rectangle.LowerLeft.Latitude;
-		var widthDeg = rectangle.UpperRight.Longitude - rectangle.LowerLeft.Longitude;
-		//Allow wrapping around 180/-180
-		if (widthDeg < 0)
-			widthDeg += 360;
-
-		Width = (int)double.Round(widthDeg / pixelScale);
-		Height = (int)double.Round(heightDeg / pixelScale);
-
-		using var wgs = new SpatialReference(WGS_1984_WKT);
-
-		TempDataset = CreateEmptyDataset(Width, Height, cacheFile);
-		TempDataset.SetSpatialRef(wgs);
-		TempDataset.SetGeoTransform(new GeoTransform
-		{
-			UpperLeft_X = rectangle.LowerLeft.Longitude,
-			UpperLeft_Y = rectangle.UpperRight.Latitude,
-			PixelWidth = pixelScale,
-			PixelHeight = -pixelScale
-		});
-	}
-
-	private static Dataset CreateEmptyDataset(int width, int height, string? fileName)
-	{
+		Dataset dataset;
 		if (string.IsNullOrWhiteSpace(fileName))
 		{
 			using var tifDriver = Gdal.GetDriverByName("MEM");
-			return tifDriver.Create("", width, height, 3, DataType.GDT_Byte, null);
+			dataset = tifDriver.Create("", Width, Height, 3, DataType.GDT_Byte, null);
 		}
 		else
 		{
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			return tifDriver.Create(fileName, width, height, 3, DataType.GDT_Byte, null);
+			dataset = tifDriver.Create(fileName, Width, Height, 3, DataType.GDT_Byte, null);
 		}
+
+		using var sourceSr = new SpatialReference("");
+		sourceSr.ImportFromEPSG(EpsgNumber);
+		dataset.SetSpatialRef(sourceSr);
+		dataset.SetGeoTransform(geoTransform);
+		return dataset;
 	}
 
-	public void AddTile(Tile tile, Dataset image)
+	protected abstract int GetTopGlobalPixel(ITile tile);
+
+	public void AddTile(ITile tile, Dataset image)
 	{
 		//Tile's global pixel coordinates of the tile's top-left corner.
 		var gpx_x = tile.Column * TILE_SZ;
-		//Rows are from bottom-to-top, but Gdal datasets are top-to-bottom.
-		var gpx_y = ((1 << tile.Level) - tile.Row - 1) * TILE_SZ;
+		var gpx_y = GetTopGlobalPixel(tile);
 
 		//The tile is entirely to the left of the region, so wrap around the globe.
 		if (gpx_x + TILE_SZ < RasterX)
@@ -100,12 +78,13 @@ internal class EarthImage : IDisposable
 
 		var buff2 = GC.AllocateUninitializedArray<byte>(size_x * size_y * bandCount);
 		image.ReadRaster(read_x, read_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
-		TempDataset.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
+		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}
 
 	public void Save(string path, string? outSR, Action<double> progress, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
 	{
-		TempDataset?.FlushCache();
+		if (TempDataset == null) return;
+		TempDataset.FlushCache();
 
 		Dataset saved;
 
@@ -122,7 +101,7 @@ internal class EarthImage : IDisposable
 				"-co", "PHOTOMETRIC=YCBCR",
 				"-co", "TILED=TRUE",
 				"-r", "bilinear",
-				"-s_srs", WGS_1984_WKT,
+				"-s_srs", $"EPSG:{EpsgNumber}",
 				"-t_srs", outSR
 			];
 			using var options = new GDALWarpAppOptions(parameters);

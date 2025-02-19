@@ -38,17 +38,11 @@ public static class Util
 		return rowCol * 360d / numTiles - 180;
 	}
 
-	public static int Mod(int value, int modulus)
-	{
-		var result = value % modulus;
-		return result >= 0 ? result : result + modulus;
-	}
-
 	[StackTraceHidden]
 	public static int ValidateLevel(int level)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegative(level, nameof(level));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(level, Tile.MaxLevel, nameof(level));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(level, KeyholeTile.MaxLevel, nameof(level));
 		return 1 << level;
 	}
 

@@ -2,7 +2,7 @@
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks.Sources;
 
-namespace LibGoogleEarth.IO;
+namespace LibMapCommon.IO;
 
 internal class CachedValueTaskSource<TResult>(int capacity)
 {

@@ -1,6 +1,6 @@
 ﻿using Keyhole;
 using Keyhole.Dbroot;
-using LibGoogleEarth.IO;
+using LibMapCommon.IO;
 using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
@@ -105,11 +105,11 @@ public abstract class DbRoot
 	}
 
 	/// <summary>
-	/// Gets a <see cref="TileNode"/> for a specified <see cref="Tile"/>
+	/// Gets a <see cref="TileNode"/> for a specified <see cref="KeyholeTile"/>
 	/// </summary>
 	/// <param name="tile">The tile to get</param>
-	/// <returns>The <see cref="Tile"/>'s <see cref="TileNode"/></returns>
-	public async Task<TileNode?> GetNodeAsync(Tile tile)
+	/// <returns>The <see cref="KeyholeTile"/>'s <see cref="TileNode"/></returns>
+	public async Task<TileNode?> GetNodeAsync(KeyholeTile tile)
 	{
 		var packet = await GetQuadtreePacketAsync(tile);
 		return
@@ -133,11 +133,11 @@ public abstract class DbRoot
 	}
 
 	/// <summary>
-	/// Gets a <see cref="QuadtreePacket"/> which references a specified <see cref="Tile"/>
+	/// Gets a <see cref="QuadtreePacket"/> which references a specified <see cref="KeyholeTile"/>
 	/// </summary>
 	/// <param name="tile">The tile to get</param>
 	/// <returns>The <see cref="QuadtreePacket"/> which references the <see cref="TileNode"/></returns>
-	private async Task<IQuadtreePacket?> GetQuadtreePacketAsync(Tile tile)
+	private async Task<IQuadtreePacket?> GetQuadtreePacketAsync(KeyholeTile tile)
 	{
 		if ((DateTime.UtcNow - LastCacheComact) > CacheCompactInterval)
 		{
@@ -164,13 +164,13 @@ public abstract class DbRoot
 
 	private async Task<IQuadtreePacket?> GetRootCachedAsync()
 	{
-		return await PacketCache.GetOrCreateAsync(Tile.Root, loadRootPacketAsync, Options);
+		return await PacketCache.GetOrCreateAsync(KeyholeTile.Root, loadRootPacketAsync, Options);
 
 		async Task<IQuadtreePacket> loadRootPacketAsync(ICacheEntry _)
-			=> await GetPacketAsync(Tile.Root, (int)DbRootBuffer.DatabaseVersion.QuadtreeVersion);
+			=> await GetPacketAsync(KeyholeTile.Root, (int)DbRootBuffer.DatabaseVersion.QuadtreeVersion);
 	}
 
-	private async Task<IQuadtreePacket?> GetChildCachedAsync(IQuadtreePacket parentPacket, Tile path)
+	private async Task<IQuadtreePacket?> GetChildCachedAsync(IQuadtreePacket parentPacket, KeyholeTile path)
 	{
 		return await PacketCache.GetOrCreateAsync(path, loadChildPacketAsync, Options);
 
@@ -188,7 +188,7 @@ public abstract class DbRoot
 		}
 	}
 
-	protected abstract Task<IQuadtreePacket> GetPacketAsync(Tile path, int epoch);
+	protected abstract Task<IQuadtreePacket> GetPacketAsync(KeyholeTile path, int epoch);
 
 	/// <summary>
 	/// Download, decrypt and cache a file from Google Earth.
@@ -234,7 +234,7 @@ public abstract class DbRoot
 			Decrypt(data);
 			return data;
 		}
-		
+
 	}
 
 	private void Decrypt(Span<byte> cipherText)

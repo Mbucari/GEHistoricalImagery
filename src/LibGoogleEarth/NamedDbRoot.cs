@@ -11,10 +11,10 @@ internal class NamedDbRoot : DbRoot
 	internal NamedDbRoot(Database database, DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
 		: base(cacheDir, dbRootEnc)
 	{
-		_database = database;		
+		_database = database;
 	}
 
-	protected override async Task<IQuadtreePacket> GetPacketAsync(Tile tile, int epoch)
+	protected override async Task<IQuadtreePacket> GetPacketAsync(KeyholeTile tile, int epoch)
 	{
 		const string QP2_EXTENDED = "https://khmdb.google.com/flatfile?db={0}&qp-{1}-q.{2}";
 

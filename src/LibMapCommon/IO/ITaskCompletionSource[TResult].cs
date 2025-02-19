@@ -1,4 +1,4 @@
-﻿namespace LibGoogleEarth.IO;
+﻿namespace LibMapCommon.IO;
 
 internal interface ITaskCompletionSource<TResult>
 {

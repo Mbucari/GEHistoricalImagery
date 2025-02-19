@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using LibGoogleEarth;
+using LibMapCommon;
 using System.Text;
 
 namespace GEHistoricalImagery.Cli;
@@ -123,8 +124,8 @@ internal class Availability : AoiVerb
 
 	private async Task<char[][]> DrawAvailability(DbRoot root, DateOnly date)
 	{
-		var ll = Aoi.LowerLeft.GetTile(ZoomLevel);
-		var ur = Aoi.UpperRight.GetTile(ZoomLevel);
+		var ll = Aoi.LowerLeft.GetTile<KeyholeTile>(ZoomLevel);
+		var ur = Aoi.UpperRight.GetTile<KeyholeTile>(ZoomLevel);
 
 		var width = ur.Column - ll.Column + 1;
 		var height = ur.Row - ll.Row + 1;
@@ -139,7 +140,7 @@ internal class Availability : AoiVerb
 
 			for (int c = ll.Column; c <= ur.Column; c++)
 			{
-				var tile = new Tile(r, c, ZoomLevel);
+				var tile = new KeyholeTile(r, c, ZoomLevel);
 
 				var node = await root.GetNodeAsync(tile);
 
@@ -168,13 +169,13 @@ internal class Availability : AoiVerb
 	private async Task<DateOnly[]> GetAllDatesAsync(DbRoot root, Rectangle aoi, int zoomLevel)
 	{
 		int count = 0;
-		int numTiles = aoi.GetTileCount(zoomLevel);
+		int numTiles = aoi.GetTileCount<KeyholeTile>(zoomLevel);
 		ReportProgress(0);
 
 		SortedSet<DateOnly> dates = [];
 		ParallelProcessor<SortedSet<DateOnly>> processor = new(ConcurrentDownload);
 
-		await foreach (var dSet in processor.EnumerateResults(aoi.GetTiles(zoomLevel).Select(getDatedTiles)))
+		await foreach (var dSet in processor.EnumerateResults(aoi.GetTiles<KeyholeTile>(zoomLevel).Select(getDatedTiles)))
 		{
 			foreach (var d in dSet)
 				dates.Add(d);
@@ -184,7 +185,7 @@ internal class Availability : AoiVerb
 
 		return dates.Reverse().ToArray();
 
-		async Task<SortedSet<DateOnly>> getDatedTiles(Tile tile)
+		async Task<SortedSet<DateOnly>> getDatedTiles(KeyholeTile tile)
 		{
 			SortedSet<DateOnly> dates = [];
 

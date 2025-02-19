@@ -1,4 +1,5 @@
 ﻿using LibGoogleEarth;
+using LibMapCommon;
 
 namespace LibGoogleEarthTest;
 
@@ -17,7 +18,7 @@ public class CoordinateTests
 	public void GetTile(double lat, double lon, int zoom, int expectedRow, int expectedColumn)
 	{
 		var c = new Coordinate(lat, lon);
-		var tile = c.GetTile(zoom);
+		var tile = c.GetTile<KeyholeTile>(zoom);
 
 		Assert.AreEqual(zoom, tile.Level);
 		Assert.AreEqual(expectedRow, tile.Row);
@@ -26,11 +27,11 @@ public class CoordinateTests
 
 	[DataTestMethod]
 	[DataRow(-1)]
-	[DataRow(Tile.MaxLevel + 1)]
+	[DataRow(KeyholeTile.MaxLevel + 1)]
 	public void GetTileFail(int zoom)
 	{
 		var c = new Coordinate(0, 0);
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => c.GetTile(zoom));
+		Assert.ThrowsException<ArgumentOutOfRangeException>(() => c.GetTile<KeyholeTile>(zoom));
 	}
 
 	[DataTestMethod]

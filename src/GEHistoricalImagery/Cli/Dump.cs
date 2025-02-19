@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using LibGoogleEarth;
+using LibMapCommon;
 using System.IO;
 
 namespace GEHistoricalImagery.Cli;
@@ -100,11 +101,11 @@ internal class Dump : AoiVerb
 
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var desiredDate = Date!.Value;
-		int tileCount = Aoi.GetTileCount(ZoomLevel);
+		int tileCount = Aoi.GetTileCount<KeyholeTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
-		var filenameFormatter = new FilenameFormatter(Formatter!, Aoi, ZoomLevel);
+		var filenameFormatter = new FilenameFormatter<KeyholeTile>(Formatter!, Aoi, ZoomLevel);
 
 		await foreach (var tds in processor.EnumerateResults(generateWork()))
 		{
@@ -129,11 +130,11 @@ internal class Dump : AoiVerb
 
 		IEnumerable<Task<TileDataset>> generateWork()
 			=> Aoi
-			.GetTiles(ZoomLevel)
+			.GetTiles<KeyholeTile>(ZoomLevel)
 			.Select(t => Task.Run(() => DownloadTile(root, t, desiredDate)));
 	}
 
-	private static async Task<TileDataset> DownloadTile(DbRoot root, Tile tile, DateOnly desiredDate)
+	private static async Task<TileDataset> DownloadTile(DbRoot root, KeyholeTile tile, DateOnly desiredDate)
 	{
 		if (await root.GetNodeAsync(tile) is not TileNode node)
 			return emptyDataset();
@@ -168,12 +169,12 @@ internal class Dump : AoiVerb
 
 	private class TileDataset
 	{
-		public required Tile Tile { get; init; }
+		public required ITile Tile { get; init; }
 		public byte[]? Dataset { get; init; }
 		public required string? Message { get; init; }
 	}
 
-	private class FilenameFormatter
+	private class FilenameFormatter<T> where T : ITile<T>
 	{
 		private readonly string LocalRowFormat;
 		private readonly string LocalColumnFormat;
@@ -185,7 +186,7 @@ internal class Dump : AoiVerb
 		private readonly int NumTilesAtLevel;
 		public FilenameFormatter(string formatter, Rectangle aoi, int zoom)
 		{
-			var lowerLeft = aoi.LowerLeft.GetTile(zoom);
+			var lowerLeft = aoi.LowerLeft.GetTile<T>(zoom);
 
 			LowerLeftRow = lowerLeft.Row;
 			LowerLeftColumn = lowerLeft.Column;
@@ -202,13 +203,13 @@ internal class Dump : AoiVerb
 				.Replace("{r}", "{4}");
 		}
 
-		public string GetString(Tile tile)
+		public string GetString(ITile tile)
 		{
 			int localCol = tile.Column - LowerLeftColumn;
 			if (localCol < 0)
 				localCol += NumTilesAtLevel;
 
-			int localRow = tile.Row - LowerLeftRow;
+			int localRow = int.Abs(tile.Row - LowerLeftRow);
 			if (localRow < 0)
 				localRow += NumTilesAtLevel;
 
@@ -223,8 +224,8 @@ internal class Dump : AoiVerb
 
 		private static void GetGlobalFormatters(Rectangle aoi, int zoom, out string colFormatter, out string rowFormatter)
 		{
-			var lowerLeft = aoi.LowerLeft.GetTile(zoom);
-			var upperRight = aoi.UpperRight.GetTile(zoom);
+			var lowerLeft = aoi.LowerLeft.GetTile<T>(zoom);
+			var upperRight = aoi.UpperRight.GetTile<T>(zoom);
 
 			var maxRow = Math.Max(lowerLeft.Row, upperRight.Row);
 			var maxCol = Math.Max(lowerLeft.Column, upperRight.Column);
@@ -235,7 +236,7 @@ internal class Dump : AoiVerb
 
 		private static void GetLocalFormatters(Rectangle aoi, int zoom, out string colFormatter, out string rowFormatter)
 		{
-			aoi.GetNumRowsAndColumns(zoom, out int numRows, out int numColumns);
+			aoi.GetNumRowsAndColumns<T>(zoom, out int numRows, out int numColumns);
 
 			rowFormatter = DigitFormatter(numRows);
 			colFormatter = DigitFormatter(numColumns);

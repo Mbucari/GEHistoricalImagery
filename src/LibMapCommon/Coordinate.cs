@@ -1,13 +1,14 @@
-﻿using LibGoogleEarth.TypeConverters;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
-namespace LibGoogleEarth;
+namespace LibMapCommon;
+
 
 /// <summary>
-/// A geographic coordinate
+/// A WGS 1984 geographic coordinate
 /// </summary>
 [TypeConverter(typeof(CoordinateTypeConverter))]
-public readonly struct Coordinate
+public readonly struct Coordinate : IEquatable<Coordinate>
 {
 	/// <summary> The <see cref="Coordinate"/>'s longitude </summary>
 	public readonly double Latitude;
@@ -17,12 +18,12 @@ public readonly struct Coordinate
 	public readonly bool IsValidGeographicCoordinate => Math.Abs(Latitude) <= 90 && Math.Abs(Longitude) <= 180;
 
 	/// <summary>
-	/// Gets the <see cref="Tile"/> containing this <see cref="Coordinate"/> at a specified zoom level.
+	/// Gets the <see cref="KeyholeTile"/> containing this <see cref="Coordinate"/> at a specified zoom level.
 	/// </summary>
-	/// <param name="level">The <see cref="Tile"/>'s zoom level</param>
-	public Tile GetTile(int level)
+	/// <param name="level">The <see cref="KeyholeTile"/>'s zoom level</param>
+	public T GetTile<T>(int level) where T : ITile<T>
 	{
-		return new(Util.LatLongToRowCol(Latitude, level), Util.LatLongToRowCol(Longitude, level), level);
+		return T.GetTile(this, level);
 	}
 
 	/// <summary>
@@ -71,6 +72,29 @@ public readonly struct Coordinate
 		else
 			return $"{coordinate:F6}°";
 	}
+
+	/// <summary>
+	/// converts the WGS 84 geographic coordinate to a Web Mercator coordinate.
+	/// </summary>
+	public WebCoordinate ToWebMercator()
+	{
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(double.Abs(Latitude), 85.05, nameof(Latitude));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(double.Abs(Longitude), 180, nameof(Longitude));
+
+		//https://gis.stackexchange.com/questions/17336/transforming-epsg3857-to-epsg4326
+		//https://gis.stackexchange.com/questions/153839/how-to-transform-epsg3857-to-tile-pixel-coordinates-at-zoom-factor-0
+
+		var x = Longitude * WebCoordinate.MetersPerDegree;
+		var y = double.Log(double.Tan((90 + Latitude) * double.Pi / 360)) / (double.Pi / 180) * WebCoordinate.MetersPerDegree;
+		return new WebCoordinate(x, y);
+	}
+
+	public bool Equals(Coordinate other)
+		=> Latitude == other.Latitude && Longitude == other.Longitude;
+	public override int GetHashCode()
+		=> Latitude.GetHashCode() ^ Longitude.GetHashCode();
+	public override bool Equals([NotNullWhen(true)] object? obj)
+		=> obj is Coordinate other && Equals(other);
 }
 
 public enum CoordinateFormat

@@ -9,8 +9,8 @@ public record DatedTile : IEarthAsset<byte[]>
 {
 	private const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
 	private const string ROOT_URL_NO_PROVIDER = "https://kh.google.com/flatfile?f1-{0}-i.{1}";
-	/// <summary> The <see cref="LibGoogleEarth.Tile"/> covered by this image  </summary>
-	public Tile Tile { get; }
+	/// <summary> The <see cref="KeyholeTile"/> covered by this image  </summary>
+	public KeyholeTile Tile { get; }
 	/// <summary> The aerial image's epoch. </summary>
 	public int Epoch { get; }
 	public DateOnly Date { get; }
@@ -23,7 +23,7 @@ public record DatedTile : IEarthAsset<byte[]>
 
 	public bool Compressed => false;
 
-	internal DatedTile(Tile tile, QuadtreeImageryDatedTile datedTile)
+	internal DatedTile(KeyholeTile tile, QuadtreeImageryDatedTile datedTile)
 	{
 		Tile = tile;
 		Provider = datedTile.Provider;
@@ -33,7 +33,7 @@ public record DatedTile : IEarthAsset<byte[]>
 		AssetUrl = string.Format(ROOT_URL, tile.Path, Epoch, datedTile.Date.ToString("x"));
 	}
 
-	internal DatedTile(Tile tile, DateOnly tileDate, QuadtreeLayer imageryLayer)
+	internal DatedTile(KeyholeTile tile, DateOnly tileDate, QuadtreeLayer imageryLayer)
 	{
 		Tile = tile;
 		Provider = 0;

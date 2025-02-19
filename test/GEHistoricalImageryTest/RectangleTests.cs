@@ -1,5 +1,5 @@
-﻿using GEHistoricalImagery;
-using LibGoogleEarth;
+﻿using LibGoogleEarth;
+using LibMapCommon;
 
 namespace GEHistoricalImageryTest;
 
@@ -13,10 +13,10 @@ public class RectangleTests
 		var ur = new Coordinate(90, -0.0000001);
 
 		var rec = new Rectangle(ll, ur);
-		for (int i = 1; i <= Tile.MaxLevel; i++)
+		for (int i = 1; i <= KeyholeTile.MaxLevel; i++)
 		{
 			var numTiles = 1 << i;
-			rec.GetNumRowsAndColumns(i, out var nRows, out var nColumns);
+			rec.GetNumRowsAndColumns<KeyholeTile>(i, out var nRows, out var nColumns);
 			Assert.AreEqual(numTiles, nColumns);
 			Assert.AreEqual(numTiles / 2 + 1, nRows);
 		}

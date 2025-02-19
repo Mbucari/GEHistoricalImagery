@@ -1,6 +1,6 @@
-﻿namespace LibGoogleEarth.IO;
+﻿namespace LibMapCommon.IO;
 
-internal static class AsyncMutex
+public static class AsyncMutex
 {
 	private const int MaxValueTasks = 10;
 	private static readonly CachedValueTaskSource<IAsyncDisposable> ValueTaskSources = new(MaxValueTasks);

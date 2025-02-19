@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using LibGoogleEarth;
+using LibMapCommon;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -34,7 +35,7 @@ internal class Info : OptionsBase
 
 		for (int i = startLevel; i <= endLevel; i++)
 		{
-			var tile = Coordinate.Value.GetTile(i);
+			var tile = Coordinate.Value.GetTile<KeyholeTile>(i);
 			var node = await root.GetNodeAsync(tile);
 
 			Console.WriteLine($"  Level = {i}, Path = {tile.Path}");

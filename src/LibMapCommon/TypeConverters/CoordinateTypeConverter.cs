@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 
-namespace LibGoogleEarth.TypeConverters;
+namespace LibMapCommon;
 
 public class CoordinateTypeConverter : TypeConverter
 {
@@ -9,7 +9,7 @@ public class CoordinateTypeConverter : TypeConverter
 	{
 		if (value is not string text) return null;
 
-		var split = text.Split(',');		
+		var split = text.Split(',');
 
 		if (split.Length != 2) return null;
 

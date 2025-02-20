@@ -13,6 +13,6 @@ public class DatedRegion
 		Rings = rings;
 	}
 
-	public bool Contains(WebCoordinate coordinate) => Rings.Any(r => r.Contains(coordinate));
+	public bool Contains(WebMercator coordinate) => Rings.Any(r => r.Contains(coordinate));
 
 }

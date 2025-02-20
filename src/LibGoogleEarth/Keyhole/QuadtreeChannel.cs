@@ -1,3 +1,3 @@
 ﻿namespace Keyhole;
 
-partial class QuadtreeChannel : IQuadtreeChannel { }
+public partial class QuadtreeChannel : IQuadtreeChannel { }

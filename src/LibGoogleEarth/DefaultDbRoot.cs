@@ -1,5 +1,6 @@
 ﻿using Keyhole;
 using Keyhole.Dbroot;
+using LibMapCommon;
 
 namespace LibGoogleEarth;
 
@@ -8,8 +9,8 @@ internal class DefaultDbRoot : DbRoot
 	public override Database Database => Database.Default;
 	public static string DatabaseUrl => "https://khmdb.google.com/dbRoot.v5?&hl=en&gl=us&output=proto";
 
-	internal DefaultDbRoot(DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
-		: base(cacheDir, dbRootEnc) { }
+	internal DefaultDbRoot(CachedHttpClient cachedHttpClient, EncryptedDbRootProto dbRootEnc)
+		: base(cachedHttpClient, dbRootEnc) { }
 
 	protected override async Task<IQuadtreePacket> GetPacketAsync(KeyholeTile tile, int epoch)
 	{

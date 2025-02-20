@@ -25,25 +25,17 @@ public static class Util
 	}
 	public static int LatLongToRowCol(double latLong, int level)
 	{
-		int numTiles = ValidateLevel(level);
+		int numTiles = LibMapCommon.Util.ValidateLevel(level, KeyholeTile.MaxLevel);
 		int rowCol = (int)Math.Floor((latLong + 180) / 360 * numTiles);
 		return Math.Min(rowCol, numTiles - 1);
 	}
 
 	public static double RowColToLatLong(int level, double rowCol)
 	{
-		int numTiles = ValidateLevel(level);
+		int numTiles = LibMapCommon.Util.ValidateLevel(level, KeyholeTile.MaxLevel);
 		ArgumentOutOfRangeException.ThrowIfNegative(rowCol, nameof(rowCol));
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(rowCol, numTiles, nameof(rowCol));
 		return rowCol * 360d / numTiles - 180;
-	}
-
-	[StackTraceHidden]
-	public static int ValidateLevel(int level)
-	{
-		ArgumentOutOfRangeException.ThrowIfNegative(level, nameof(level));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(level, KeyholeTile.MaxLevel, nameof(level));
-		return 1 << level;
 	}
 
 	[StackTraceHidden]

@@ -32,6 +32,12 @@ internal class Availability : AoiVerb
 	#region Esri
 	private async Task Run_Esri()
 	{
+		if (ConcurrentDownload > 10)
+		{
+			ConcurrentDownload = 10;
+			Console.Error.WriteLine($"Limiting to {ConcurrentDownload} concurrent scrapes of Esri metadata.");
+		}
+
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
 		Console.Write("Loading World Atlas WayBack Layer Info: ");

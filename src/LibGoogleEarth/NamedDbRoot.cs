@@ -1,5 +1,6 @@
 ﻿using Keyhole;
 using Keyhole.Dbroot;
+using LibMapCommon;
 
 namespace LibGoogleEarth;
 
@@ -8,8 +9,8 @@ internal class NamedDbRoot : DbRoot
 	public override Database Database => _database;
 	private readonly Database _database;
 
-	internal NamedDbRoot(Database database, DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
-		: base(cacheDir, dbRootEnc)
+	internal NamedDbRoot(Database database, CachedHttpClient cachedHttpClient, EncryptedDbRootProto dbRootEnc)
+		: base(cachedHttpClient, dbRootEnc)
 	{
 		_database = database;
 	}

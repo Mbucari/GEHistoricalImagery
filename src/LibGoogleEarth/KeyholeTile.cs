@@ -65,7 +65,7 @@ r0	|  0  |  1  |
 	/// <param name="level">The <see cref="KeyholeTile"/>'s zoom level</param>
 	public KeyholeTile(int rowIndex, int colIndex, int level)
 	{
-		var numTiles = Util.ValidateLevel(level);
+		var numTiles = LibMapCommon.Util.ValidateLevel(level, MaxLevel);
 		ArgumentOutOfRangeException.ThrowIfNegative(rowIndex, nameof(rowIndex));
 		ArgumentOutOfRangeException.ThrowIfNegative(colIndex, nameof(colIndex));
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(rowIndex, numTiles - 1, nameof(rowIndex));
@@ -92,16 +92,16 @@ r0	|  0  |  1  |
 	}
 	#endregion
 
-	public static KeyholeTile GetTile(Coordinate coordinate, int level)
+	public static KeyholeTile GetTile(Wgs1984 coordinate, int level)
 	{
 		return new(Util.LatLongToRowCol(coordinate.Latitude, level), Util.LatLongToRowCol(coordinate.Longitude, level), level);
 	}
 
-	public static KeyholeTile GetMinimumCorner(Coordinate c1, Coordinate c2, int level)
+	public static KeyholeTile GetMinimumCorner(Wgs1984 c1, Wgs1984 c2, int level)
 	{
 		var lowerMost = Math.Min(c1.Latitude, c2.Latitude);
 		var leftMost = Math.Min(c1.Longitude, c2.Longitude);
-		return GetTile(new Coordinate(lowerMost, leftMost), level);
+		return GetTile(new Wgs1984(lowerMost, leftMost), level);
 	}
 
 	public static KeyholeTile Create(int row, int col, int level)
@@ -111,16 +111,16 @@ r0	|  0  |  1  |
 	private double RowColToLatLong(double rowCol)
 		=> Util.RowColToLatLong(Level, rowCol);
 
-	/// <summary> The lower-left (southwest) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
-	public Coordinate LowerLeft => new(RowColToLatLong(Row), RowColToLatLong(Column));
-	/// <summary> The lower-right (southeast) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
-	public Coordinate LowerRight => new(RowColToLatLong(Row), RowColToLatLong(Column + 1));
-	/// <summary> The upper-left (northwest) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
-	public Coordinate UpperLeft => new(RowColToLatLong(Row + 1), RowColToLatLong(Column));
-	/// <summary> The upper-right (northeast) <see cref="Coordinate"/> of this <see cref="KeyholeTile"/> </summary>
-	public Coordinate UpperRight => new(RowColToLatLong(Row + 1), RowColToLatLong(Column + 1));
-	/// <summary> <see cref="Coordinate"/> of the center of this <see cref="KeyholeTile"/> </summary>
-	public Coordinate Center => new(RowColToLatLong(Row + 0.5), RowColToLatLong(Column + 0.5));
+	/// <summary> The lower-left (southwest) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
+	public Wgs1984 LowerLeft => new(RowColToLatLong(Row), RowColToLatLong(Column));
+	/// <summary> The lower-right (southeast) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
+	public Wgs1984 LowerRight => new(RowColToLatLong(Row), RowColToLatLong(Column + 1));
+	/// <summary> The upper-left (northwest) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
+	public Wgs1984 UpperLeft => new(RowColToLatLong(Row + 1), RowColToLatLong(Column));
+	/// <summary> The upper-right (northeast) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
+	public Wgs1984 UpperRight => new(RowColToLatLong(Row + 1), RowColToLatLong(Column + 1));
+	/// <summary> <see cref="Wgs1984"/> of the center of this <see cref="KeyholeTile"/> </summary>
+	public Wgs1984 Center => new(RowColToLatLong(Row + 0.5), RowColToLatLong(Column + 0.5));
 	#endregion
 
 	#region Helpers

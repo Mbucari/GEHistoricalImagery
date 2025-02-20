@@ -1,3 +1,3 @@
 ﻿namespace Keyhole;
 
-partial class QuadtreeLayer : IQuadtreeLayer { }
+public partial class QuadtreeLayer : IQuadtreeLayer { }

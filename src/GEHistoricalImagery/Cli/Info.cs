@@ -9,7 +9,7 @@ namespace GEHistoricalImagery.Cli;
 internal class Info : OptionsBase
 {
 	[Option('l', "location", Required = true, HelpText = "Geographic location", MetaValue = "LAT,LONG")]
-	public Coordinate? Coordinate { get; set; }
+	public Wgs1984? Coordinate { get; set; }
 
 	[Option('z', "zoom", Default = null, HelpText = "Zoom level (Optional, [0-23])", MetaValue = "N", Required = false)]
 	public int? ZoomLevel { get; set; }
@@ -38,7 +38,7 @@ internal class Info : OptionsBase
 		await task;
 	}
 
-	private async Task Run_Esri(Coordinate coordinate, int startLevel, int endLevel)
+	private async Task Run_Esri(Wgs1984 coordinate, int startLevel, int endLevel)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
@@ -50,7 +50,7 @@ internal class Info : OptionsBase
 			int count = 0;
 			await foreach (var dated in wayBack.GetDatesAsync(tile))
 			{
-				Console.WriteLine($"    date = {DateString(dated.Date)}, version = {dated.Version}");
+				Console.WriteLine($"    layer_date = {DateString(dated.LayerDate)}, captured = {DateString(dated.CaptureDate)}");
 				count++;
 			}
 
@@ -62,7 +62,7 @@ internal class Info : OptionsBase
 		}
 	}
 
-	private async Task Run_Keyhole(Coordinate coordinate, int startLevel, int endLevel)
+	private async Task Run_Keyhole(Wgs1984 coordinate, int startLevel, int endLevel)
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 

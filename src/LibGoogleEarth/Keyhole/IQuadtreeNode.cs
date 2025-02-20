@@ -2,7 +2,7 @@
 
 public interface IQuadtreeNode
 {
-    int CacheNodeEpoch { get; }
-    IReadOnlyList<IQuadtreeLayer> Layer { get; }
-    IReadOnlyList<IQuadtreeChannel> Channel { get; }
+	int CacheNodeEpoch { get; }
+	IReadOnlyList<IQuadtreeLayer> Layer { get; }
+	IReadOnlyList<IQuadtreeChannel> Channel { get; }
 }

@@ -1,12 +1,10 @@
 ﻿using Keyhole;
 using Keyhole.Dbroot;
-using LibMapCommon.IO;
+using LibMapCommon;
 using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace LibGoogleEarth;
 
@@ -24,10 +22,7 @@ public enum Database
 /// </summary>
 public abstract class DbRoot
 {
-	private static readonly HttpClient HttpClient = new();
-
-	/// <summary> The database's local cache directory </summary>
-	public DirectoryInfo? CacheDir { get; }
+	private readonly CachedHttpClient HttpClient;
 	/// <summary>  The keyhole DbRoot protocol buffer  </summary>
 	public DbRootProto DbRootBuffer { get; }
 	/// <summary> The google earth database </summary>
@@ -39,15 +34,14 @@ public abstract class DbRoot
 	private static readonly MemoryCacheEntryOptions Options = new() { SlidingExpiration = CacheCompactInterval };
 	private DateTime LastCacheComact;
 
-	protected DbRoot(DirectoryInfo? cacheDir, EncryptedDbRootProto dbRootEnc)
+	protected DbRoot(CachedHttpClient cachedHttpClient, EncryptedDbRootProto dbRootEnc)
 	{
-		CacheDir = cacheDir;
+		HttpClient = cachedHttpClient;
 		EncryptionData = dbRootEnc.EncryptionData.Memory;
 		var bts = dbRootEnc.DbrootData.ToByteArray();
 		Decrypt(bts);
 		DbRootBuffer = DbRootProto.Parser.ParseFrom(DecompressBuffer(bts));
 	}
-
 
 	/// <summary>
 	/// Create a new instance of the Google Earth database
@@ -58,50 +52,18 @@ public abstract class DbRoot
 	{
 		var url = database is Database.Default ? DefaultDbRoot.DatabaseUrl : NamedDbRoot.DatabaseUrl(database);
 
-		var uri = new Uri(url);
-
-
 		var cacheDirInfo = cacheDir is null ? null : new DirectoryInfo(cacheDir);
 		cacheDirInfo?.Create();
 
-		var dbRootDir = cacheDirInfo?.FullName ?? Path.GetTempPath();
+		var cachedHttpClient = new CachedHttpClient(cacheDirInfo);
 
-		using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-		var dbRootFile = new FileInfo(Path.Combine(dbRootDir, Path.GetFileName(uri.AbsolutePath) + "_" + database.ToString()));
+		byte[] dbRootBts = await cachedHttpClient.GetBytesIfNewer(url);
 
-		await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(dbRootFile.FullName));
-
-		if (dbRootFile.Exists)
-			request.Headers.IfModifiedSince = dbRootFile.LastWriteTimeUtc;
-
-		using var response = await HttpClient.SendAsync(request);
-
-		byte[] dbRootBts;
-
-		if (dbRootFile.Exists && response.StatusCode == System.Net.HttpStatusCode.NotModified)
-			dbRootBts = File.ReadAllBytes(dbRootFile.FullName);
-		else
-		{
-			response.EnsureSuccessStatusCode();
-			dbRootBts = await response.Content.ReadAsByteArrayAsync();
-			try
-			{
-				File.WriteAllBytes(dbRootFile.FullName, dbRootBts);
-
-				if (response.Content.Headers.LastModified.HasValue)
-					dbRootFile.LastWriteTimeUtc = response.Content.Headers.LastModified.Value.UtcDateTime;
-			}
-			catch (Exception ex)
-			{
-				Console.Error.WriteLine($"Failed to Cache {dbRootFile.FullName}.");
-				Console.Error.WriteLine(ex.Message);
-			}
-		}
 		var proto = EncryptedDbRootProto.Parser.ParseFrom(dbRootBts);
 
 		return database is Database.Default
-			? new DefaultDbRoot(cacheDirInfo, proto)
-			: new NamedDbRoot(database, cacheDirInfo, proto);
+			? new DefaultDbRoot(cachedHttpClient, proto)
+			: new NamedDbRoot(database, cachedHttpClient, proto);
 	}
 
 	/// <summary>
@@ -195,47 +157,8 @@ public abstract class DbRoot
 	/// </summary>
 	/// <param name="url">The Google Earth asset Url</param>
 	/// <returns>The decrypted asset's bytes</returns>
-	protected async Task<byte[]> DownloadBytesAsync(string url)
-	{
-		var uri = new Uri(url);
-
-		if (CacheDir?.Exists is true)
-		{
-			var fileName = Path.Combine(CacheDir.FullName, Path.GetFileName(uri.PathAndQuery.Replace('?', '-')));
-			await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + HashString(fileName));
-
-			if (File.Exists(fileName) && File.ReadAllBytes(fileName) is byte[] b && b.Length > 0)
-				return b;
-			else
-			{
-				var data = await downloadAndDecrypt();
-
-				try
-				{
-					File.WriteAllBytes(fileName, data);
-				}
-				catch (Exception ex)
-				{
-					Console.Error.WriteLine($"Failed to Cache {uri.PathAndQuery}.");
-					Console.Error.WriteLine(ex.Message);
-				}
-
-				return data;
-			}
-		}
-		else
-		{
-			return await downloadAndDecrypt();
-		}
-
-		async Task<byte[]> downloadAndDecrypt()
-		{
-			var data = await HttpClient.GetByteArrayAsync(uri);
-			Decrypt(data);
-			return data;
-		}
-
-	}
+	protected Task<byte[]> DownloadBytesAsync(string url)
+		=> HttpClient.GetByteArrayAsync(url, Decrypt);
 
 	private void Decrypt(Span<byte> cipherText)
 		=> Encode(EncryptionData.Span, cipherText);
@@ -295,7 +218,4 @@ public abstract class DbRoot
 			return false;
 		}
 	}
-
-	private static string HashString(string s)
-		=> Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(s)));
 }

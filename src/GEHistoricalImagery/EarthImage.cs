@@ -4,7 +4,7 @@ using OSGeo.OSR;
 
 namespace GEHistoricalImagery;
 
-internal abstract class EarthImage : IDisposable
+internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 {
 	public const int TILE_SZ = 256;
 	protected int Width { get; init; }
@@ -17,7 +17,6 @@ internal abstract class EarthImage : IDisposable
 
 	/// <summary> The y-coordinate of the output dataset's top-left corner relative to global pixel space  </summary>
 	protected int RasterY { get; init; }
-	protected abstract int EpsgNumber { get; }
 
 	static EarthImage()
 	{
@@ -25,34 +24,58 @@ internal abstract class EarthImage : IDisposable
 		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 
-	protected Dataset CreateEmptyDataset(string? fileName, GeoTransform geoTransform)
+	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)
 	{
-		Dataset dataset;
+		long globalPixels = TILE_SZ * (1L << level);
+
+		var upperLeft = rectangle.GetUpperLeft<T>();
+
+		(var urX, var urY) = upperLeft.GetGlobalPixelCoordinate(level);
+		(var lrX, var lrY) = rectangle.GetLowerRight<T>().GetGlobalPixelCoordinate(level);
+
+		RasterX = urX.ToRoundedInt();
+		RasterY = urY.ToRoundedInt();
+
+		Width = (lrX - urX).ToRoundedInt();
+		Height = (lrY - urY).ToRoundedInt();
+		//Allow wrapping around 180/-180
+		if (Width < 0)
+			Width = (int)(Width + globalPixels);
+
+		using var sourceSr = new SpatialReference("");
+		sourceSr.ImportFromEPSG(T.EpsgNumber);
+
+		var geoTransform = new GeoTransform
+		{
+			UpperLeft_X = upperLeft.X,
+			UpperLeft_Y = upperLeft.Y,
+			PixelWidth = T.Equator / globalPixels,
+			PixelHeight = -T.Equator / globalPixels
+		};
+
+		TempDataset = CreateEmptyDataset(cacheFile);
+		TempDataset.SetSpatialRef(sourceSr);
+		TempDataset.SetGeoTransform(geoTransform);
+	}
+
+	protected Dataset CreateEmptyDataset(string? fileName)
+	{
 		if (string.IsNullOrWhiteSpace(fileName))
 		{
 			using var tifDriver = Gdal.GetDriverByName("MEM");
-			dataset = tifDriver.Create("", Width, Height, 3, DataType.GDT_Byte, null);
+			return tifDriver.Create("", Width, Height, 3, DataType.GDT_Byte, null);
 		}
 		else
 		{
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			dataset = tifDriver.Create(fileName, Width, Height, 3, DataType.GDT_Byte, null);
+			return tifDriver.Create(fileName, Width, Height, 3, DataType.GDT_Byte, null);
 		}
-
-		using var sourceSr = new SpatialReference("");
-		sourceSr.ImportFromEPSG(EpsgNumber);
-		dataset.SetSpatialRef(sourceSr);
-		dataset.SetGeoTransform(geoTransform);
-		return dataset;
 	}
-
-	protected abstract int GetTopGlobalPixel(ITile tile);
 
 	public void AddTile(ITile tile, Dataset image)
 	{
 		//Tile's global pixel coordinates of the tile's top-left corner.
-		var gpx_x = tile.Column * TILE_SZ;
-		var gpx_y = GetTopGlobalPixel(tile);
+		(var gpx_x, var gpx_y) = tile.GetTopLeftPixel<T>();
 
 		//The tile is entirely to the left of the region, so wrap around the globe.
 		if (gpx_x + TILE_SZ < RasterX)
@@ -81,7 +104,7 @@ internal abstract class EarthImage : IDisposable
 		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}
 
-	public void Save(string path, string? outSR, Action<double> progress, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
+	public void Save(string path, string? outSR, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
 	{
 		if (TempDataset == null) return;
 		TempDataset.FlushCache();
@@ -101,7 +124,7 @@ internal abstract class EarthImage : IDisposable
 				"-co", "PHOTOMETRIC=YCBCR",
 				"-co", "TILED=TRUE",
 				"-r", "bilinear",
-				"-s_srs", $"EPSG:{EpsgNumber}",
+				"-s_srs", $"EPSG:{T.EpsgNumber}",
 				"-t_srs", outSR
 			];
 			using var options = new GDALWarpAppOptions(parameters);
@@ -138,14 +161,28 @@ internal abstract class EarthImage : IDisposable
 
 		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
 		{
-			progress(Complete);
-			return 1;
+			var args = new ImageSaveEventArgs(Complete);
+			Saving?.Invoke(this, args);
+			return args.Continue ? 1 : 0;
 		}
 	}
+
+	public event EventHandler<ImageSaveEventArgs>? Saving;
 
 	public void Dispose()
 	{
 		TempDataset?.FlushCache();
 		TempDataset?.Dispose();
+	}
+}
+
+public class ImageSaveEventArgs : EventArgs
+{
+	public double Progress { get; }
+	public bool Continue { get; } = true;
+
+	internal ImageSaveEventArgs(double progress)
+	{
+		Progress = progress;
 	}
 }

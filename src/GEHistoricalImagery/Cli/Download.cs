@@ -100,7 +100,7 @@ internal class Download : AoiVerb
 
 		try
 		{
-			using var image = new EsriImage(Aoi, ZoomLevel, tempFile);
+			using var image = new EarthImage<WebMercator>(Aoi, ZoomLevel, tempFile);
 
 			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
@@ -130,7 +130,8 @@ internal class Download : AoiVerb
 			Console.Write("Saving Image: ");
 			Progress = 0;
 
-			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
+			image.Saving += Image_Saving;
+			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
 			ReplaceProgress("Done!\r\n");
 		}
 		finally
@@ -194,7 +195,7 @@ internal class Download : AoiVerb
 
 		try
 		{
-			using var image = new KeyholeImage(Aoi, ZoomLevel, tempFile);
+			using var image = new EarthImage<Wgs1984>(Aoi, ZoomLevel, tempFile);
 
 			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
@@ -224,7 +225,8 @@ internal class Download : AoiVerb
 			Console.Write("Saving Image: ");
 			Progress = 0;
 
-			image.Save(saveFile.FullName, TargetSpatialReference, ReportProgress, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
+			image.Saving += Image_Saving;
+			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
 			ReplaceProgress("Done!\r\n");
 		}
 		finally
@@ -281,6 +283,11 @@ internal class Download : AoiVerb
 	#endregion
 
 	#region Common
+
+	private void Image_Saving(object? sender, ImageSaveEventArgs e)
+	{
+		ReportProgress(e.Progress);
+	}
 
 	private static TileDataset EmptyDataset(ITile tile) => new()
 	{

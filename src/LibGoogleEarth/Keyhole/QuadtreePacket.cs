@@ -1,6 +1,6 @@
 ﻿namespace Keyhole;
 
-partial class QuadtreePacket : IQuadtreePacket
+public partial class QuadtreePacket : IQuadtreePacket
 {
 	IReadOnlyList<ISparseQuadtreeNode> IQuadtreePacket.SparseQuadtreeNode => SparseQuadtreeNode;
 

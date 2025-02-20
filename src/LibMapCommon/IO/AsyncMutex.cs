@@ -1,6 +1,6 @@
 ﻿namespace LibMapCommon.IO;
 
-public static class AsyncMutex
+internal static class AsyncMutex
 {
 	private const int MaxValueTasks = 10;
 	private static readonly CachedValueTaskSource<IAsyncDisposable> ValueTaskSources = new(MaxValueTasks);

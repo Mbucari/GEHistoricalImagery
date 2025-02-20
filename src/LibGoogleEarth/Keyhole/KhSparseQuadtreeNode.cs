@@ -6,8 +6,8 @@ internal record KhSparseQuadtreeNode : ISparseQuadtreeNode
 	public KhQuadtreeNode Node { get; }
 	IQuadtreeNode ISparseQuadtreeNode.Node => Node;
 	public KhSparseQuadtreeNode(int subIndex, KhQuadtreeNode node)
-    {
-        Index = subIndex;
-        Node = node;
-    }
+	{
+		Index = subIndex;
+		Node = node;
+	}
 }

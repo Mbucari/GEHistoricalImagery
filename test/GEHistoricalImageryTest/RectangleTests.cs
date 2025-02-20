@@ -9,8 +9,8 @@ public class RectangleTests
 	[TestMethod]
 	public void WrapAroundRectangle()
 	{
-		var ll = new Coordinate(-90, 0);
-		var ur = new Coordinate(90, -0.0000001);
+		var ll = new Wgs1984(-90, 0);
+		var ur = new Wgs1984(90, -0.0000001);
 
 		var rec = new Rectangle(ll, ur);
 		for (int i = 1; i <= KeyholeTile.MaxLevel; i++)
@@ -35,8 +35,8 @@ public class RectangleTests
 	[DataRow(1, -10, 0, 10)] //negative height (negative width is allowed for wrapping around 180/-180)
 	public void InvalidRectangles(double ll_lat, double ll_long, double ur_lat, double ur_long)
 	{
-		var ll = new Coordinate(ll_lat, ll_long);
-		var ur = new Coordinate(ur_lat, ur_long);
+		var ll = new Wgs1984(ll_lat, ll_long);
+		var ur = new Wgs1984(ur_lat, ur_long);
 		Assert.ThrowsException<ArgumentException>(() => new Rectangle(ll, ur));
 	}
 }

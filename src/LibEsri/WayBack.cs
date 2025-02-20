@@ -1,7 +1,5 @@
 ﻿using LibEsri.Geometry;
 using LibMapCommon;
-using LibMapCommon.IO;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 
@@ -10,17 +8,14 @@ namespace LibEsri;
 public class WayBack
 {
 	private const string WayBackUrl = "https://wayback.maptiles.arcgis.com/arcgis/rest/services/world_imagery/mapserver/wmts/1.0.0/wmtscapabilities.xml";
-	private static readonly HttpClient HttpClient = new();
-
-	/// <summary> The database's local cache directory </summary>
-	public DirectoryInfo? CacheDir { get; }
+	private readonly CachedHttpClient HttpClient;
 	private Dictionary<string, Layer> Capabilities { get; }
 	public IReadOnlyCollection<Layer> Layers => Capabilities.Values;
 
-	private WayBack(DirectoryInfo? cacheDir, Dictionary<string, Layer> capabilities)
+	private WayBack(CachedHttpClient cacheHttpClient, Dictionary<string, Layer> capabilities)
 	{
-		CacheDir = cacheDir;
 		Capabilities = capabilities;
+		HttpClient = cacheHttpClient;
 	}
 
 	public static async Task<WayBack> CreateAsync(string? cacheDir)
@@ -28,13 +23,14 @@ public class WayBack
 		var cacheDirInfo = cacheDir is null ? null : new DirectoryInfo(cacheDir);
 		cacheDirInfo?.Create();
 
+		var cachedHttpClient = new CachedHttpClient(cacheDirInfo);
 
-		var stream = await HttpClient.GetStreamAsync(WayBackUrl);
+		var stream = await cachedHttpClient.GetStreamAsync(WayBackUrl);
 		var caps = await LibEsri.Capabilities.LoadAsync(stream) ?? throw new Exception();
 
 		var dict = caps.Layers.ToDictionary(l => l.ID);
 
-		return new WayBack(cacheDirInfo, caps.Layers.ToDictionary(l => l.ID));
+		return new WayBack(cachedHttpClient, caps.Layers.ToDictionary(l => l.ID));
 	}
 
 	private async Task<DateOnly> GetDateAsync(Layer layer, EsriTile tile)
@@ -90,7 +86,7 @@ public class WayBack
 	public async Task<byte[]> DownloadTileAsync(Layer layer, EsriTile tile)
 	{
 		var url = layer.GetAssetUrl(tile);
-		var bts = await DownloadBytesAsync(url);
+		var bts = await HttpClient.GetByteArrayAsync(url);
 		return bts;
 	}
 
@@ -130,7 +126,7 @@ public class WayBack
 				{
 					//Only emit a layer once the actual tile date changes.
 					//In this way, only the earliest version with unique imagery is emitted.
-					yield return new DatedEsriTile(tile, lastDate.Value, last);
+					yield return new DatedEsriTile(lastDate.Value, last);
 				}
 				lastDate = date;
 				last = f;
@@ -138,49 +134,11 @@ public class WayBack
 		}
 
 		if (lastDate.HasValue && last != null)
-			yield return new DatedEsriTile(tile, lastDate.Value, last);
+			yield return new DatedEsriTile(lastDate.Value, last);
 	}
 
 	protected async Task<JsonNode?> DownloadJsonAsync(string url)
-		=> JsonNode.Parse(await DownloadBytesAsync(url));
+		=> JsonNode.Parse(await HttpClient.GetByteArrayAsync(url));
 	protected async Task<string> DownloadStringAsync(string url)
-		=> Encoding.UTF8.GetString(await DownloadBytesAsync(url));
-
-	/// <summary>
-	/// Download, decrypt and cache a file from Google Earth.
-	/// </summary>
-	/// <param name="url">The Google Earth asset Url</param>
-	/// <returns>The decrypted asset's bytes</returns>
-	protected async Task<byte[]> DownloadBytesAsync(string url)
-	{
-		if (CacheDir?.Exists is true)
-		{
-			var uuid = HashString(url);
-			var fileName = Path.Combine(CacheDir.FullName, uuid);
-			await using var mutex = await AsyncMutex.AcquireAsync("Global\\" + uuid);
-
-			if (File.Exists(fileName) && File.ReadAllBytes(fileName) is byte[] b && b.Length > 0)
-				return b;
-			else
-			{
-				var data = await HttpClient.GetByteArrayAsync(url);
-
-				try
-				{
-					File.WriteAllBytes(fileName, data);
-				}
-				catch (Exception ex)
-				{
-					Console.Error.WriteLine($"Failed to Cache {url}.");
-					Console.Error.WriteLine(ex.Message);
-				}
-				return data;
-			}
-		}
-		else
-			return await HttpClient.GetByteArrayAsync(url);
-	}
-
-	private static string HashString(string s)
-		=> Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(s)));
+		=> Encoding.UTF8.GetString(await HttpClient.GetByteArrayAsync(url));
 }

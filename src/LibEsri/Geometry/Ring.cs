@@ -11,7 +11,7 @@ internal class Ring
 	public double MaxY { get; }
 	public bool IsValid => Coordinates.Length > 2;
 
-	public Ring(IEnumerable<WebCoordinate> coordinates)
+	public Ring(IEnumerable<WebMercator> coordinates)
 	{
 		Coordinates = coordinates.Select(c => (Vector2)c).ToArray();
 
@@ -21,7 +21,7 @@ internal class Ring
 		MaxY = Coordinates.MaxBy(v => v.Y).Y;
 	}
 
-	public bool Contains(WebCoordinate coordinate)
+	public bool Contains(WebMercator coordinate)
 	{
 		if (!IsValid || coordinate.X < MinX || coordinate.X > MaxX || coordinate.Y < MinY || coordinate.Y > MaxY)
 			return false;

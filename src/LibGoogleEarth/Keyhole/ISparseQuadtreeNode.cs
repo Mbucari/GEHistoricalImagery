@@ -2,6 +2,6 @@
 
 public interface ISparseQuadtreeNode
 {
-    int Index { get; }
-    IQuadtreeNode Node { get; }
+	int Index { get; }
+	IQuadtreeNode Node { get; }
 }

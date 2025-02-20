@@ -2,6 +2,6 @@
 
 public interface IQuadtreePacket
 {
-    int PacketEpoch { get; }
-    IReadOnlyList<ISparseQuadtreeNode> SparseQuadtreeNode { get; }
+	int PacketEpoch { get; }
+	IReadOnlyList<ISparseQuadtreeNode> SparseQuadtreeNode { get; }
 }

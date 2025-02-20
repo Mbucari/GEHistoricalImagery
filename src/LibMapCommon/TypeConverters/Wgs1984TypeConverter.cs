@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace LibMapCommon;
 
-public class CoordinateTypeConverter : TypeConverter
+public class Wgs1984TypeConverter : TypeConverter
 {
 	public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 	{
@@ -20,6 +20,6 @@ public class CoordinateTypeConverter : TypeConverter
 		if (lat < -90 || lat > 90 || lng < -180 || lng > 180)
 			return null;
 
-		return new Coordinate(lat, lng);
+		return new Wgs1984(lat, lng);
 	}
 }

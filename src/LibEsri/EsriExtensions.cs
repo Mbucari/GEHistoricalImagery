@@ -6,7 +6,7 @@ namespace LibEsri;
 
 public static class EsriExtensions
 {
-	public static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer)
+	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -38,7 +38,7 @@ public static class EsriExtensions
 		}
 	}
 
-	public static IEnumerable<WebCoordinate> ToCoordinates(this JsonArray? jsonArray)
+	internal static IEnumerable<WebMercator> ToCoordinates(this JsonArray? jsonArray)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -48,21 +48,7 @@ public static class EsriExtensions
 			if (c.Count == 2 &&
 				c[0]?.GetValue<double>() is double x &&
 				c[1]?.GetValue<double>() is double y)
-				yield return new WebCoordinate(x, y);
+				yield return new WebMercator(x, y);
 		}
-	}
-
-	public static (int pixelX, int pixelY) GetGlobalPixelCoordinate(this WebCoordinate coordinate, int zoom)
-	{
-		//https://github.com/Leaflet/Leaflet/discussions/8100
-
-		const int TILE_SZ = 256;
-		const int HALF_TILE = TILE_SZ / 2;
-
-		var size = 1 << zoom;
-
-		var xPercent = (HALF_TILE + coordinate.X * TILE_SZ / WebCoordinate.Equator) * size;
-		var yPercent = (HALF_TILE - coordinate.Y * TILE_SZ / WebCoordinate.Equator) * size;
-		return ((int)double.Round(xPercent, 0), (int)double.Round(yPercent, 0));
 	}
 }

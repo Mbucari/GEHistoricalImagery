@@ -2,6 +2,6 @@
 
 public interface IQuadtreeChannel
 {
-    int Type { get; }
-    int ChannelEpoch { get; }
+	int Type { get; }
+	int ChannelEpoch { get; }
 }

@@ -17,7 +17,7 @@ public class CoordinateTests
 	[DataRow(0, -0.00000001, 1, 1, 0)]
 	public void GetTile(double lat, double lon, int zoom, int expectedRow, int expectedColumn)
 	{
-		var c = new Coordinate(lat, lon);
+		var c = new Wgs1984(lat, lon);
 		var tile = c.GetTile<KeyholeTile>(zoom);
 
 		Assert.AreEqual(zoom, tile.Level);
@@ -30,7 +30,7 @@ public class CoordinateTests
 	[DataRow(KeyholeTile.MaxLevel + 1)]
 	public void GetTileFail(int zoom)
 	{
-		var c = new Coordinate(0, 0);
+		var c = new Wgs1984(0, 0);
 		Assert.ThrowsException<ArgumentOutOfRangeException>(() => c.GetTile<KeyholeTile>(zoom));
 	}
 
@@ -41,7 +41,7 @@ public class CoordinateTests
 	[DataRow(0, 180.00000001)]
 	public void InvalidCoordinate(double lat, double lon)
 	{
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Coordinate(lat, lon));
+		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Wgs1984(lat, lon));
 	}
 
 	[DataTestMethod]
@@ -50,6 +50,6 @@ public class CoordinateTests
 	[DataRow(90.00000001, 0)]
 	public void InvalidGeographicCoordinate(double lat, double lon)
 	{
-		Assert.IsFalse(new Coordinate(lat, lon).IsValidGeographicCoordinate);
+		Assert.IsFalse(new Wgs1984(lat, lon).IsValidGeographicCoordinate);
 	}
 }

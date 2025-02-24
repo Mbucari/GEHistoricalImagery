@@ -107,7 +107,7 @@ internal class Download : AoiVerb
 				{
 					if (tds.Dataset is not null)
 					{
-						image.AddTile((EsriTile)tds.Tile, tds.Dataset);
+						image.AddTile(tds.Tile, tds.Dataset);
 						numTilesDownload++;
 					}
 

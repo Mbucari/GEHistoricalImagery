@@ -20,7 +20,11 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 
 	static EarthImage()
 	{
+#if LINUX
+		Gdal.AllRegister();
+#else
 		GdalConfiguration.ConfigureGdal();
+#endif
 		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 

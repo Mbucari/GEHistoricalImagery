@@ -26,11 +26,22 @@ internal static class AsyncMutex
 				try
 				{
 					// Wait for either the mutex to be acquired, or cancellation
+#if LINUX
+					while (!mutex.WaitOne(10))
+					{
+						if (cancellationToken.IsCancellationRequested)
+						{
+							taskCompletionSource.SetCanceled(cancellationToken);
+							return;
+						}
+					}
+#else
 					if (WaitHandle.WaitAny([mutex, cancellationToken.WaitHandle]) != 0)
 					{
 						taskCompletionSource.SetCanceled(cancellationToken);
 						return;
 					}
+#endif
 				}
 				catch (AbandonedMutexException)
 				{ /* Abandoned by another process, we acquired it. */ }

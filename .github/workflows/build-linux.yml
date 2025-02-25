@@ -1,0 +1,106 @@
+# build-linux.yml
+# Reusable workflow that builds the Linux and MacOS (x64 and arm64) versions of Libation.
+---
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      version_override:
+        type: string
+        description: "Version number override"
+        required: false
+      runs_on:
+        type: string
+        description: "The GitHub hosted runner to use"
+        required: true
+      architecture:
+        type: string
+        description: "CPU architecture targeted by the build."
+        required: true
+
+env:
+  DOTNET_CONFIGURATION: "Release"
+  DOTNET_VERSION: "9.0.x"
+
+jobs:
+  build:
+    name: "linux-${{ inputs.architecture }}"
+    runs-on: ${{ inputs.runs_on }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Get version
+        id: get_version
+        run: |
+          inputVersion="${{ inputs.version_override }}"
+          if [[ "${#inputVersion}" -gt 0 ]]
+          then
+            version="${inputVersion}"
+          else
+            version="$(grep -Eio -m 1 '<Version>.*</Version>' ./src/GEHistoricalImagery/GEHistoricalImagery.csproj | sed -r 's/<\/?Version>//g')"
+          fi
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Publish
+        id: publish
+        working-directory: ./src
+        run: |
+          preprocessor="LINUX"
+          RUNTIME_ID="linux-${{ inputs.architecture }}"
+
+          OUTPUT="bin/Publish/$RUNTIME_ID/gdal"
+
+          echo "Runtime Identifier: $RUNTIME_ID"
+          echo "Output Directory: $OUTPUT"
+
+          dotnet publish \
+              GEHistoricalImagery/GEHistoricalImagery.csproj \
+              --runtime $RUNTIME_ID \
+              --configuration ${{ env.DOTNET_CONFIGURATION }} \
+              --output $OUTPUT \
+              -p:DefineConstants=$preprocessor \
+              -p:PublishProtocol=FileSystem \
+              -p:SelfContained=true \
+              -p:PublishTrimmed=true
+
+      - name: Build bundle
+        id: bundle
+        working-directory: ./src/bin/Publish/linux-${{ inputs.architecture }}
+        run: |
+          
+          BUNDLE_DIR=$(pwd)
+          echo "Bundle dir: ${BUNDLE_DIR}"
+          scriptfile=GEHistoricalImagery
+          
+          echo -e '#!/usr/bin/env bash' > $scriptfile
+          echo -e 'SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )' >> $scriptfile
+          echo -e 'export GEHistoricalImagery_Cache="$SCRIPT_DIR/cache"' >> $scriptfile
+          echo -e 'export GDAL_DATA="$SCRIPT_DIR/gdal"' >> $scriptfile
+          echo -e 'export GDAL_DRIVER_PATH="$SCRIPT_DIR/gdal"' >> $scriptfile
+          echo -e 'export PROJ_LIB="$SCRIPT_DIR/gdal"' >> $scriptfile
+          echo -e '"$SCRIPT_DIR/gdal/GEHistoricalImagery" "$@"' >> $scriptfile
+          chmod +x $scriptfile
+          
+          bundleName="GEHistoricalImagery.${{ steps.get_version.outputs.version }}-linux-${{ inputs.architecture }}.tar.gz"
+          
+          tar -cvz -f "./../$bundleName" *
+          
+          artifact="$bundleName"
+          echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
+          echo "PWD = $BUNDLE_DIR"
+          ls
+          cd ..
+          ls
+
+      - name: Publish bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.bundle.outputs.artifact }}
+          path: ./src/bin/Publish/${{ steps.bundle.outputs.artifact }}
+          if-no-files-found: error
+          retention-days: 7

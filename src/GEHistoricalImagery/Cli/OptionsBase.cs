@@ -17,7 +17,10 @@ internal abstract class OptionsBase
 	public bool DisableCache { get; set; }
 	public abstract Task RunAsync();
 
-	protected string? CacheDir => DisableCache ? null : "./cache";
+	protected string? CacheDir
+		=> DisableCache ? null
+		: Environment.GetEnvironmentVariable("GEHistoricalImagery_Cache") is string cacheDir ? cacheDir
+		: "./cache";
 
 	public double Progress { get; set; }
 

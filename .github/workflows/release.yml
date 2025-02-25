@@ -1,0 +1,50 @@
+# release.yml
+# Builds and creates the release on any tags starting with a `v`
+---
+name: release
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  prerelease:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Get tag version
+        id: get_version
+        run: |
+          export TAG="${{ github.ref_name }}"
+          echo "version=${TAG#v}" >> "${GITHUB_OUTPUT}"
+
+  build:
+    needs: [prerelease]
+    uses: ./.github/workflows/build.yml
+    with:
+      version_override: ${{ needs.prerelease.outputs.version }}
+
+  release:
+    needs: [prerelease, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*GEHistoricalImagery.*"
+          path: artifacts
+
+      - name: Release
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: GEHistoricalImagery ${{ needs.prerelease.outputs.version }}
+          body: <Put a body here>
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          draft: true
+          prerelease: false
+          files: |
+            artifacts/*/*
+            
+            
+            

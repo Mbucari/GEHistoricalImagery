@@ -1,0 +1,13 @@
+# validate.yml
+---
+name: validate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml

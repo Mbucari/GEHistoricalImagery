@@ -1,0 +1,87 @@
+# build-windows.yml
+---
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      version_override:
+        type: string
+        description: "Version number override"
+        required: false
+      run_unit_tests:
+        type: boolean
+        description: "Skip running unit tests"
+        required: false
+        default: true
+      architecture:
+        type: string
+        description: "CPU architecture targeted by the build."
+        required: true
+
+env:
+  DOTNET_CONFIGURATION: "Release"
+  DOTNET_VERSION: "9.0.x"
+
+jobs:
+  build:
+    name: "win-${{ inputs.architecture }}"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Get version
+        id: get_version
+        run: |
+          if ("${{ inputs.version_override }}".length -gt 0) {
+            $version = "${{ inputs.version_override }}"
+          } else {
+            $version = (Select-Xml -Path "./src/GEHistoricalImagery/GEHistoricalImagery.csproj" -XPath "/Project/PropertyGroup/Version").Node.InnerXML.Trim()
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Publish
+        working-directory: ./src
+        run: |
+          $RUNTIME_ID="win-${{ inputs.architecture }}"
+
+          $OUTPUT="bin/Publish/win-${{ inputs.architecture }}"
+
+          echo "Runtime Identifier: $RUNTIME_ID"
+          echo "Output Directory: $OUTPUT"
+
+          dotnet publish `
+              GEHistoricalImagery/GEHistoricalImagery.csproj `
+              --runtime $RUNTIME_ID `
+              --configuration ${{ env.DOTNET_CONFIGURATION }} `
+              --output $OUTPUT `
+              -p:PublishProtocol=FileSystem `
+              -p:SelfContained=true `
+              -p:PublishAot=true
+          
+          
+          Copy-Item "GEHistoricalImagery\bin\Release\gdal" "$OUTPUT\" -Force -Recurse
+          
+          if ("${{ inputs.architecture }}" -eq "x64") { Remove-Item -Path "$OUTPUT\gdal\x86" -Force -Recurse }
+          if ("${{ inputs.architecture }}" -eq "x86") { Remove-Item -Path "$OUTPUT\gdal\x64" -Force -Recurse }
+
+      - name: Zip artifact
+        id: zip
+        working-directory: ./src/bin/Publish
+        run: |
+          $bin_dir = "win-${{ inputs.architecture }}\"
+          $artifact="GEHistoricalImagery.${{ steps.get_version.outputs.version }}-win-${{ inputs.architecture }}.zip"
+          "artifact=$artifact" >> $env:GITHUB_OUTPUT
+          Compress-Archive -Path "${bin_dir}*" -DestinationPath "$artifact"
+
+      - name: Publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GEHistoricalImagery.${{ steps.get_version.outputs.version }}-win-${{ inputs.architecture }}.zip
+          path: ./src/bin/Publish/${{ steps.zip.outputs.artifact }}
+          if-no-files-found: error
+          retention-days: 7

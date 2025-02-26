@@ -66,7 +66,8 @@ jobs:
               -p:DefineConstants=$preprocessor \
               -p:PublishProtocol=FileSystem \
               -p:SelfContained=true \
-              -p:PublishTrimmed=true
+              -p:PublishTrimmed=true \
+              -p:PublishSingleFile=true
 
       - name: Build bundle
         id: bundle
@@ -86,17 +87,11 @@ jobs:
           echo -e '"$SCRIPT_DIR/gdal/GEHistoricalImagery" "$@"' >> $scriptfile
           chmod +x $scriptfile
           
-          bundleName="GEHistoricalImagery.${{ steps.get_version.outputs.version }}-linux-${{ inputs.architecture }}.tar.gz"
+          artifact="GEHistoricalImagery.${{ steps.get_version.outputs.version }}-linux-${{ inputs.architecture }}.tar.gz"
           
-          tar -cvz -f "./../$bundleName" *
-          
-          artifact="$bundleName"
+          tar -cvz -f "./../$artifact" *
           echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
-          echo "PWD = $BUNDLE_DIR"
-          ls
-          cd ..
-          ls
-
+          
       - name: Publish bundle
         uses: actions/upload-artifact@v4
         with:

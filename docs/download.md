@@ -46,7 +46,7 @@ Download historical imagery at zoom level `20` from within the region defined by
 
    **Command:**
    ```Console
-   GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek 1.tif"
+   GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 --target-sr https://epsg.io/103248.wkt --output "./Cherry Creek 1.tif"
    ```
    **Output:**
    ![Cherry Creek 1-Small.jpg](assets/Cherry%20Creek%201-Small.jpg)
@@ -55,7 +55,7 @@ Download historical imagery at zoom level `20` from within the region defined by
 
    **Command:**
    ```Console
-   GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2023/04/29 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek 2.tif"
+   GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2023/04/29 --target-sr https://epsg.io/103248.wkt --output "./Cherry Creek 2.tif"
    ```
    Notice that the left ~30% of the image is from a different date than the rest of the image. This matches the availability shown in [Availability Map 2](availability.md#availability-map-2---imagery-from-20230429).
    
@@ -66,7 +66,7 @@ Download historical imagery at zoom level `20` from within the region defined by
 
    **Command:**
    ```Console
-   GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2021/08/17 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek 3.tif"
+   GEHistoricalImagery download --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2021/08/17 --target-sr https://epsg.io/103248.wkt --output "./Cherry Creek 3.tif"
    ```
    Notice the L-shaped region of the image is from a different date than the rest of the image. This matches the availability shown in [Availability Map 3](availability.md#availability-map-3---imagery-from-20210517).
 
@@ -79,7 +79,7 @@ Download historical imagery at zoom level `20` from within the region defined by
    
    **Command:**
    ```Console
-   GEHistoricalImagery download --provider wayback --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 19 --date 2023/04/05 --target-sr https://epsg.io/103248.wkt --output ".\Cherry Creek 4.tif"
+   GEHistoricalImagery download --provider wayback --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 19 --date 2023/04/05 --target-sr https://epsg.io/103248.wkt --output "./Cherry Creek 4.tif"
    ```
 
    **Output:**
@@ -87,4 +87,4 @@ Download historical imagery at zoom level `20` from within the region defined by
 
 
 ************************
-<p align="center"><i>Updated 2025/02/19</i></p>
+<p align="center"><i>Updated 2025/02/26</i></p>

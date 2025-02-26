@@ -51,7 +51,7 @@ Save the images with filenames in the format `"Zoom={Z}, Column={c}, Row={r}.jpg
 
    **Command:**
    ```Console
-   GEHistoricalImagery dump --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 -f "Zoom={Z}, Column={c}, Row={r}.jpg" -o ".\Tiles"
+   GEHistoricalImagery dump --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 -f "Zoom={Z}, Column={c}, Row={r}.jpg" -o "./Tiles"
    ```   
    **Output:**
    ```
@@ -74,7 +74,7 @@ There are `2^zoom` number of global rows, beginning with row 0 at -180 degrees l
 
    **Command:**
    ```Console
-   GEHistoricalImagery dump --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 -f "Zoom={Z}, Global Column={C}, Global Row={R}.jpg" -o ".\Tiles"
+   GEHistoricalImagery dump --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 -f "Zoom={Z}, Global Column={C}, Global Row={R}.jpg" -o "./Tiles"
    ```
    **Output:**
    ```
@@ -96,13 +96,16 @@ $Z$ is the zoom level.<br>
 ### Esri Tiles
 
 $$Longitude = 360\frac{Column}{2^{Z}}-180$$
+
 $$Latitude = \arctan(\sinh(\pi (1-2\frac{Row}{2^{Z}}))) \frac{180}{\pi}$$
 or
 $$Column = 2^{Z}\frac{Longitude + 180}{360}$$
+
 $$Row = \frac{2^{Z}}{2}(1 - \frac{1}{\pi}\ln(\tan(\frac{\pi\cdot Latitude}{180}) + \sec(\frac{\pi\cdot Latitude}{180})) $$
+
 Where:
 
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/02/19</i></p>
+<p align="center"><i>Updated 2025/02/26</i></p>

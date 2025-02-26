@@ -28,7 +28,7 @@ Use the `gehinix.sh` script to download, build and run GEHistoricalImagery. The 
 
 ```console
 wget https://raw.githubusercontent.com/Mbucari/GEHistoricalImagery/refs/heads/master/gehinix.sh
-chmod +x gehinix.sh &&
+chmod +x gehinix.sh
 ./gehinix.sh
 ```
 

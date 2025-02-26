@@ -50,6 +50,7 @@ Download historical imagery at zoom level `20` from within the region defined by
    ```
    **Output:**
    ![Cherry Creek 1-Small.jpg](assets/Cherry%20Creek%201-Small.jpg)
+   [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%201.tif)
 
 ### Example 2 - Get imagery from 2023/04/29
 
@@ -61,6 +62,7 @@ Download historical imagery at zoom level `20` from within the region defined by
    
    **Output:**
    ![Cherry Creek 2-Small.jpg](assets/Cherry%20Creek%202-Small.jpg)
+   [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%202.tif)
 
 ### Example 3 -  Get imagery from 2021/08/17
 
@@ -72,6 +74,7 @@ Download historical imagery at zoom level `20` from within the region defined by
 
    **Output:**
    ![Cherry Creek 3-Small.jpg](assets/Cherry%20Creek%203-Small.jpg)
+   [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%203.tif)
 
 ### Example 4 -  Get imagery from Esri Wayback version 2023/04/15
 
@@ -84,6 +87,7 @@ Download historical imagery at zoom level `20` from within the region defined by
 
    **Output:**
    ![Cherry Creek 4-Small.jpg](assets/Cherry%20Creek%204-Small.jpg)
+   [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%204.tif)
 
 
 ************************

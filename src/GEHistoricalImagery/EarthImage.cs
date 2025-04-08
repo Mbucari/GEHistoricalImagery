@@ -159,9 +159,6 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 			if (!scaleFirst)
 				geoTransform.Scale(scale);
 
-			geoTransform.ColumnRotation = 0.003;
-
-
             saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();
 
@@ -183,9 +180,7 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
             sw.WriteLine(geoTransform.PixelHeight);
             sw.WriteLine(geoTransform.UpperLeft_X);
             sw.WriteLine(geoTransform.UpperLeft_Y);
-        }
-
-		
+        }		
 
 		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
 		{

@@ -90,6 +90,31 @@ public class WayBack
 		return bts;
 	}
 
+	public async Task<DatedEsriTile?> GetNearestDatedTileAsync(EsriTile tile, DateOnly desiredDate)
+	{
+		DatedEsriTile? datedTile = null;
+
+		await foreach (var dt in GetDatesAsync(tile))
+		{
+			datedTile ??= dt;
+			if (dt.CaptureDate <= desiredDate)
+				break;
+			else if (dt.CaptureDate < desiredDate)
+			{
+				var d1 = datedTile.CaptureDate.DayNumber - desiredDate.DayNumber;
+				var d2 = desiredDate.DayNumber - dt.CaptureDate.DayNumber;
+
+				if (d2 < d1)
+					datedTile = dt;
+
+				break;
+			}
+
+			datedTile = dt;
+		}
+		return datedTile;
+	}
+
 	public async IAsyncEnumerable<DatedEsriTile> GetDatesAsync(EsriTile tile)
 	{
 		string? skipUntil = null;
@@ -126,7 +151,7 @@ public class WayBack
 				{
 					//Only emit a layer once the actual tile date changes.
 					//In this way, only the earliest version with unique imagery is emitted.
-					yield return new DatedEsriTile(lastDate.Value, last);
+					yield return new DatedEsriTile(lastDate.Value, last, tile);
 				}
 				lastDate = date;
 				last = f;
@@ -134,7 +159,7 @@ public class WayBack
 		}
 
 		if (lastDate.HasValue && last != null)
-			yield return new DatedEsriTile(lastDate.Value, last);
+			yield return new DatedEsriTile(lastDate.Value, last, tile);
 	}
 
 	protected async Task<JsonNode?> DownloadJsonAsync(string url)

@@ -12,6 +12,9 @@ internal class Download : AoiVerb
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
 	public DateOnly? Date { get; set; }
 
+	[Option("layer-date", HelpText = "(Wayback only) The date specifies a layer instead of an image capture date")]
+	public bool LayerDate { get; set; }
+
 	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "out.tif", Required = true)]
 	public string? SavePath { get; set; }
 
@@ -87,10 +90,6 @@ internal class Download : AoiVerb
 	private async Task Run_Esri(FileInfo saveFile, DateOnly desiredDate)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
-		var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
-
-		Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
-		ReportProgress(0);
 
 		var tempFile = Path.GetTempFileName();
 		int tileCount = Aoi.GetTileCount<EsriTile>(ZoomLevel);
@@ -142,9 +141,57 @@ internal class Download : AoiVerb
 
 
 		IEnumerable<Task<TileDataset>> generateWork()
-			=> Aoi
-			.GetTiles<EsriTile>(ZoomLevel)
-			.Select(t => Task.Run(() => DownloadTile(wayBack, t, layer)));
+		{
+			if (LayerDate)
+			{
+				var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
+
+				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
+				ReportProgress(0);
+				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(wayBack, t, layer)));
+			}
+			else
+			{
+				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
+				ReportProgress(0);
+				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(wayBack, t, desiredDate)));
+			}
+		}
+	}
+
+	private static async Task<TileDataset> DownloadTile(WayBack wayBack, EsriTile tile, DateOnly desiredDate)
+	{
+		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
+
+		try
+		{
+			var dt = await wayBack.GetNearestDatedTileAsync(tile, desiredDate);
+			if (dt is null)
+				return EmptyDataset(tile);
+
+			var bytes = await wayBack.DownloadTileAsync(dt.Layer, dt.Tile);
+
+			string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
+			try
+			{
+				Gdal.FileFromMemBuffer(memFile, bytes);
+
+				return new()
+				{
+					Tile = tile,
+					Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
+					Dataset = Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, [])
+				};
+			}
+			finally
+			{
+				Gdal.Unlink(memFile);
+			}
+		}
+		catch (HttpRequestException)
+		{ /* Failed to get a dated tile image. This wile will be black in the final image. */ }
+
+		return EmptyDataset(tile);
 	}
 
 	private static async Task<TileDataset> DownloadTile(WayBack wayBack, EsriTile tile, Layer layer)

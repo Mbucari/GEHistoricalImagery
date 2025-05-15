@@ -22,6 +22,9 @@ internal partial class Dump : AoiVerb
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
 	public DateOnly? Date { get; set; }
 
+	[Option("layer-date", HelpText = "(Wayback only) The date specifies a layer instead of an image capture date")]
+	public bool LayerDate { get; set; }
+
 	[Option('o', "output", HelpText = "Output image tile save directory", MetaValue = "[Directory]", Required = true)]
 	public string? SavePath { get; set; }
 
@@ -110,10 +113,6 @@ internal partial class Dump : AoiVerb
 	private async Task Run_Esri(DirectoryInfo saveFolder, DateOnly desiredDate)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
-		var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
-
-		Console.Write("Grabbing Image Tiles: ");
-		ReportProgress(0);
 
 		int tileCount = Aoi.GetTileCount<EsriTile>(ZoomLevel);
 		int numTilesProcessed = 0;
@@ -143,12 +142,50 @@ internal partial class Dump : AoiVerb
 		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 		IEnumerable<Task<TileDataset>> generateWork()
-			=> Aoi
-			.GetTiles<EsriTile>(ZoomLevel)
-			.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, filenameFormatter.HasDate)));
+		{
+			if (LayerDate)
+			{
+				var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
+
+				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
+				ReportProgress(0);
+				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer)));
+			}
+			else
+			{
+				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
+				ReportProgress(0);
+				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDate)));
+			}
+		}
 	}
 
-	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer, bool getDate)
+	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, DateOnly desiredDate)
+	{
+		try
+		{
+			var dt = await wayBack.GetNearestDatedTileAsync(tile, desiredDate);
+			if (dt is null)
+				return EmptyDataset(tile);
+
+			var imageBts = await wayBack.DownloadTileAsync(dt.Layer, dt.Tile);
+
+			return new()
+			{
+				Tile = tile,
+				Dataset = imageBts,
+				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
+				TileDate = dt.CaptureDate
+			};
+		}
+		catch (HttpRequestException)
+		{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
+
+		return EmptyDataset(tile);
+
+	}
+
+	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer)
 	{
 		try
 		{
@@ -159,7 +196,7 @@ internal partial class Dump : AoiVerb
 				Tile = tile,
 				Dataset = imageBts,
 				Message = null,
-				TileDate = getDate ? await wayBack.GetDateAsync(layer, tile) : default
+				TileDate = layer.Date
 			};
 		}
 		catch (HttpRequestException)
@@ -261,7 +298,6 @@ internal partial class Dump : AoiVerb
 
 	private class FilenameFormatter<T> where T : ITile<T>
 	{
-		public bool HasDate { get; }
 		private readonly string LocalRowFormat;
 		private readonly string LocalColumnFormat;
 		private readonly string GlobalRowFormat;
@@ -280,7 +316,6 @@ internal partial class Dump : AoiVerb
 			GetLocalFormatters(aoi, zoom, out LocalColumnFormat, out LocalRowFormat);
 			GetGlobalFormatters(aoi, zoom, out GlobalColumnFormat, out GlobalRowFormat);
 
-			HasDate = formatter.Contains("{D}");
 			FormatString
 				= formatter
 				.Replace("{Z}", "{0}")

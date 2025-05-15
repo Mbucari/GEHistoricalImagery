@@ -33,7 +33,7 @@ public class WayBack
 		return new WayBack(cachedHttpClient, caps.Layers.ToDictionary(l => l.ID));
 	}
 
-	private async Task<DateOnly> GetDateAsync(Layer layer, EsriTile tile)
+	public async Task<DateOnly> GetDateAsync(Layer layer, EsriTile tile)
 	{
 		var metadataUrl = layer.GetPointQueryUrl(tile);
 

@@ -16,6 +16,7 @@ internal partial class Dump : AoiVerb
 				  "{R}" = tile's global row number
 				  "{c}" = tile's column number within the rectangle
 				  "{r}" = tile's row number within the rectangle
+				  "{D}" = tile's image capture date
 				""";
 
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
@@ -129,7 +130,7 @@ internal partial class Dump : AoiVerb
 				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
 			else
 			{
-				var saveFile = filenameFormatter.GetString(tds.Tile);
+				var saveFile = filenameFormatter.GetString(tds);
 				var savePath = Path.Combine(saveFolder.FullName, saveFile);
 				File.WriteAllBytes(savePath, tds.Dataset);
 				numTilesDownload++;
@@ -144,10 +145,10 @@ internal partial class Dump : AoiVerb
 		IEnumerable<Task<TileDataset>> generateWork()
 			=> Aoi
 			.GetTiles<EsriTile>(ZoomLevel)
-			.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer)));
+			.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, filenameFormatter.HasDate)));
 	}
 
-	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer)
+	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer, bool getDate)
 	{
 		try
 		{
@@ -157,7 +158,8 @@ internal partial class Dump : AoiVerb
 			{
 				Tile = tile,
 				Dataset = imageBts,
-				Message = null
+				Message = null,
+				TileDate = getDate ? await wayBack.GetDateAsync(layer, tile) : default
 			};
 		}
 		catch (HttpRequestException)
@@ -192,7 +194,7 @@ internal partial class Dump : AoiVerb
 				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
 			else
 			{
-				var saveFile = filenameFormatter.GetString(tds.Tile);
+				var saveFile = filenameFormatter.GetString(tds);
 				var savePath = Path.Combine(saveFolder.FullName, saveFile);
 				File.WriteAllBytes(savePath, tds.Dataset);
 				numTilesDownload++;
@@ -226,7 +228,8 @@ internal partial class Dump : AoiVerb
 						Tile = tile,
 						Dataset = imageBts,
 						Message = dt.Date == desiredDate ? null
-						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
+						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}",
+						TileDate = dt.Date
 					};
 				}
 			}
@@ -246,6 +249,7 @@ internal partial class Dump : AoiVerb
 
 	private class TileDataset
 	{
+		public DateOnly TileDate { get; init; }
 		public required ITile Tile { get; init; }
 		public byte[]? Dataset { get; init; }
 		public required string? Message { get; init; }
@@ -257,6 +261,7 @@ internal partial class Dump : AoiVerb
 
 	private class FilenameFormatter<T> where T : ITile<T>
 	{
+		public bool HasDate { get; }
 		private readonly string LocalRowFormat;
 		private readonly string LocalColumnFormat;
 		private readonly string GlobalRowFormat;
@@ -275,32 +280,35 @@ internal partial class Dump : AoiVerb
 			GetLocalFormatters(aoi, zoom, out LocalColumnFormat, out LocalRowFormat);
 			GetGlobalFormatters(aoi, zoom, out GlobalColumnFormat, out GlobalRowFormat);
 
+			HasDate = formatter.Contains("{D}");
 			FormatString
 				= formatter
 				.Replace("{Z}", "{0}")
 				.Replace("{C}", "{1}")
 				.Replace("{c}", "{2}")
 				.Replace("{R}", "{3}")
-				.Replace("{r}", "{4}");
+				.Replace("{r}", "{4}")
+				.Replace("{D}", "{5}");
 		}
 
-		public string GetString(ITile tile)
+		public string GetString(TileDataset dataset)
 		{
-			int localCol = tile.Column - LowerLeftColumn;
+			int localCol = dataset.Tile.Column - LowerLeftColumn;
 			if (localCol < 0)
 				localCol += NumTilesAtLevel;
 
-			int localRow = int.Abs(tile.Row - LowerLeftRow);
+			int localRow = int.Abs(dataset.Tile.Row - LowerLeftRow);
 			if (localRow < 0)
 				localRow += NumTilesAtLevel;
 
 			return string.Format(
 				FormatString,
-				tile.Level,
-				tile.Column.ToString(GlobalColumnFormat),
+				dataset.Tile.Level,
+				dataset.Tile.Column.ToString(GlobalColumnFormat),
 				localCol.ToString(LocalColumnFormat),
-				tile.Row.ToString(GlobalRowFormat),
-				localRow.ToString(LocalRowFormat));
+				dataset.Tile.Row.ToString(GlobalRowFormat),
+				localRow.ToString(LocalRowFormat),
+				dataset.TileDate.ToString("yyyy-MM-dd"));
 		}
 
 		private static void GetGlobalFormatters(Rectangle aoi, int zoom, out string colFormatter, out string rowFormatter)

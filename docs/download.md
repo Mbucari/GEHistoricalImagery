@@ -93,4 +93,4 @@ Download historical imagery at zoom level `20` from within the region defined by
 
 
 ************************
-<p align="center"><i>Updated 2025/02/26</i></p>
+<p align="center"><i>Updated 2025/05/15</i></p>

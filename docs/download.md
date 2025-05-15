@@ -18,6 +18,8 @@ If imagery is not available for the specified date, the downloader will use the 
 
   -d yyyy/MM/dd, --date=yyyy/MM/dd        Required. Imagery Date
 
+  --layer-date                            (Wayback only) The date specifies a layer instead of an image capture date
+
   -o out.tif, --output=out.tif            Required. Output GeoTiff save location
 
   -p N, --parallel=N                      (Default: ALL_CPUS) Number of concurrent downloads

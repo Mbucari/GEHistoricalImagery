@@ -27,14 +27,19 @@ If imagery is not available for the specified date, the downloader will use the 
                                                       "{R}" = tile's global row number
                                                       "{c}" = tile's column number within the rectangle
                                                       "{r}" = tile's row number within the rectangle
+                                                      "{D}" = tile's image capture date (or wayback layer date depending on
+                                                              'layer-date' option)
 
   -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
 
-  --provider=TM                       (Default: TM) Aerial imagery provider
-                                       [TM]      Google Earth Time Machine
-                                       [Wayback] ESRI World Imagery Wayback
+  --layer-date                                      (Wayback only) The date specifies a layer instead of an image
+                                                    capture date
 
-  --no-cache                          (Default: false) Disable local caching  
+  --provider=TM                                     (Default: TM) Aerial imagery provider
+                                                     [TM]      Google Earth Time Machine
+                                                     [Wayback] ESRI World Imagery Wayback
+
+  --no-cache                                        (Default: false) Disable local caching  
 ```
 ## Examples
 Download historical imagery tiles at zoom level `20` from within the region defined by the lower-left (southwest) corner `39.619819,-104.856121` and upper-right (northeast) corner `39.638393,-104.824990`.

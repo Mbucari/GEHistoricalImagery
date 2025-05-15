@@ -16,7 +16,8 @@ internal partial class Dump : AoiVerb
 				  "{R}" = tile's global row number
 				  "{c}" = tile's column number within the rectangle
 				  "{r}" = tile's row number within the rectangle
-				  "{D}" = tile's image capture date
+				  "{D}" = tile's image capture date (or wayback layer date
+				              depending on 'layer-date' option)
 				""";
 
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]

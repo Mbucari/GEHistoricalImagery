@@ -27,8 +27,8 @@ If imagery is not available for the specified date, the downloader will use the 
                                                       "{R}" = tile's global row number
                                                       "{c}" = tile's column number within the rectangle
                                                       "{r}" = tile's row number within the rectangle
-                                                      "{D}" = tile's image capture date (or wayback layer date depending on
-                                                              'layer-date' option)
+                                                      "{D}" = tile's image capture date
+                                                      "{LD}" = tile's layer date (wayback only)
 
   -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
 
@@ -113,4 +113,4 @@ Where:
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/05/15</i></p>
+<p align="center"><i>Updated 2025/05/16</i></p>

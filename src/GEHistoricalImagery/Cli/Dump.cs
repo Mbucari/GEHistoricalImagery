@@ -16,8 +16,8 @@ internal partial class Dump : AoiVerb
 				  "{R}" = tile's global row number
 				  "{c}" = tile's column number within the rectangle
 				  "{r}" = tile's row number within the rectangle
-				  "{D}" = tile's image capture date (or wayback layer date
-				              depending on 'layer-date' option)
+				  "{D}" = tile's image capture date
+				  "{LD}" = tile's layer date (wayback only)
 				""";
 
 	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
@@ -150,7 +150,7 @@ internal partial class Dump : AoiVerb
 
 				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
 				ReportProgress(0);
-				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer)));
+				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, filenameFormatter.HasTileDate)));
 			}
 			else
 			{
@@ -176,7 +176,8 @@ internal partial class Dump : AoiVerb
 				Tile = tile,
 				Dataset = imageBts,
 				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
-				TileDate = dt.CaptureDate
+				TileDate = dt.CaptureDate,
+				LayerDate = dt.LayerDate
 			};
 		}
 		catch (HttpRequestException)
@@ -186,7 +187,7 @@ internal partial class Dump : AoiVerb
 
 	}
 
-	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer)
+	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer, bool getTileDate)
 	{
 		try
 		{
@@ -197,7 +198,8 @@ internal partial class Dump : AoiVerb
 				Tile = tile,
 				Dataset = imageBts,
 				Message = null,
-				TileDate = layer.Date
+				TileDate = getTileDate ? await wayBack.GetDateAsync(layer, tile) : default,
+				LayerDate = layer.Date
 			};
 		}
 		catch (HttpRequestException)
@@ -287,6 +289,7 @@ internal partial class Dump : AoiVerb
 
 	private class TileDataset
 	{
+		public DateOnly? LayerDate { get; init; }
 		public DateOnly TileDate { get; init; }
 		public required ITile Tile { get; init; }
 		public byte[]? Dataset { get; init; }
@@ -299,6 +302,8 @@ internal partial class Dump : AoiVerb
 
 	private class FilenameFormatter<T> where T : ITile<T>
 	{
+		public bool HasTileDate { get; }
+
 		private readonly string LocalRowFormat;
 		private readonly string LocalColumnFormat;
 		private readonly string GlobalRowFormat;
@@ -317,6 +322,7 @@ internal partial class Dump : AoiVerb
 			GetLocalFormatters(aoi, zoom, out LocalColumnFormat, out LocalRowFormat);
 			GetGlobalFormatters(aoi, zoom, out GlobalColumnFormat, out GlobalRowFormat);
 
+			HasTileDate = formatter.Contains("{D}");
 			FormatString
 				= formatter
 				.Replace("{Z}", "{0}")
@@ -324,7 +330,8 @@ internal partial class Dump : AoiVerb
 				.Replace("{c}", "{2}")
 				.Replace("{R}", "{3}")
 				.Replace("{r}", "{4}")
-				.Replace("{D}", "{5}");
+				.Replace("{D}", "{5}")
+				.Replace("{LD}", "{6}");
 		}
 
 		public string GetString(TileDataset dataset)
@@ -344,7 +351,8 @@ internal partial class Dump : AoiVerb
 				localCol.ToString(LocalColumnFormat),
 				dataset.Tile.Row.ToString(GlobalRowFormat),
 				localRow.ToString(LocalRowFormat),
-				dataset.TileDate.ToString("yyyy-MM-dd"));
+				dataset.TileDate.ToString("yyyy-MM-dd"),
+				dataset.LayerDate?.ToString("yyyy-MM-dd"));
 		}
 
 		private static void GetGlobalFormatters(Rectangle aoi, int zoom, out string colFormatter, out string rowFormatter)

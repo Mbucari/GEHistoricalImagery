@@ -9,10 +9,10 @@ public class WayBack
 {
 	private const string WayBackUrl = "https://wayback.maptiles.arcgis.com/arcgis/rest/services/world_imagery/mapserver/wmts/1.0.0/wmtscapabilities.xml";
 	private readonly CachedHttpClient HttpClient;
-	private Dictionary<string, Layer> Capabilities { get; }
+	private Dictionary<int, Layer> Capabilities { get; }
 	public IReadOnlyCollection<Layer> Layers => Capabilities.Values;
 
-	private WayBack(CachedHttpClient cacheHttpClient, Dictionary<string, Layer> capabilities)
+	private WayBack(CachedHttpClient cacheHttpClient, Dictionary<int, Layer> capabilities)
 	{
 		Capabilities = capabilities;
 		HttpClient = cacheHttpClient;
@@ -27,8 +27,6 @@ public class WayBack
 
 		var stream = await cachedHttpClient.GetStreamAsync(WayBackUrl);
 		var caps = await LibEsri.Capabilities.LoadAsync(stream) ?? throw new Exception();
-
-		var dict = caps.Layers.ToDictionary(l => l.ID);
 
 		return new WayBack(cachedHttpClient, caps.Layers.ToDictionary(l => l.ID));
 	}
@@ -117,7 +115,7 @@ public class WayBack
 
 	public async IAsyncEnumerable<DatedEsriTile> GetDatesAsync(EsriTile tile)
 	{
-		string? skipUntil = null;
+		int? skipUntil = null;
 		DateOnly? lastDate = null;
 		Layer? last = null;
 
@@ -136,8 +134,8 @@ public class WayBack
 			Layer f;
 			if (ss?["select"]?[0] is JsonValue v)
 			{
-				skipUntil = v.GetValue<int>().ToString();
-				f = Capabilities[skipUntil];
+				skipUntil = v.GetValue<int>();
+				f = Capabilities[skipUntil.Value];
 			}
 			else
 			{

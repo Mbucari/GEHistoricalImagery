@@ -96,8 +96,6 @@ public class WayBack
 		{
 			datedTile ??= dt;
 			if (dt.CaptureDate <= desiredDate)
-				break;
-			else if (dt.CaptureDate < desiredDate)
 			{
 				var d1 = datedTile.CaptureDate.DayNumber - desiredDate.DayNumber;
 				var d2 = desiredDate.DayNumber - dt.CaptureDate.DayNumber;

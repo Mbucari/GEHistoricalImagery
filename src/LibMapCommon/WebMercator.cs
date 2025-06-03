@@ -19,7 +19,7 @@ public readonly struct WebMercator : IEquatable<WebMercator>, ICoordinate<WebMer
 	public double Y => _Y;
 
 	/// <summary>
-	/// Initialize a new <see cref="Wgs1984"/> instance.
+	/// Initialize a new <see cref="WebMercator"/> instance.
 	/// </summary>
 	/// <param name="x">The Web Mercator's X coordinate</param>
 	/// <param name="y">The Web Mercator's Y coordinate</param>
@@ -48,7 +48,7 @@ public readonly struct WebMercator : IEquatable<WebMercator>, ICoordinate<WebMer
 	public bool Equals(WebMercator other)
 		=> other.X == X && other.Y == Y;
 	public override int GetHashCode()
-		=> X.GetHashCode() ^ Y.GetHashCode();
+		=> HashCode.Combine(_X, _Y);
 	public override bool Equals([NotNullWhen(true)] object? obj)
 		=> obj is WebMercator other && Equals(other);
 

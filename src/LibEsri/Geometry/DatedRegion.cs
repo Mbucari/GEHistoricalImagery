@@ -1,18 +1,18 @@
-﻿using LibMapCommon;
+﻿using LibMapCommon.Geometry;
 
 namespace LibEsri.Geometry;
 
 public class DatedRegion
 {
 	public DateOnly Date { get; }
-	internal Ring[] Rings { get; }
+	internal WebMercatorPoly[] Rings { get; private set; }
 
-	internal DatedRegion(DateOnly date, Ring[] rings)
+	internal DatedRegion(DateOnly date, WebMercatorPoly[] rings, WebMercatorPoly? clippingRegion = null)
 	{
 		Date = date;
-		Rings = rings;
+		Rings = clippingRegion is null ? rings : rings.SelectMany(r => r.Clip(clippingRegion)).ToArray();
 	}
 
-	public bool Contains(WebMercator coordinate) => Rings.Any(r => r.Contains(coordinate));
+	public bool ContainsTile(EsriTile tile) => Rings.Any(r => r.ContainsTile(tile));
 
 }

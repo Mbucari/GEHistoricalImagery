@@ -1,12 +1,13 @@
 ﻿using LibEsri.Geometry;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 using System.Text.Json.Nodes;
 
 namespace LibEsri;
 
 public static class EsriExtensions
 {
-	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer)
+	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer, WebMercatorPoly region)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -16,15 +17,15 @@ public static class EsriExtensions
 			if (f?["attributes"]?["SRC_DATE2"]?.GetValue<long>() is not long dateNum)
 				continue;
 
-			if (f?["geometry"]?["rings"]?.AsArray().ToRings().ToArray() is not Ring[] rings)
+			if (f?["geometry"]?["rings"]?.AsArray().ToRings().ToArray() is not WebMercatorPoly[] rings)
 				continue;
 
 			var dateOnly = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(dateNum).DateTime);
-			yield return new DatedRegion(dateOnly, rings);
+			yield return new DatedRegion(dateOnly, rings, region);
 		}
 	}
 
-	internal static IEnumerable<Ring> ToRings(this JsonArray? jsonArray)
+	private static IEnumerable<WebMercatorPoly> ToRings(this JsonArray? jsonArray)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -34,11 +35,11 @@ public static class EsriExtensions
 			var coordinates = r.ToCoordinates();
 
 			if (coordinates.Any())
-				yield return new Ring(coordinates);
+				yield return new WebMercatorPoly(coordinates);
 		}
 	}
 
-	internal static IEnumerable<WebMercator> ToCoordinates(this JsonArray? jsonArray)
+	private static IEnumerable<WebMercator> ToCoordinates(this JsonArray? jsonArray)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;

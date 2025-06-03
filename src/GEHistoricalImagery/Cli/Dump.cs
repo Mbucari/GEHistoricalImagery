@@ -115,10 +115,10 @@ internal partial class Dump : AoiVerb
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		int tileCount = Aoi.GetTileCount<EsriTile>(ZoomLevel);
+		int tileCount = Region.GetTileCount<EsriTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
-		var filenameFormatter = new FilenameFormatter<EsriTile>(Formatter!, Aoi, ZoomLevel);
+		var filenameFormatter = new FilenameFormatter<EsriTile>(Formatter!, Region.GetBoundingRectangle(), ZoomLevel);
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		await foreach (var tds in processor.EnumerateResults(generateWork()))
@@ -150,13 +150,13 @@ internal partial class Dump : AoiVerb
 
 				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
 				ReportProgress(0);
-				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, filenameFormatter.HasTileDate)));
+				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, filenameFormatter.HasTileDate)));
 			}
 			else
 			{
 				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
 				ReportProgress(0);
-				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDate)));
+				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDate)));
 			}
 		}
 	}
@@ -219,10 +219,10 @@ internal partial class Dump : AoiVerb
 		ReportProgress(0);
 
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		int tileCount = Aoi.GetTileCount<KeyholeTile>(ZoomLevel);
+		int tileCount = Region.GetTileCount<KeyholeTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
-		var filenameFormatter = new FilenameFormatter<KeyholeTile>(Formatter!, Aoi, ZoomLevel);
+		var filenameFormatter = new FilenameFormatter<KeyholeTile>(Formatter!, Region.GetBoundingRectangle(), ZoomLevel);
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		await foreach (var tds in processor.EnumerateResults(generateWork()))
@@ -247,7 +247,7 @@ internal partial class Dump : AoiVerb
 		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 		IEnumerable<Task<TileDataset>> generateWork()
-			=> Aoi
+			=> Region
 			.GetTiles<KeyholeTile>(ZoomLevel)
 			.Select(t => Task.Run(() => DownloadTile(root, t, desiredDate)));
 	}

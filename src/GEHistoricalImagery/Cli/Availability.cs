@@ -2,7 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using LibEsri;
 using LibGoogleEarth;
-using LibMapCommon;
+using LibMapCommon.Geometry;
 using System.Text;
 
 namespace GEHistoricalImagery.Cli;
@@ -42,7 +42,7 @@ internal class Availability : AoiVerb
 
 		Console.Write("Loading World Atlas WayBack Layer Info: ");
 
-		var all = await GetAllEsriRegions(wayBack, Aoi, ZoomLevel);
+		var all = await GetAllEsriRegions(wayBack, Region, ZoomLevel);
 		ReplaceProgress("Done!\r\n");
 
 		if (all.Sum(r => r.Availabilities.Length) == 0)
@@ -54,11 +54,17 @@ internal class Availability : AoiVerb
 		new OptionChooser<EsriRegion>().WaitForOptions(all);
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, Rectangle aoi, int zoomLevel)
+	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, Wgs1984Poly aoi, int zoomLevel)
 	{
 		int count = 0;
 		int numTiles = wayBack.Layers.Count;
 		ReportProgress(0);
+
+		var mercAoi = aoi.ToWebMercator();
+		var rect = aoi.GetBoundingRectangle();
+		var ll = rect.LowerLeft.GetTile<EsriTile>(ZoomLevel);
+		var ur = rect.UpperRight.GetTile<EsriTile>(ZoomLevel);
+		rect.GetNumRowsAndColumns<EsriTile>(ZoomLevel, out int nRows, out int nColumns);
 
 		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
 		List<EsriRegion> allLayers = new();
@@ -88,23 +94,27 @@ internal class Availability : AoiVerb
 
 		async Task<EsriRegion> getLayerDates(Layer layer)
 		{
-			var regions = await wayBack.GetDateRegionsAsync(layer, aoi, ZoomLevel);
+			var regions = await wayBack.GetDateRegionsAsync(layer, mercAoi, ZoomLevel);
 
-			List<RegionAvailability> displays = new();
+			List<RegionAvailability> displays = new(regions.Length);
 
 			for (int i = 0; i < regions.Length; i++)
 			{
-				var availability = DrawAvailability(regions[i]);
+				var availability = new RegionAvailability(regions[i].Date, nRows, nColumns);
 
-				if (hasAnyTiles(availability))
-					displays.Add(new RegionAvailability(regions[i].Date, availability));
+				foreach (var tile in Region.GetTiles<EsriTile>(ZoomLevel))
+				{
+					var cIndex = tile.Column - ll.Column;
+					var rIndex = tile.Row - ur.Row;
+					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
+				}
+
+				if (availability.HasAnyTiles())
+					displays.Add(availability);
 			}
 
-			return new EsriRegion(layer, displays.ToArray());
+			return new EsriRegion(layer, displays.OrderByDescending(d => d.Date).ToArray());
 		}
-
-		static bool hasAnyTiles(char[][] map)
-			=> map.Any(x => x.Any(c => c != ':' && c != '˙'));
 	}
 
 	private class EsriRegion(Layer layer, RegionAvailability[] regions) : IDatedOption
@@ -122,8 +132,7 @@ internal class Availability : AoiVerb
 				Console.WriteLine("\r\n" + availabilityStr);
 				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 
-				foreach (var ca in Availabilities[0].Availability)
-					Console.WriteLine(new string(ca));
+				Availabilities[0].DrawMap();
 			}
 			else if (Availabilities.Length > 1)
 			{
@@ -136,45 +145,6 @@ internal class Availability : AoiVerb
 		}
 	}
 
-	private char[][] DrawAvailability(LibEsri.Geometry.DatedRegion region)
-	{
-		var ll = Aoi.LowerLeft.GetTile<EsriTile>(ZoomLevel);
-		var ur = Aoi.UpperRight.GetTile<EsriTile>(ZoomLevel);
-
-		var width = ur.Column - ll.Column + 1;
-		var height = ll.Row - ur.Row + 1;
-		height = height % 2 == 0 ? height / 2 : height / 2 + 1;
-
-		//Each character row represents two node rows
-		char[][] availability = new char[height][];
-		for (int i = 0; i < height; i++)
-			availability[i] = Enumerable.Repeat(':', width).ToArray();
-
-		for (int r = ll.Row, rIndex = 0; r >= ur.Row; r--, rIndex++)
-		{
-			availability[rIndex / 2] ??= new char[width];
-
-			for (int c = ll.Column; c <= ur.Column; c++)
-			{
-				var tile = new EsriTile(r, c, ZoomLevel);
-
-				if (region.Contains(tile.Center.ToWebMercator()))
-					MarkAvailable(availability, rIndex, c - ll.Column);
-			}
-		}
-
-		if ((ll.Row - ur.Row) % 2 == 0)
-		{
-			for (int c = 0; c < availability[^1].Length; c++)
-			{
-				if (availability[^1][c] == ':')
-					availability[^1][c] = '˙';
-			}
-		}
-
-		return availability;
-	}
-
 	#endregion
 
 	#region Keyhole
@@ -183,7 +153,7 @@ internal class Availability : AoiVerb
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		Console.Write("Loading Quad Tree Packets: ");
 
-		var all = await GetAllDatesAsync(root, Aoi, ZoomLevel);
+		var all = await GetAllDatesAsync(root, Region, ZoomLevel);
 		ReplaceProgress("Done!\r\n");
 
 		if (all.Length == 0)
@@ -195,33 +165,30 @@ internal class Availability : AoiVerb
 		new OptionChooser<RegionAvailability>().WaitForOptions(all);
 	}
 
-	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, Rectangle aoi, int zoomLevel)
+	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, Wgs1984Poly reg, int zoomLevel)
 	{
 		int count = 0;
-		int numTiles = aoi.GetTileCount<KeyholeTile>(zoomLevel);
+		int numTiles = reg.GetTileCount<KeyholeTile>(zoomLevel);
 		ReportProgress(0);
 
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
 
-		var ll = Aoi.LowerLeft.GetTile<KeyholeTile>(ZoomLevel);
-		var ur = Aoi.UpperRight.GetTile<KeyholeTile>(ZoomLevel);
+		var aoi = reg.GetBoundingRectangle();
 
-		var width = ur.Column - ll.Column + 1;
-		var height = ur.Row - ll.Row + 1;
-		height = height % 2 == 0 ? height / 2 : height / 2 + 1;
+		aoi.GetNumRowsAndColumns<KeyholeTile>(zoomLevel, out int nRows, out int nColumns);
+		var ll = aoi.LowerLeft.GetTile<KeyholeTile>(ZoomLevel);
+		var ur = aoi.UpperRight.GetTile<KeyholeTile>(ZoomLevel);
 
 		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();
+		HashSet<Tuple<int, int>> uniquePoints = new();
 
-		await foreach (var dSet in processor.EnumerateResults(aoi.GetTiles<KeyholeTile>(zoomLevel).Select(getDatedTiles)))
+		await foreach (var dSet in processor.EnumerateResults(reg.GetTiles<KeyholeTile>(zoomLevel).Select(getDatedTiles)))
 		{
 			foreach (var d in dSet)
 			{
 				if (!uniqueDates.ContainsKey(d.Date))
 				{
-					var map = new char[height][];
-					for (int i = 0; i < height; i++)
-						map[i] = Enumerable.Repeat(':', width).ToArray();
-					uniqueDates.Add(d.Date, new RegionAvailability(d.Date, map));
+					uniqueDates.Add(d.Date, new RegionAvailability(d.Date, nRows, nColumns));
 				}
 
 				var region = uniqueDates[d.Date];
@@ -229,22 +196,22 @@ internal class Availability : AoiVerb
 				var cIndex = d.Tile.Column - ll.Column;
 				var rIndex = ur.Row - d.Tile.Row;
 
-				if (await root.GetNodeAsync(d.Tile) is TileNode node)
-					MarkAvailable(region.Availability, rIndex, cIndex);
+				uniquePoints.Add(new Tuple<int, int>(rIndex, cIndex));
+				region[rIndex, cIndex] = await root.GetNodeAsync(d.Tile) is TileNode;
 			}
 
 			ReportProgress(++count / (double)numTiles);
 		}
 
-
-		if ((ur.Row - ll.Row) % 2 == 0)
+		//Go back and mark unavailable tiles within the region of interest
+		foreach (var a in uniqueDates.Values)
 		{
-			foreach (var region in uniqueDates.Values)
+			for (int r = 0; r < a.Height; r++)
 			{
-				for (int c = 0; c < region.Availability[^1].Length; c++)
+				for (int c = 0; c < a.Width; c++)
 				{
-					if (region.Availability[^1][c] == ':')
-						region.Availability[^1][c] = '˙';
+					if (uniquePoints.Contains(new Tuple<int, int>(r, c)) && a[r, c] is null)
+						a[r, c] = false;
 				}
 			}
 		}
@@ -273,29 +240,36 @@ internal class Availability : AoiVerb
 
 	#region Common
 
-	private class RegionAvailability(DateOnly date, char[][] availability) : IEquatable<RegionAvailability>, IDatedOption
+	private class RegionAvailability : IEquatable<RegionAvailability>, IDatedOption
 	{
-		public DateOnly Date { get; } = date;
-		public char[][] Availability { get; } = availability;
+		public DateOnly Date { get; }
+		private bool?[,] Availability { get; }
 
-		public bool Equals(RegionAvailability? other)
+		public int Height => Availability.GetLength(0);
+		public int Width => Availability.GetLength(1);
+		public bool? this[int rIndex, int cIndex]
 		{
-			return other != null && other.Date == Date && arraysEqual(other.Availability, Availability);
+			get => Availability[rIndex, cIndex];
+			set => Availability[rIndex, cIndex] = value;
 		}
 
-		private static bool arraysEqual(char[][] m1, char[][] m2)
+		public RegionAvailability(DateOnly date, int height, int width)
 		{
-			if (m1.Length != m2.Length)
+			Date = date;
+			Availability = new bool?[height, width];
+		}
+
+		public bool HasAnyTiles() => Availability.OfType<bool>().Any(b => b);
+		public bool Equals(RegionAvailability? other)
+		{
+			if (other == null || other.Date != Date || other.Height != Height || other.Width != Width)
 				return false;
 
-			for (int i = 0; i < m1.Length; i++)
+			for (int i = 0; i < Height; i++)
 			{
-				if (m1[i].Length != m2[i].Length)
-					return false;
-
-				for (int j = 0; j < m1[i].Length; j++)
+				for (int j = 0; j < Width; j++)
 				{
-					if (m1[i][j] != m2[i][j])
+					if (other.Availability[i, j] != Availability[i, j])
 						return false;
 				}
 			}
@@ -307,29 +281,48 @@ internal class Availability : AoiVerb
 			var availabilityStr = $"Tile availability on {DateString(Date)}";
 			Console.WriteLine("\r\n" + availabilityStr);
 			Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
+			DrawMap();
+		}
 
-			foreach (var ca in Availability)
-				Console.WriteLine(new string(ca));
+		public void DrawMap()
+		{
+			/*
+			 _________________________
+			 | Top       | TTTFFFNNN |
+			 ------------|------------
+			 | Bottom    | TFNTFNTFN |
+			 ------------|------------
+			 | Character | █▀▀▄:˙▄.  |
+			 -------------------------
+			 */
+
+			for (int y = 0; y < Height; y += 2)
+			{
+				var has2Rows = y + 1 < Height;
+				char[] row = new char[Width];
+				for (int x = 0; x < Width; x++)
+				{
+					var top = Availability[y, x];
+					if (has2Rows)
+					{
+						var bottom = Availability[y + 1, x];
+						row[x] = top is true & bottom is true ? '█' :
+							top is true ? '▀' :
+							bottom is true ? '▄' :
+							top is false & bottom is false ? ':' :
+							top is false ? '˙' :
+							bottom is false ? '.' : ' ';
+					}
+					else
+					{
+						row[x] = top is true ? '▀' :
+							top is false ? '˙' : ' ';
+					}
+				}
+
+				Console.WriteLine(new string(row));
+			}
 		}
 	}
-	private static void MarkAvailable(char[][] availability, int rIndex, int cIndex)
-	{
-		var existing = availability[rIndex / 2][cIndex];
-		if (rIndex % 2 == 0)
-		{
-			availability[rIndex / 2][cIndex]
-				= existing == ':' ? '▀'
-				: existing == '▄' ? '█'
-				: existing;
-		}
-		else
-		{
-			availability[rIndex / 2][cIndex]
-				= existing == ':' ? '▄'
-				: existing == '▀' ? '█'
-				: existing;
-		}
-	}
-
 	#endregion
 }

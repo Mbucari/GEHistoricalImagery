@@ -1,4 +1,5 @@
 ﻿using LibMapCommon;
+using LibMapCommon.Geometry;
 using OSGeo.GDAL;
 using OSGeo.OSR;
 
@@ -28,20 +29,21 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 
-	public EarthImage(Rectangle rectangle, int level, string? cacheFile = null)
+	public EarthImage(Wgs1984Poly region, int level, string? cacheFile = null)
 	{
+		var rectangle = region.GetBoundingRectangle();
 		long globalPixels = TILE_SZ * (1L << level);
 
 		var upperLeft = rectangle.GetUpperLeft<T>();
 
-		(var urX, var urY) = upperLeft.GetGlobalPixelCoordinate(level);
-		(var lrX, var lrY) = rectangle.GetLowerRight<T>().GetGlobalPixelCoordinate(level);
+		var pxUl = upperLeft.GetGlobalPixelCoordinate(level);
+		var pxLr = rectangle.GetLowerRight<T>().GetGlobalPixelCoordinate(level);
 
-		RasterX = urX.ToRoundedInt();
-		RasterY = urY.ToRoundedInt();
+		RasterX = pxUl.X.ToRoundedInt();
+		RasterY = pxUl.Y.ToRoundedInt();
 
-		Width = (lrX - urX).ToRoundedInt();
-		Height = (lrY - urY).ToRoundedInt();
+		Width = (pxLr.X - pxUl.X).ToRoundedInt();
+		Height = (pxLr.Y - pxUl.Y).ToRoundedInt();
 		//Allow wrapping around 180/-180
 		if (Width < 0)
 			Width = (int)(Width + globalPixels);
@@ -54,7 +56,7 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 			UpperLeft_X = upperLeft.X,
 			UpperLeft_Y = upperLeft.Y,
 			PixelWidth = T.Equator / globalPixels,
-			PixelHeight = -T.Equator / globalPixels
+			PixelHeight = T.Equator / globalPixels
 		};
 
 		TempDataset = CreateEmptyDataset(cacheFile);
@@ -79,7 +81,10 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 	public void AddTile(ITile tile, Dataset image)
 	{
 		//Tile's global pixel coordinates of the tile's top-left corner.
-		(var gpx_x, var gpx_y) = tile.GetTopLeftPixel<T>();
+		var gpx = tile.GetTopLeftPixel<T>();
+
+		int gpx_x = (int)gpx.X;
+		int gpx_y = (int)gpx.Y;
 
 		//The tile is entirely to the left of the region, so wrap around the globe.
 		if (gpx_x + TILE_SZ < RasterX)
@@ -102,10 +107,9 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 
 		int bandCount = image.RasterCount;
 		var bandMap = Enumerable.Range(1, bandCount).ToArray();
-
-		var buff2 = GC.AllocateUninitializedArray<byte>(size_x * size_y * bandCount);
-		image.ReadRaster(read_x, read_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
-		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, buff2, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
+		var rasterBuff = GC.AllocateUninitializedArray<byte>(size_x * size_y * bandCount);
+		image.ReadRaster(read_x, read_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
+		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}
 
 	public void Save(string path, string? outSR, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)

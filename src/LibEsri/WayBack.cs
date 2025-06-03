@@ -1,5 +1,6 @@
 ﻿using LibEsri.Geometry;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 using System.Text;
 using System.Text.Json.Nodes;
 
@@ -49,7 +50,7 @@ public class WayBack
 		return layer.Date;
 	}
 
-	public async Task<DatedRegion[]> GetDateRegionsAsync(Layer layer, Rectangle region, int zoom)
+	public async Task<DatedRegion[]> GetDateRegionsAsync(Layer layer, WebMercatorPoly region, int zoom)
 	{
 		var metadataUrl = layer.GetEnvelopeQueryUrl(region, zoom);
 
@@ -57,7 +58,7 @@ public class WayBack
 		{
 			var ss = await DownloadJsonAsync(metadataUrl);
 
-			if (ss?["features"]?.AsArray().ToDatedRegions(layer).ToArray() is not DatedRegion[] regions)
+			if (ss?["features"]?.AsArray().ToDatedRegions(layer, region).ToArray() is not DatedRegion[] regions)
 				return Array.Empty<DatedRegion>();
 
 			//consolidate duplicate dates

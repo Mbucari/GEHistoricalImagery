@@ -1,4 +1,5 @@
 ﻿using LibMapCommon;
+using LibMapCommon.Geometry;
 using System.Diagnostics;
 using System.Xml.Linq;
 
@@ -60,17 +61,20 @@ public class Layer
 		return url;
 	}
 
-	public string GetEnvelopeQueryUrl(Rectangle region, int level)
+	public string GetEnvelopeQueryUrl(WebMercatorPoly region, int level)
 	{
-		var xmin = region.LowerLeft.Longitude;
-		var xmax = region.UpperRight.Longitude;
-		var ymin = region.LowerLeft.Latitude;
-		var ymax = region.UpperRight.Latitude;
+		string[] points = new string[region.Edges.Length + 1];
+
+		for (int i = 0; i < region.Edges.Length; i++)
+			points[i] = $"%5B{region.Edges[i].Origin.X},{region.Edges[i].Origin.Y}%5D";
+		points[^1] = points[0];
+
+		var ring = $"%7B%22rings%22%3A%5B%5B{string.Join("%2C", points)}%5D%5D%2C%22spatialReference%22%3A%7B%22wkid%22%3A{WebMercator.EpsgNumber}%7D%7D";
 
 		var metadataUrl
 			= GetMetadataUrl(level, returnGeometry: true, "SRC_DATE2")
-			+ "&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelEnvelopeIntersects&geometry="
-			+ $"%7B%22xmin%22%3A{xmin}%2C%22ymin%22%3A{ymin}%2C%22xmax%22%3A{xmax}%2C%22ymax%22%3A{ymax}%2C%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%7D";
+			+ "&geometryType=esriGeometryPolygon&spatialRel=esriSpatialRelIntersects&geometry="
+			+ ring;
 		return metadataUrl;
 	}
 

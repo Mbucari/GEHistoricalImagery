@@ -2,6 +2,7 @@
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 using OSGeo.GDAL;
 
 namespace GEHistoricalImagery.Cli;
@@ -78,7 +79,6 @@ internal class Download : AoiVerb
 		}
 
 		var desiredDate = Date!.Value;
-
 		var task = Provider is Provider.Wayback ? Run_Esri(saveFile, desiredDate)
 			: Run_Keyhole(saveFile, desiredDate);
 
@@ -92,14 +92,14 @@ internal class Download : AoiVerb
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
 		var tempFile = Path.GetTempFileName();
-		int tileCount = Aoi.GetTileCount<EsriTile>(ZoomLevel);
+		int tileCount = Region.GetTileCount<EsriTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		try
 		{
-			using var image = new EarthImage<WebMercator>(Aoi, ZoomLevel, tempFile);
+			using var image = new EarthImage<WebMercator>(Region, ZoomLevel, tempFile);
 
 			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
@@ -142,27 +142,26 @@ internal class Download : AoiVerb
 
 		IEnumerable<Task<TileDataset>> generateWork()
 		{
+			var aoi = Region.ToWebMercator().ToPixelPolygon(ZoomLevel);
 			if (LayerDate)
 			{
 				var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
 
 				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
 				ReportProgress(0);
-				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(wayBack, t, layer)));
+				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, layer)));
 			}
 			else
 			{
 				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
 				ReportProgress(0);
-				return Aoi.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(wayBack, t, desiredDate)));
+				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDate)));
 			}
 		}
 	}
 
-	private static async Task<TileDataset> DownloadTile(WayBack wayBack, EsriTile tile, DateOnly desiredDate)
+	private async Task<TileDataset> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, DateOnly desiredDate)
 	{
-		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
-
 		try
 		{
 			var dt = await wayBack.GetNearestDatedTileAsync(tile, desiredDate);
@@ -171,22 +170,12 @@ internal class Download : AoiVerb
 
 			var bytes = await wayBack.DownloadTileAsync(dt.Layer, dt.Tile);
 
-			string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
-			try
+			return new()
 			{
-				Gdal.FileFromMemBuffer(memFile, bytes);
-
-				return new()
-				{
-					Tile = tile,
-					Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
-					Dataset = Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, [])
-				};
-			}
-			finally
-			{
-				Gdal.Unlink(memFile);
-			}
+				Tile = tile,
+				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
+				Dataset = OpenDataset<WebMercator>(aoi, tile, bytes)
+			};
 		}
 		catch (HttpRequestException)
 		{ /* Failed to get a dated tile image. This wile will be black in the final image. */ }
@@ -194,30 +183,18 @@ internal class Download : AoiVerb
 		return EmptyDataset(tile);
 	}
 
-	private static async Task<TileDataset> DownloadTile(WayBack wayBack, EsriTile tile, Layer layer)
+	private async Task<TileDataset> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, Layer layer)
 	{
-		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
-
 		try
 		{
 			var bytes = await wayBack.DownloadTileAsync(layer, tile);
 
-			string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
-			try
+			return new()
 			{
-				Gdal.FileFromMemBuffer(memFile, bytes);
-
-				return new()
-				{
-					Tile = tile,
-					Message = null,
-					Dataset = Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, [])
-				};
-			}
-			finally
-			{
-				Gdal.Unlink(memFile);
-			}
+				Tile = tile,
+				Message = null,
+				Dataset = OpenDataset<WebMercator>(aoi, tile, bytes)
+			};
 		}
 		catch (HttpRequestException)
 		{ /* Failed to get a dated tile image. This wile will be black in the final image. */ }
@@ -235,14 +212,14 @@ internal class Download : AoiVerb
 
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var tempFile = Path.GetTempFileName();
-		int tileCount = Aoi.GetTileCount<KeyholeTile>(ZoomLevel);
+		int tileCount = Region.GetTileCount<KeyholeTile>(ZoomLevel);
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
 
 		try
 		{
-			using var image = new EarthImage<Wgs1984>(Aoi, ZoomLevel, tempFile);
+			using var image = new EarthImage<Wgs1984>(Region, ZoomLevel, tempFile);
 
 			await foreach (var tds in processor.EnumerateResults(generateWork()))
 				using (tds)
@@ -283,15 +260,13 @@ internal class Download : AoiVerb
 		}
 
 		IEnumerable<Task<TileDataset>> generateWork()
-			=> Aoi
+			=> Region
 			.GetTiles<KeyholeTile>(ZoomLevel)
-			.Select(t => Task.Run(() => DownloadTile(root, t, desiredDate)));
+			.Select(t => Task.Run(() => DownloadTile(Region.ToPixelPolygon(ZoomLevel), root, t, desiredDate)));
 	}
 
-	private static async Task<TileDataset> DownloadTile(DbRoot root, KeyholeTile tile, DateOnly desiredDate)
+	private async Task<TileDataset> DownloadTile(PixelPointPoly aoi, DbRoot root, KeyholeTile tile, DateOnly desiredDate)
 	{
-		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
-
 		if (await root.GetNodeAsync(tile) is not TileNode node)
 			return EmptyDataset(tile);
 
@@ -303,22 +278,12 @@ internal class Download : AoiVerb
 				if (imageBts == null)
 					continue;
 
-				string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
-				try
+				return new()
 				{
-					Gdal.FileFromMemBuffer(memFile, imageBts);
-
-					return new()
-					{
-						Tile = tile,
-						Dataset = Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, []),
-						Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
-					};
-				}
-				finally
-				{
-					Gdal.Unlink(memFile);
-				}
+					Tile = tile,
+					Dataset = OpenDataset<Wgs1984>(aoi, tile, imageBts),
+					Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
+				};
 			}
 			catch (HttpRequestException)
 			{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
@@ -330,6 +295,45 @@ internal class Download : AoiVerb
 	#endregion
 
 	#region Common
+
+	private Dataset OpenDataset<T>(PixelPointPoly aoi, ITile tile, byte[] jpgBytes) where T : ICoordinate<T>
+	{
+		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
+		string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
+
+		try
+		{
+			Gdal.FileFromMemBuffer(memFile, jpgBytes);
+
+			var image =  Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, []);
+
+			if (aoi.TileOnBroder(tile))
+			{
+				//Blank all pixels outside of the region
+
+				var gpx = tile.GetTopLeftPixel<T>();
+
+				var tileImage = new TileImage(image);
+				var zeroPixel = Enumerable.Repeat((byte)0, image.RasterCount).ToArray();
+
+				for (int y = 0; y < image.RasterYSize; y++)
+				{
+					for (int x = 0; x < image.RasterXSize; x++)
+					{
+						if (!aoi.ContainsPoint(new PixelPoint(aoi.ZoomLevel, gpx.X + x + 0.5, gpx.Y + y + 0.5)))
+							tileImage.SetPixel(x, y, zeroPixel);
+					}
+				}
+				image.Dispose();
+				return tileImage.ToDataset();
+			}
+			else return image;
+		}
+		finally
+		{
+			Gdal.Unlink(memFile);
+		}
+	}
 
 	private void Image_Saving(object? sender, ImageSaveEventArgs e)
 	{
@@ -351,6 +355,54 @@ internal class Download : AoiVerb
 		public void Dispose()
 		{
 			Dataset?.Dispose();
+		}
+	}
+
+	internal class TileImage
+	{
+		private byte[] ImageBytes { get; }
+		private int BandCount { get; }
+		private int[] BandMap { get; }
+		private int RasterX { get; }
+		private int RasterY { get; }
+		public TileImage(Dataset tile)
+		{
+			ArgumentNullException.ThrowIfNull(tile, nameof(tile));
+
+			BandCount = tile.RasterCount;
+			BandMap = Enumerable.Range(1, BandCount).ToArray();
+			RasterX = tile.RasterXSize;
+			RasterY = tile.RasterYSize;
+
+			ImageBytes = GC.AllocateUninitializedArray<byte>(RasterX * RasterY * BandCount);
+			tile.ReadRaster(0, 0, RasterX, RasterY, ImageBytes, RasterX, RasterY, BandCount, BandMap, BandCount, RasterY * BandCount, 1);
+		}
+
+		public Dataset ToDataset()
+		{
+			using var tifDriver = Gdal.GetDriverByName("MEM");
+			var memDataset = tifDriver.Create("", RasterX, RasterY, BandCount, DataType.GDT_Byte, null);
+			memDataset.WriteRaster(0, 0, RasterX, RasterY, ImageBytes, RasterX, RasterY, BandCount, BandMap, BandCount, RasterY * BandCount, 1);
+			return memDataset;
+		}
+
+		public void SetPixel(int x, int y, byte[] values)
+		{
+			ArgumentNullException.ThrowIfNull(values, nameof(values));
+			ArgumentOutOfRangeException.ThrowIfNegative(x, nameof(x));
+			ArgumentOutOfRangeException.ThrowIfNegative(y, nameof(y));
+			ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(x, RasterX, nameof(x));
+			ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(y, RasterY, nameof(y));
+			if (values.Length != BandCount)
+				throw new ArgumentOutOfRangeException(nameof(values));
+
+			var index = (y * RasterY + x) * BandCount;
+
+			for (int i = 0; i < BandCount; i++)
+			{
+				if (BandMap[i] != 0)
+					ImageBytes[index + i] = values[i];
+			}
 		}
 	}
 	#endregion

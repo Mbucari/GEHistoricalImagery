@@ -103,7 +103,7 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, ICoordinate<Wgs1984>
 	public bool Equals(Wgs1984 other)
 		=> Latitude == other.Latitude && Longitude == other.Longitude;
 	public override int GetHashCode()
-		=> Latitude.GetHashCode() ^ Longitude.GetHashCode();
+		=> HashCode.Combine(_X, _Y);
 	public override bool Equals([NotNullWhen(true)] object? obj)
 		=> obj is Wgs1984 other && Equals(other);
 

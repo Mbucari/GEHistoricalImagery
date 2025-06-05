@@ -88,12 +88,11 @@ Download historical imagery at zoom level `20` from within the region defined by
    
    **Command:**
    ```Console
-   GEHistoricalImagery download --provider wayback --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 19 --date 2023/04/05 --target-sr https://epsg.io/103248.wkt --output "./Cherry Creek 4.tif"
+   GEHistoricalImagery download --provider wayback --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 19 --date 2023/04/23 --target-sr https://epsg.io/103248.wkt --output "./Cherry Creek 4.tif"
    ```
 
    **Output:**
    ![Cherry Creek 4-Small.jpg](assets/Cherry%20Creek%204-Small.jpg)
-   [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%204.tif)
 
 ### Example 5 - Get imagery from an irregular region
 

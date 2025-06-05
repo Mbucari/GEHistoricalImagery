@@ -6,26 +6,29 @@ Tiles that are available from a specific date are shaded, and unavailable tiles 
 
 ## Usage
 ```Console
-GEHistoricalImagery availability --lower-left [LAT,LONG] --upper-right [LAT,LONG] --zoom [N] [--parallel [N]] [--provider [P]] [--no-cache]
+GEHistoricalImagery availability [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] --zoom [N] [--parallel [N]] [--provider [P]] [--no-cache]
 
-  --lower-left=LAT,LONG     Required. Geographic coordinate of the lower-left (southwest) corner of the rectangular area
-                            of interest.
+-p N, --parallel=N                           (Default: 20) Number of concurrent downloads
 
-  --upper-right=LAT,LONG    Required. Geographic coordinate of the upper-right (northeast) corner of the rectangular
-                            area of interest.
+  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2    A list of geographic coordinates which are the vertices of the
+                                               polygonal area of interest. Vertex coordinates delimiter with a '+'.
 
-  -z N, --zoom=N            Required. Zoom level [1-23]
-  
-  -p N, --parallel=N        (Default: 20) Number of concurrent downloads
+  --lower-left=LAT,LONG                        Geographic coordinate of the lower-left (southwest) corner of the
+                                               rectangular area of interest.
 
-  --provider=TM             (Default: TM) Aerial imagery provider
-                             [TM]      Google Earth Time Machine
-                             [Wayback] ESRI World Imagery Wayback
+  --upper-right=LAT,LONG                       Geographic coordinate of the upper-right (northeast) corner of the
+                                               rectangular area of interest.
 
-  --no-cache                (Default: false) Disable local caching
+  -z N, --zoom=N                               Required. Zoom level [1-23]
+
+  --provider=TM                                (Default: TM) Aerial imagery provider
+                                                [TM]      Google Earth Time Machine
+                                                [Wayback] ESRI World Imagery Wayback
+
+  --no-cache                                   (Default: false) Disable local caching
 ```
 
-## Example
+## Example 1
 Gets the availability diagram for the rectangular region defined by the lower-left (southwest) corner `39.619819,-104.856121` and upper-right (northeast) corner `39.638393,-104.824990`.
 
 **Command:**
@@ -153,5 +156,55 @@ Tile availability on 2021/05/17
 ˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙
 ```
 
+## Example 2 - Polygonal Region
+Gets the availability diagram for a polygonal region defined by a list of geographic coordinate vertices.
+
+**Command:**
+```console
+GEHistoricalImagery availability --zoom 20 --region 39.619819,-104.856121+39.632275,-104.856121+39.631955,-104.854045+39.632230,-104.851632+39.631864,-104.850180+39.631864,-104.848694+39.632139,-104.846911+39.633238,-104.845782+39.634108,-104.843761+39.635345,-104.842513+39.637268,-104.841860+39.638393,-104.841563+39.638393,-104.828670+39.636859,-104.828686+39.636081,-104.828567+39.635228,-104.828357+39.634643,-104.828082+39.629716,-104.824990+39.619819,-104.824990
+```
+**Output:**
+```Console
+Loading Quad Tree Packets: Done!
+[0]  2025/03/03  [1]  2024/06/05  [2]  2023/10/20  [3]  2023/09/05  [4]  2023/05/28
+[5]  2023/04/29  [6]  2022/09/26  [7]  2021/08/17  [8]  2021/06/15  [9]  2021/06/11
+[a]  2020/10/03  [b]  2020/09/30  [c]  2020/06/07  [d]  2019/10/03  [e]  2019/09/13
+[f]  2018/06/01  [g]  2017/06/10  [h]  2017/05/14  [i]  2015/10/10  [j]  2014/10/07
+[k]  2014/06/03  [l]  2013/10/07  [m]  2012/10/08  [n]  2011/05/05  [o]  2010/06/16
+[Esc]  Exit
+```
+### Availability Map - Imagery from 2024/06/05
+```console
+                                          ███████████████████████████████████████
+                                         ▄███████████████████████████████████████
+                                         ████████████████████████████████████████
+                                        █████████████████████████████████████████
+                                       ▄██████████████████████████████████████████
+                                     ▄████████████████████████████████████████████▄
+                                  ▄▄███████████████████████████████████████████████▄
+                              ▄▄█████████████████████████████████████████████████████
+                            ▄█████████████████████████████████████████████████████████▄
+:::........::::............:███████████████████████████████████████████████████████████▄
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████▄
+::::::::::::::::::::::::::::██████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::███████████████████████████████████████████████████████████████▄
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+::::::::::::::::::::::::::::████████████████████████████████████████████████████████████████
+˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙˙▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+```
+This diagram, shown by pressing `5` in the console, shows the tiles with available imagery from 2023/04/29. The shaded areas represent tiles which contain imagery for the selected date, the dots represent tiles which have no imagery for the selected date, and the empty area show space outside of the polygonal region.
+
 ************************
-<p align="center"><i>Updated 2025/02/19</i></p>
+<p align="center"><i>Updated 2025/06/05</i></p>

@@ -6,17 +6,21 @@ If imagery is not available for the specified date, the downloader will use the 
 
 ## Usage
 ```Console
- GEHistoricalImagery dump --lower-left [LAT,LONG] --upper-right [LAT,LONG] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache]
+ GEHistoricalImagery dump [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+...]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache]
 
-  --lower-left=LAT,LONG                             Required. Geographic coordinate of the lower-left (southwest) corner
-                                                    of the rectangular area of interest.
+  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2         A list of geographic coordinates which are the vertices of the
+                                                    polygonal area of interest. Vertex coordinates delimiter with a '+'.
 
-  --upper-right=LAT,LONG                            Required. Geographic coordinate of the upper-right (northeast)
-                                                    corner of the rectangular area of interest.
+  --lower-left=LAT,LONG                             Geographic coordinate of the lower-left (southwest) corner of the
+                                                    rectangular area of interest.
 
-  -z N, --zoom=N                                    Required. Zoom level [1-24]
+  --upper-right=LAT,LONG                            Geographic coordinate of the upper-right (northeast) corner of the
+                                                    rectangular area of interest.
 
   -d yyyy/MM/dd, --date=yyyy/MM/dd                  Required. Imagery Date
+
+  --layer-date                                      (Wayback only) The date specifies a layer instead of an image
+                                                    capture date
 
   -o [Directory], --output=[Directory]              Required. Output image tile save directory
 
@@ -32,14 +36,13 @@ If imagery is not available for the specified date, the downloader will use the 
 
   -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
 
-  --layer-date                                      (Wayback only) The date specifies a layer instead of an image
-                                                    capture date
+  -z N, --zoom=N                                    Required. Zoom level [1-23]
 
   --provider=TM                                     (Default: TM) Aerial imagery provider
                                                      [TM]      Google Earth Time Machine
                                                      [Wayback] ESRI World Imagery Wayback
 
-  --no-cache                                        (Default: false) Disable local caching  
+  --no-cache                                        (Default: false) Disable local caching
 ```
 ## Examples
 Download historical imagery tiles at zoom level `20` from within the region defined by the lower-left (southwest) corner `39.619819,-104.856121` and upper-right (northeast) corner `39.638393,-104.824990`.
@@ -113,4 +116,4 @@ Where:
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/05/16</i></p>
+<p align="center"><i>Updated 2025/06/05</i></p>

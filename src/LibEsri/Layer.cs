@@ -63,9 +63,9 @@ public class Layer
 
 	public string GetEnvelopeQueryUrl(WebMercatorPoly region, int level)
 	{
-		string[] points = new string[region.Edges.Length + 1];
+		string[] points = new string[region.Edges.Count + 1];
 
-		for (int i = 0; i < region.Edges.Length; i++)
+		for (int i = 0; i < region.Edges.Count; i++)
 			points[i] = $"%5B{region.Edges[i].Origin.X},{region.Edges[i].Origin.Y}%5D";
 		points[^1] = points[0];
 

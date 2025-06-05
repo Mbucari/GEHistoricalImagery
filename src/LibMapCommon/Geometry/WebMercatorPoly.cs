@@ -1,21 +1,21 @@
 ﻿namespace LibMapCommon.Geometry;
 
-public sealed class WebMercatorPoly : Polygon<WebMercator>, IPolygon<WebMercatorPoly>
+public sealed class WebMercatorPoly : Polygon<WebMercatorPoly, WebMercator>
 {
 	public WebMercatorPoly(IEnumerable<WebMercator> coordinates)
 		: base(coordinates.ToArray()) { }
-	private WebMercatorPoly(IEnumerable<Line2> edges)
+	private WebMercatorPoly(IList<Line2> edges)
 		: base(edges) { }
 
 	public bool ContainsTile(ITile tile)
 		=> ContainsPoint(tile.Center.ToWebMercator()) || TileOnBroder(tile);
 
-	public WebMercatorPoly CreateFromEdges(IEnumerable<Line2> edges) => new WebMercatorPoly(edges);
+	protected override WebMercatorPoly CreateFromEdges(IList<Line2> edges) => new WebMercatorPoly(edges);
 
 	public override PixelPointPoly ToPixelPolygon(int level)
 	{
-		var pixelCoords = new PixelPoint[Edges.Length];
-		for (int i = 0; i < Edges.Length; i++)
+		var pixelCoords = new PixelPoint[Edges.Count];
+		for (int i = 0; i < Edges.Count; i++)
 		{
 			var origin = Edges[i].Origin;
 			var vertex = new WebMercator(origin.X, origin.Y);

@@ -1,24 +1,24 @@
 ﻿namespace LibMapCommon.Geometry;
 
-public sealed class Wgs1984Poly : Polygon<Wgs1984>, IPolygon<Wgs1984Poly>
+public sealed class Wgs1984Poly : Polygon<Wgs1984Poly, Wgs1984>
 {
 	public Wgs1984Poly(params Wgs1984[] coords)
 		: base(coords) { }
-	private Wgs1984Poly(IEnumerable<Line2> edges)
+	private Wgs1984Poly(IList<Line2> edges)
 		: base(edges) { }
 
 	public WebMercatorPoly ToWebMercator()
 		=> new WebMercatorPoly(Edges.Select(e => new Wgs1984(e.Origin.Y, e.Origin.X).ToWebMercator()));
 
-	public Wgs1984Poly CreateFromEdges(IEnumerable<Line2> edges) => new Wgs1984Poly(edges);
+	protected override Wgs1984Poly CreateFromEdges(IList<Line2> edges) => new Wgs1984Poly(edges);
 
 	public Rectangle GetBoundingRectangle()
 		=> new Rectangle(new Wgs1984(MinY, MinX), new Wgs1984(MaxY, MaxX));
 
 	public override PixelPointPoly ToPixelPolygon(int level)
 	{
-		var pixelCoords = new PixelPoint[Edges.Length];
-		for (int i = 0; i < Edges.Length; i++)
+		var pixelCoords = new PixelPoint[Edges.Count];
+		for (int i = 0; i < Edges.Count; i++)
 		{
 			var origin = Edges[i].Origin;
 			var vertex = new Wgs1984(origin.Y, origin.X);

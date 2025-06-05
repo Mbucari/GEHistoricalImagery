@@ -1,28 +1,24 @@
 ﻿namespace LibMapCommon.Geometry;
 
-
-public interface IPolygon<T> where T : IPolygon<T>
-{
-	public abstract T CreateFromEdges(IEnumerable<Line2> edges);
-}
-
-public abstract class Polygon<TCoordinate> where TCoordinate : struct, ICoordinate
+public abstract class Polygon<TPoly, TCoordinate> 
+	where TPoly : Polygon<TPoly, TCoordinate>
+	where TCoordinate : ICoordinate
 {
 	public double MinX { get; }
 	public double MinY { get; }
 	public double MaxX { get; }
 	public double MaxY { get; }
-	public Line2[] Edges { get; }
+	public IList<Line2> Edges { get; }
 
 	protected Polygon(params TCoordinate[] coords) : this(CreateEdges(coords)) { }
-	protected Polygon(IEnumerable<Line2> edges)
+	protected Polygon(IList<Line2> edges)
 	{
 		MinX = edges.MinBy(v => v.Origin.X).Origin.X;
 		MinY = edges.MinBy(v => v.Origin.Y).Origin.Y;
 		MaxX = edges.MaxBy(v => v.Origin.X).Origin.X;
 		MaxY = edges.MaxBy(v => v.Origin.Y).Origin.Y;
-		Edges = edges.ToArray();
-		if (Edges.Length < 3)
+		Edges = edges;
+		if (Edges.Count < 3)
 			throw new ArgumentException("Polygon must contain at least three edges");
 	}
 
@@ -33,24 +29,21 @@ public abstract class Polygon<TCoordinate> where TCoordinate : struct, ICoordina
 	/// </summary>
 	public abstract PixelPointPoly ToPixelPolygon(int level);
 
-	private static Line2[] CreateEdges<T>(T[] coords) where T : ICoordinate
+	private static Line2[] CreateEdges<T>(IList<T> coords) where T : ICoordinate
 	{
-		var edges = new Line2[coords.Length];
-		for (int i = 0; i < coords.Length; i++)
+		var edges = new Line2[coords.Count];
+		for (int i = 0; i < coords.Count; i++)
 		{
 			var origin = coords[i];
-			var next = coords[(i + 1) % coords.Length];
-			edges[i] = LineFrom(origin.X, origin.Y, next.X, next.Y);
+			var next = coords[(i + 1) % coords.Count];
+			edges[i] = LineFrom(origin, next);
 		}
 		return edges;
 	}
 
-	protected static Line2 LineFrom(TCoordinate origin, TCoordinate destination)
-		=> LineFrom(origin.X, origin.Y, destination.X, destination.Y);
-
-	protected static Line2 LineFrom(double x1, double y1, double x2, double y2)
-		=> new Line2(new Vector2(x1, y1), new Vector2(x2 - x1, y2 - y1));
-
+	private static Line2 LineFrom<T>(T origin, T destination) where T : ICoordinate
+		=> new Line2(new Vector2(origin.X, origin.Y),
+			new Vector2(destination.X - origin.X, destination.Y - origin.Y));
 
 	/// <summary>
 	/// Determine if the point resides inside the polygon using ray casting
@@ -71,7 +64,7 @@ public abstract class Polygon<TCoordinate> where TCoordinate : struct, ICoordina
 		{
 			var v = edge.Intersect(testEdge);
 
-			if (v.X > 0 && v.X < 1 && v.Y > 0)
+			if (v.X >= 0 && v.X < 1 && v.Y >= 0)
 				hitCount++;
 		}
 
@@ -88,34 +81,41 @@ public abstract class Polygon<TCoordinate> where TCoordinate : struct, ICoordina
 		var ll = GetFromWgs1984(tile.LowerLeft);
 		var lr = GetFromWgs1984(tile.LowerRight);
 
-		Line2[] tileEdges = [LineFrom(ul, ur), LineFrom(ur, lr), LineFrom(lr, ll), LineFrom(ll, ul)];
+		var rectangle = CreateFromEdges([LineFrom(ul, ur), LineFrom(ur, lr), LineFrom(lr, ll), LineFrom(ll, ul)]);
 
-		return Edges.Any(e => tileEdges.Any(t => LinesIntersect(e, t)));
+		return PolygonIntersects(rectangle);
+	}
 
-		static bool LinesIntersect(Line2 l1, Line2 l2)
+	public bool PolygonIntersects(TPoly other)
+	{
+		return Edges.Any(e => other.Edges.Any(t => SegmentsIntersect(e, t)));
+
+		static bool SegmentsIntersect(Line2 l1, Line2 l2)
 		{
 			var v = l1.Intersect(l2);
-			return v.X > 0 && v.X < 1 && v.Y > 0 && v.Y < 1;
+			return v.X >= 0 && v.X < 1 && v.Y >= 0 && v.Y < 1;
 		}
 	}
+
+	protected abstract TPoly CreateFromEdges(IList<Line2> edges);
 
 	/// <summary>
 	/// Clip this polygon 
 	/// </summary>
 	/// <returns>A collection of polygons which, combined, span the clipped polygon</returns>
-	public TPoly[] Clip<TPoly>(TPoly clippingPolygon) where TPoly : Polygon<TCoordinate>, IPolygon<TPoly>
-		=> TriangulatePolygon(clippingPolygon).Select(ClipToTriangle).OfType<TPoly>().ToArray();
+	public TPoly[] Clip(TPoly clippingPolygon)
+		=> clippingPolygon.TriangulatePolygon().Select(ClipToTriangle).OfType<TPoly>().ToArray();
 
 	/// <summary>
 	/// Convert a polygon to a collection of triangular polygons
 	/// </summary>
-	public static TPoly[] TriangulatePolygon<TPoly>(TPoly polygon) where TPoly : Polygon<TCoordinate>, IPolygon<TPoly>
+	public IList<TPoly> TriangulatePolygon()
 	{
 		//Ear clipping
-		var triangles = new List<TPoly>(polygon.Edges.Length - 2);
+		var triangles = new List<TPoly>(Edges.Count - 2);
 
-		var poly = polygon.CreateFromEdges(polygon.Edges);
-		var edges = polygon.Edges.ToList();
+		var poly = CreateFromEdges(Edges);
+		var edges = Edges.ToList();
 
 		for (int i = 0; edges.Count > 3; i = (i + 1) % edges.Count)
 		{
@@ -138,34 +138,36 @@ public abstract class Polygon<TCoordinate> where TCoordinate : struct, ICoordina
 
 			if (poly.ContainsPoint(centroidX, centroidY))
 			{
-				triangles.Add(polygon.CreateFromEdges([
-					LineFrom(e1.Origin.X, e1.Origin.Y, e2.Origin.X, e2.Origin.Y),
-					LineFrom(e2.Origin.X, e2.Origin.Y, e3.Origin.X, e3.Origin.Y),
-					LineFrom(e3.Origin.X, e3.Origin.Y, e1.Origin.X, e1.Origin.Y)]));
+				triangles.Add(CreateFromEdges([
+					LineFrom(e1.Origin, e2.Origin),
+					LineFrom(e2.Origin, e3.Origin),
+					LineFrom(e3.Origin, e1.Origin)]));
 
 				ClipEdges();
 			}
 
+			#region Algorithm Function
 			void ClipEdges()
 			{
 				edges.RemoveAt(i);
-				edges[edges.IndexOf(e2)] = LineFrom(e1.Origin.X, e1.Origin.Y, e3.Origin.X, e3.Origin.Y);
-				poly = polygon.CreateFromEdges(edges);
+				edges[edges.IndexOf(e2)] = LineFrom(e1.Origin, e3.Origin);
+				poly = CreateFromEdges(edges);
 				i--;
 			}
+			#endregion
 		}
 
 		triangles.Add(poly);
-		return triangles.ToArray();
+		return triangles;
 	}
 
 	/// <summary>
 	/// Sutherland–Hodgman polygon clipping algorithm.
 	/// Requires the clipping polygon to be convex, so only clip with triangles.
 	/// </summary>
-	private TPoly? ClipToTriangle<TPoly>(TPoly triangle) where TPoly : Polygon<TCoordinate>, IPolygon<TPoly>
+	private TPoly? ClipToTriangle(TPoly triangle)
 	{
-		if (triangle.Edges.Length != 3)
+		if (triangle.Edges.Count != 3)
 			throw new ArgumentException("Clipping polygon must be a triangle");
 
 		//Determine triangle direction for easy Inside() checks.
@@ -183,34 +185,35 @@ public abstract class Polygon<TCoordinate> where TCoordinate : struct, ICoordina
 				var prev_point = inputList[i];
 				var current_point = inputList[(i + 1) % inputList.Count];
 
-				if (Inside(clipEdge, clockwise, current_point))
+				if (Inside(current_point))
 				{
-					if (!Inside(clipEdge, clockwise, prev_point))
+					if (!Inside(prev_point))
 					{
-						outputList.Add(IntersectPoint(clipEdge, prev_point, current_point));
+						outputList.Add(ComputeIntersection(LineFrom(prev_point, current_point)));
 					}
 
 					outputList.Add(current_point);
 				}
-				else if (Inside(clipEdge, clockwise, prev_point))
+				else if (Inside(prev_point))
 				{
-					outputList.Add(IntersectPoint(clipEdge, prev_point, current_point));
-				}
+					outputList.Add(ComputeIntersection(LineFrom(prev_point, current_point)));
+				}				
 			}
+
+			#region Algorithm Functions
+			bool Inside(Vector2 point)
+			=> (clipEdge.Direction.Cross(point - clipEdge.Origin) > 0) ^ clockwise;
+
+			Vector2 ComputeIntersection(Line2 targetEdge)
+			{
+				var v = clipEdge.Intersect(targetEdge);
+				var newX = targetEdge.Origin.X + targetEdge.Direction.X * v.Y;
+				var newY = targetEdge.Origin.Y + targetEdge.Direction.Y * v.Y;
+				return new Vector2(newX, newY);
+			}
+			#endregion
 		}
 
-		return outputList.Count < 3 ? null : triangle.CreateFromEdges(CreateEdges(outputList.ToArray()));
+		return outputList.Count < 3 ? null : triangle.CreateFromEdges(CreateEdges(outputList));
 	}
-
-	private static Vector2 IntersectPoint(Line2 clipEdge, Vector2 prev_point, Vector2 current_point)
-	{
-		var targetEdge = LineFrom(prev_point.X, prev_point.Y, current_point.X, current_point.Y);
-		var v = clipEdge.Intersect(targetEdge);
-		var newX = targetEdge.Origin.X + targetEdge.Direction.X * v.Y;
-		var newY = targetEdge.Origin.Y + targetEdge.Direction.Y * v.Y;
-		return new Vector2(newX, newY);
-	}
-
-	private static bool Inside(Line2 testEdge, bool clockwise, Vector2 point)
-		=> (testEdge.Direction.Cross(point - testEdge.Origin) > 0) ^ clockwise;
 }

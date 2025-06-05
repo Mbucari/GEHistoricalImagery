@@ -8,14 +8,14 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class AoiVerb : OptionsBase
 {
+	[Option("region", SetName = "Region", Separator = '+', HelpText = "A list of geographic coordinates which are the vertices of the polygonal area of interest. Vertex coordinates delimiter with a '+'. ", MetaValue = "Lat0,Long0+Lat1,Long1+Lat2,Long2")]
+	public IList<string>? RegionCoordinates { get; set; }
+
 	[Option("lower-left", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the lower-left (southwest) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
 	public Wgs1984? LowerLeft { get; set; }
 
 	[Option("upper-right", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
 	public Wgs1984? UpperRight { get; set; }
-
-	[Option("region", SetName = "Region", Separator = '+', HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "Lat0,Long0+Lat1,Long1+Lat2,Long2")]
-	public IList<string>? RegionCoordinates { get; set; }
 
 	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "N", Required = true)]
 	public int ZoomLevel { get; set; }

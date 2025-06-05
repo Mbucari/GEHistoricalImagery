@@ -56,7 +56,7 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 			UpperLeft_X = upperLeft.X,
 			UpperLeft_Y = upperLeft.Y,
 			PixelWidth = T.Equator / globalPixels,
-			PixelHeight = T.Equator / globalPixels
+			PixelHeight = -T.Equator / globalPixels
 		};
 
 		TempDataset = CreateEmptyDataset(cacheFile);

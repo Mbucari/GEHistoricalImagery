@@ -18,7 +18,7 @@ public class CoordinateTests
 	public void GetTile(double lat, double lon, int zoom, int expectedRow, int expectedColumn)
 	{
 		var c = new Wgs1984(lat, lon);
-		var tile = c.GetTile<KeyholeTile>(zoom);
+		var tile = KeyholeTile.GetTile(c, zoom);
 
 		Assert.AreEqual(zoom, tile.Level);
 		Assert.AreEqual(expectedRow, tile.Row);
@@ -31,7 +31,7 @@ public class CoordinateTests
 	public void GetTileFail(int zoom)
 	{
 		var c = new Wgs1984(0, 0);
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => c.GetTile<KeyholeTile>(zoom));
+		Assert.ThrowsException<ArgumentOutOfRangeException>(() => KeyholeTile.GetTile(c, zoom));
 	}
 
 	[DataTestMethod]

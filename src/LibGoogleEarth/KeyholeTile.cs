@@ -1,11 +1,12 @@
 ﻿using LibMapCommon;
+using LibMapCommon.Geometry;
 
 namespace LibGoogleEarth;
 
 /// <summary>
 /// A square tile on earth's surface at a particular zoom level.
 /// </summary>
-public class KeyholeTile : ITile<KeyholeTile>
+public class KeyholeTile : ITile<KeyholeTile, Wgs1984>
 {
 	/// <summary> The quadtree path string </summary>
 	public string Path { get; }
@@ -97,13 +98,6 @@ r0	|  0  |  1  |
 		return new(Util.LatLongToRowCol(coordinate.Latitude, level), Util.LatLongToRowCol(coordinate.Longitude, level), level);
 	}
 
-	public static KeyholeTile GetMinimumCorner(Wgs1984 c1, Wgs1984 c2, int level)
-	{
-		var lowerMost = Math.Min(c1.Latitude, c2.Latitude);
-		var leftMost = Math.Min(c1.Longitude, c2.Longitude);
-		return GetTile(new Wgs1984(lowerMost, leftMost), level);
-	}
-
 	public static KeyholeTile Create(int row, int col, int level)
 		=> new KeyholeTile(row, col, level);
 
@@ -111,16 +105,13 @@ r0	|  0  |  1  |
 	private double RowColToLatLong(double rowCol)
 		=> Util.RowColToLatLong(Level, rowCol);
 
-	/// <summary> The lower-left (southwest) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
+	public Wgs1984 Wgs84Center => new(RowColToLatLong(Row + 0.5), RowColToLatLong(Column + 0.5));
+	public Wgs1984 Center => Wgs84Center;
 	public Wgs1984 LowerLeft => new(RowColToLatLong(Row), RowColToLatLong(Column));
-	/// <summary> The lower-right (southeast) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
 	public Wgs1984 LowerRight => new(RowColToLatLong(Row), RowColToLatLong(Column + 1));
-	/// <summary> The upper-left (northwest) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
 	public Wgs1984 UpperLeft => new(RowColToLatLong(Row + 1), RowColToLatLong(Column));
-	/// <summary> The upper-right (northeast) <see cref="Wgs1984"/> of this <see cref="KeyholeTile"/> </summary>
 	public Wgs1984 UpperRight => new(RowColToLatLong(Row + 1), RowColToLatLong(Column + 1));
-	/// <summary> <see cref="Wgs1984"/> of the center of this <see cref="KeyholeTile"/> </summary>
-	public Wgs1984 Center => new(RowColToLatLong(Row + 0.5), RowColToLatLong(Column + 0.5));
+	public GeoPolygon<Wgs1984> GetGeoPolygon() => new GeoPolygon<Wgs1984>([LowerLeft, UpperLeft, UpperRight, LowerRight]);
 	#endregion
 
 	#region Helpers
@@ -174,6 +165,7 @@ r0	|  0  |  1  |
 		string getSubindexPath()
 			=> quadTreePath.Substring((quadTreePath.Length - 1) / SUBINDEX_MAX_SZ * SUBINDEX_MAX_SZ);
 	}
+
 	#endregion
 
 }

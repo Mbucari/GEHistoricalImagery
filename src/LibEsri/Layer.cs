@@ -61,7 +61,7 @@ public class Layer
 		return url;
 	}
 
-	public string GetEnvelopeQueryUrl(WebMercatorPoly region, int level)
+	public string GetEnvelopeQueryUrl(GeoPolygon<WebMercator> region, int level)
 	{
 		string[] points = new string[region.Edges.Count + 1];
 
@@ -85,7 +85,7 @@ public class Layer
 		var metadataUrl
 			= GetMetadataUrl(tile.Level, returnGeometry: false, "SRC_DATE2")
 			+ "&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&geometry="
-			+ $"%7B%22spatialReference%22%3A%7B%22wkid%22%3A4326%7D%2C%22x%22%3A{center.Longitude}%2C%22y%22%3A{center.Latitude}%7D";
+			+ $"%7B%22spatialReference%22%3A%7B%22wkid%22%3A{WebMercator.EpsgNumber}%7D%2C%22x%22%3A{center.X}%2C%22y%22%3A{center.Y}%7D";
 		return metadataUrl;
 	}
 

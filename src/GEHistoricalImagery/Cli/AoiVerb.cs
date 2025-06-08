@@ -20,7 +20,7 @@ internal abstract class AoiVerb : OptionsBase
 	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "N", Required = true)]
 	public int ZoomLevel { get; set; }
 
-	protected Wgs1984Poly Region { get; set; } = null!;
+	protected GeoPolygon<Wgs1984> Region { get; set; } = null!;
 
 	protected IEnumerable<string> GetAoiErrors()
 	{
@@ -43,7 +43,7 @@ internal abstract class AoiVerb : OptionsBase
 				coords[i] = coord;
 			}
 
-			Region = new Wgs1984Poly(coords);
+			Region = new GeoPolygon<Wgs1984>(coords);
 		}
 		else if (LowerLeft is null && UpperRight is null)
 			yield return "An area of interest must be specified either with the 'region' option or the 'lower-left' and 'upper-right' options";
@@ -56,8 +56,11 @@ internal abstract class AoiVerb : OptionsBase
 			string? errorMessage = null;
 			try
 			{
-				var aoi = new Rectangle(LowerLeft.Value, UpperRight.Value);
-				Region = new Wgs1984Poly(aoi.LowerLeft, aoi.GetUpperLeft<Wgs1984>(), aoi.UpperRight, aoi.GetLowerRight<Wgs1984>());
+				Region = new GeoPolygon<Wgs1984>(
+					LowerLeft.Value,
+					new Wgs1984(UpperRight.Value.Latitude, LowerLeft.Value.Longitude),
+					UpperRight.Value,
+					new Wgs1984(LowerLeft.Value.Latitude, UpperRight.Value.Longitude));
 			}
 			catch (Exception e)
 			{

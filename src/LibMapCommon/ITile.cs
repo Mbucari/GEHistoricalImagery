@@ -1,10 +1,26 @@
-﻿namespace LibMapCommon;
+﻿using LibMapCommon.Geometry;
 
-public interface ITile<T> : ITile
+namespace LibMapCommon;
+
+public interface ITile<TTile, TCoordinate> : ITile<TCoordinate> where TCoordinate : IGeoCoordinate<TCoordinate>
 {
-	static abstract T GetTile(Wgs1984 coordinate, int level);
-	static abstract T GetMinimumCorner(Wgs1984 c1, Wgs1984 c2, int level);
-	static abstract T Create(int row, int col, int level);
+	static abstract TTile GetTile(TCoordinate coordinate, int level);
+	static abstract TTile Create(int row, int col, int level);
+}
+
+public interface ITile<TCoordinate> : ITile where TCoordinate : IGeoCoordinate<TCoordinate>
+{
+	/// <summary> The lower-left (southwest) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	TCoordinate LowerLeft { get; }
+	/// <summary> The lower-right (southeast) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	TCoordinate LowerRight { get; }
+	/// <summary> The upper-left (northwest) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	TCoordinate UpperLeft { get; }
+	/// <summary> The upper-right (northeast) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	TCoordinate UpperRight { get; }
+	/// <summary> coordinate of the center of this <see cref="ITile{TCoordinate}"/> </summary>
+	TCoordinate Center { get; }
+	GeoPolygon<TCoordinate> GetGeoPolygon();
 }
 
 public interface ITile
@@ -14,15 +30,6 @@ public interface ITile
 	int Column { get; }
 	/// <summary> The <see cref="ITile"/>'s zoom level. </summary>
 	int Level { get; }
-
-	/// <summary> The lower-left (southwest) <see cref="Wgs1984"/> of this <see cref="ITile"/> </summary>
-	Wgs1984 LowerLeft { get; }
-	/// <summary> The lower-right (southeast) <see cref="Wgs1984"/> of this <see cref="v"/> </summary>
-	Wgs1984 LowerRight { get; }
-	/// <summary> The upper-left (northwest) <see cref="Wgs1984"/> of this <see cref="ITile"/> </summary>
-	Wgs1984 UpperLeft { get; }
-	/// <summary> The upper-right (northeast) <see cref="Wgs1984"/> of this <see cref="ITile"/> </summary>
-	Wgs1984 UpperRight { get; }
-	/// <summary> <see cref="Wgs1984"/> of the center of this <see cref="ITile"/> </summary>
-	Wgs1984 Center { get; }
+	/// <summary> coordinate of the center of this <see cref="ITile{TCoordinate}"/> </summary>
+	Wgs1984 Wgs84Center { get; }
 }

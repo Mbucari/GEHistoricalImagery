@@ -2,6 +2,7 @@
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -115,32 +116,10 @@ internal partial class Dump : AoiVerb
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		int tileCount = Region.GetTileCount<EsriTile>(ZoomLevel);
-		int numTilesProcessed = 0;
-		int numTilesDownload = 0;
-		var filenameFormatter = new FilenameFormatter<EsriTile>(Formatter!, Region.GetBoundingRectangle(), ZoomLevel);
-		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
-
-		await foreach (var tds in processor.EnumerateResults(generateWork()))
-		{
-			if (tds.Message is not null)
-				Console.Error.WriteLine($"\r\n{tds.Message}");
-
-			if (tds.Dataset is null)
-				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
-			else
-			{
-				var saveFile = filenameFormatter.GetString(tds);
-				var savePath = Path.Combine(saveFolder.FullName, saveFile);
-				File.WriteAllBytes(savePath, tds.Dataset);
-				numTilesDownload++;
-			}
-
-			ReportProgress(++numTilesProcessed / (double)tileCount);
-		}
-
-		ReplaceProgress("Done!\r\n");
-		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+		var webMerc = Region.ToWebMercator();
+		var stats = webMerc.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
+		var formatter = new FilenameFormatter(Formatter!, stats);
+		await Run_Common(saveFolder, desiredDate, stats.TileCount, formatter, generateWork());
 
 		IEnumerable<Task<TileDataset>> generateWork()
 		{
@@ -150,13 +129,13 @@ internal partial class Dump : AoiVerb
 
 				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
 				ReportProgress(0);
-				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, filenameFormatter.HasTileDate)));
+				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, layer, formatter.HasTileDate)));
 			}
 			else
 			{
 				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
 				ReportProgress(0);
-				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDate)));
+				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDate)));
 			}
 		}
 	}
@@ -175,7 +154,7 @@ internal partial class Dump : AoiVerb
 			{
 				Tile = tile,
 				Dataset = imageBts,
-				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
+				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Wgs84Center}",
 				TileDate = dt.CaptureDate,
 				LayerDate = dt.LayerDate
 			};
@@ -184,7 +163,6 @@ internal partial class Dump : AoiVerb
 		{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
 
 		return EmptyDataset(tile);
-
 	}
 
 	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer, bool getTileDate)
@@ -206,7 +184,6 @@ internal partial class Dump : AoiVerb
 		{ /* Failed to get a dated tile image. Try again with the next nearest date.*/ }
 
 		return EmptyDataset(tile);
-
 	}
 
 	#endregion
@@ -219,32 +196,9 @@ internal partial class Dump : AoiVerb
 		ReportProgress(0);
 
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		int tileCount = Region.GetTileCount<KeyholeTile>(ZoomLevel);
-		int numTilesProcessed = 0;
-		int numTilesDownload = 0;
-		var filenameFormatter = new FilenameFormatter<KeyholeTile>(Formatter!, Region.GetBoundingRectangle(), ZoomLevel);
-		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
-
-		await foreach (var tds in processor.EnumerateResults(generateWork()))
-		{
-			if (tds.Message is not null)
-				Console.Error.WriteLine($"\r\n{tds.Message}");
-
-			if (tds.Dataset is null)
-				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
-			else
-			{
-				var saveFile = filenameFormatter.GetString(tds);
-				var savePath = Path.Combine(saveFolder.FullName, saveFile);
-				File.WriteAllBytes(savePath, tds.Dataset);
-				numTilesDownload++;
-			}
-
-			ReportProgress(++numTilesProcessed / (double)tileCount);
-		}
-
-		ReplaceProgress("Done!\r\n");
-		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+		var stats = Region.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
+		var formatter = new FilenameFormatter(Formatter!, stats);
+		await Run_Common(saveFolder, desiredDate, stats.TileCount, formatter, generateWork());
 
 		IEnumerable<Task<TileDataset>> generateWork()
 			=> Region
@@ -268,7 +222,7 @@ internal partial class Dump : AoiVerb
 						Tile = tile,
 						Dataset = imageBts,
 						Message = dt.Date == desiredDate ? null
-						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}",
+						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}",
 						TileDate = dt.Date
 					};
 				}
@@ -278,13 +232,44 @@ internal partial class Dump : AoiVerb
 		}
 
 		return EmptyDataset(tile);
+	}
 
+	#endregion
+
+	#region Common
+
+	private async Task Run_Common(DirectoryInfo saveFolder, DateOnly desiredDate, double tileCount, FilenameFormatter formatter, IEnumerable<Task<TileDataset>> generator)
+	{
+		int numTilesProcessed = 0;
+		int numTilesDownload = 0;
+		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+
+		await foreach (var tds in processor.EnumerateResults(generator))
+		{
+			if (tds.Message is not null)
+				Console.Error.WriteLine($"\r\n{tds.Message}");
+
+			if (tds.Dataset is null)
+				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
+			else
+			{
+				var saveFile = formatter.GetString(tds);
+				var savePath = Path.Combine(saveFolder.FullName, saveFile);
+				File.WriteAllBytes(savePath, tds.Dataset);
+				numTilesDownload++;
+			}
+
+			ReportProgress(++numTilesProcessed / tileCount);
+		}
+
+		ReplaceProgress("Done!\r\n");
+		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 	}
 
 	private static TileDataset EmptyDataset(ITile tile) => new()
 	{
 		Tile = tile,
-		Message = $"No imagery available for tile at {tile.Center}"
+		Message = $"No imagery available for tile at {tile.Wgs84Center}"
 	};
 
 	private class TileDataset
@@ -296,11 +281,7 @@ internal partial class Dump : AoiVerb
 		public required string? Message { get; init; }
 	}
 
-	#endregion
-
-	#region Common
-
-	private class FilenameFormatter<T> where T : ITile<T>
+	private class FilenameFormatter
 	{
 		public bool HasTileDate { get; }
 
@@ -312,15 +293,13 @@ internal partial class Dump : AoiVerb
 		private readonly int LowerLeftRow;
 		private readonly int LowerLeftColumn;
 		private readonly int NumTilesAtLevel;
-		public FilenameFormatter(string formatter, Rectangle aoi, int zoom)
+		public FilenameFormatter(string formatter, TileStats stats)
 		{
-			var lowerLeft = aoi.LowerLeft.GetTile<T>(zoom);
-
-			LowerLeftRow = lowerLeft.Row;
-			LowerLeftColumn = lowerLeft.Column;
-			NumTilesAtLevel = 1 << zoom;
-			GetLocalFormatters(aoi, zoom, out LocalColumnFormat, out LocalRowFormat);
-			GetGlobalFormatters(aoi, zoom, out GlobalColumnFormat, out GlobalRowFormat);
+			LowerLeftRow = stats.MinRow;
+			LowerLeftColumn = stats.MinColumn;
+			NumTilesAtLevel = 1 << stats.Zoom;
+			GetLocalFormatters(stats, out LocalColumnFormat, out LocalRowFormat);
+			GetGlobalFormatters(stats, out GlobalColumnFormat, out GlobalRowFormat);
 
 			HasTileDate = formatter.Contains("{D}");
 			FormatString
@@ -355,24 +334,16 @@ internal partial class Dump : AoiVerb
 				dataset.LayerDate?.ToString("yyyy-MM-dd"));
 		}
 
-		private static void GetGlobalFormatters(Rectangle aoi, int zoom, out string colFormatter, out string rowFormatter)
+		private static void GetGlobalFormatters(TileStats stats, out string colFormatter, out string rowFormatter)
 		{
-			var lowerLeft = aoi.LowerLeft.GetTile<T>(zoom);
-			var upperRight = aoi.UpperRight.GetTile<T>(zoom);
-
-			var maxRow = Math.Max(lowerLeft.Row, upperRight.Row);
-			var maxCol = Math.Max(lowerLeft.Column, upperRight.Column);
-
-			rowFormatter = DigitFormatter(maxRow);
-			colFormatter = DigitFormatter(maxCol);
+			rowFormatter = DigitFormatter(stats.MaxRow);
+			colFormatter = DigitFormatter(stats.MaxColumn);
 		}
 
-		private static void GetLocalFormatters(Rectangle aoi, int zoom, out string colFormatter, out string rowFormatter)
+		private static void GetLocalFormatters(TileStats stats, out string colFormatter, out string rowFormatter)
 		{
-			aoi.GetNumRowsAndColumns<T>(zoom, out int numRows, out int numColumns);
-
-			rowFormatter = DigitFormatter(numRows);
-			colFormatter = DigitFormatter(numColumns);
+			rowFormatter = DigitFormatter(stats.NumRows);
+			colFormatter = DigitFormatter(stats.NumColumns);
 		}
 
 		private static string DigitFormatter(int maxNumber)

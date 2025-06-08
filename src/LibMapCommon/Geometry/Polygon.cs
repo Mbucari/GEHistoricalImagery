@@ -1,35 +1,54 @@
 ﻿namespace LibMapCommon.Geometry;
 
-public abstract class Polygon<TPoly, TCoordinate> 
+public abstract class Polygon<TPoly, TCoordinate>
 	where TPoly : Polygon<TPoly, TCoordinate>
 	where TCoordinate : ICoordinate
 {
-	public double MinX { get; }
 	public double MinY { get; }
-	public double MaxX { get; }
 	public double MaxY { get; }
+	public double LeftMostX { get; }
+	public double RightMostX { get; }
 	public IList<Line2> Edges { get; }
 
-	protected Polygon(params TCoordinate[] coords) : this(CreateEdges(coords)) { }
-	protected Polygon(IList<Line2> edges)
+	protected Polygon(double smallestX, double largestX, params TCoordinate[] coords)
 	{
-		MinX = edges.MinBy(v => v.Origin.X).Origin.X;
-		MinY = edges.MinBy(v => v.Origin.Y).Origin.Y;
-		MaxX = edges.MaxBy(v => v.Origin.X).Origin.X;
-		MaxY = edges.MaxBy(v => v.Origin.Y).Origin.Y;
-		Edges = edges;
-		if (Edges.Count < 3)
-			throw new ArgumentException("Polygon must contain at least three edges");
+		Edges = CreateEdges(coords);
+		(LeftMostX, RightMostX, MinY, MaxY) = Validate(smallestX, largestX);
 	}
 
-	protected abstract TCoordinate GetFromWgs1984(Wgs1984 point);
+	protected Polygon(double smallestX, double largestX, IList<Line2> edges)
+	{
+		Edges = edges;
+		(LeftMostX, RightMostX, MinY, MaxY) = Validate(smallestX, largestX);
+	}
 
-	/// <summary>
-	/// Convert to the global pixel space for the current polygon's coordinate system.
-	/// </summary>
-	public abstract PixelPointPoly ToPixelPolygon(int level);
+	private (double leftMostX, double rightMostX, double minY, double maxY) Validate(double smallestX, double largestX)
+	{
+		if (Edges.Count < 3)
+			throw new ArgumentException("Polygon must contain at least three edges");
 
-	private static Line2[] CreateEdges<T>(IList<T> coords) where T : ICoordinate
+		double minY = Edges.Select(v => v.Origin.Y).Min();
+		double maxY = Edges.Select(v => v.Origin.Y).Max();
+		double leftMostX = Edges.Select(v => v.Origin.X).Min();
+		double rightMostX = Edges.Select(v => v.Origin.X).Max();
+
+		if (minY >= maxY)
+			throw new InvalidOperationException("Polygon cannot have zero height");
+
+		if (leftMostX == rightMostX)
+			throw new InvalidOperationException("Polygon cannot have zero width");
+
+		if (leftMostX == smallestX && rightMostX == largestX)
+		{
+			var midpoint = (largestX + smallestX) / 2;
+			leftMostX = Edges.Select(e => e.Origin.X).Where(x => x >= midpoint).Min();
+			rightMostX = Edges.Select(e => e.Origin.X).Where(x => x < midpoint).Max();
+		}
+
+		return (leftMostX, rightMostX, minY, maxY);
+	}
+
+	protected virtual IList<Line2> CreateEdges<T>(IList<T> coords) where T : ICoordinate
 	{
 		var edges = new Line2[coords.Count];
 		for (int i = 0; i < coords.Count; i++)
@@ -41,9 +60,11 @@ public abstract class Polygon<TPoly, TCoordinate>
 		return edges;
 	}
 
-	private static Line2 LineFrom<T>(T origin, T destination) where T : ICoordinate
+	protected virtual Line2 LineFrom<T>(T origin, T destination) where T : ICoordinate
 		=> new Line2(new Vector2(origin.X, origin.Y),
 			new Vector2(destination.X - origin.X, destination.Y - origin.Y));
+
+	protected abstract TPoly CreateFromEdges(IList<Line2> edges);
 
 	/// <summary>
 	/// Determine if the point resides inside the polygon using ray casting
@@ -55,49 +76,37 @@ public abstract class Polygon<TPoly, TCoordinate>
 	/// </summary>
 	private bool ContainsPoint(double x, double y)
 	{
-		if (x < MinX || x > MaxX || y < MinY || y > MaxY) return false;
+		if (y < MinY || y > MaxY) return false;
 
-		var testEdge = new Line2(new Vector2(x, y), Vector2.UnitX);
+		var testEdge = new Line2(new Vector2(x, y), Vector2.UnitY);
 
 		int hitCount = 0;
 		foreach (var edge in Edges)
 		{
-			var v = edge.Intersect(testEdge);
+			var v = edge.Intersect(testEdge, roundingDigits);
 
-			if (v.X >= 0 && v.X < 1 && v.Y >= 0)
+			if (v.X > 0 && v.X < 1 && v.Y > 0)
 				hitCount++;
 		}
 
 		return (hitCount & 1) == 1;
 	}
 
+	private const int roundingDigits = 15;
+	
 	/// <summary>
-	/// Indicates whether the tile intersects the polyline.
+	/// Indicates whether any edges of the supplied polygon intersect any edges of this polygon
 	/// </summary>
-	public bool TileOnBroder(ITile tile)
-	{
-		var ul = GetFromWgs1984(tile.UpperLeft);
-		var ur = GetFromWgs1984(tile.UpperRight);
-		var ll = GetFromWgs1984(tile.LowerLeft);
-		var lr = GetFromWgs1984(tile.LowerRight);
-
-		var rectangle = CreateFromEdges([LineFrom(ul, ur), LineFrom(ur, lr), LineFrom(lr, ll), LineFrom(ll, ul)]);
-
-		return PolygonIntersects(rectangle);
-	}
-
 	public bool PolygonIntersects(TPoly other)
 	{
 		return Edges.Any(e => other.Edges.Any(t => SegmentsIntersect(e, t)));
 
 		static bool SegmentsIntersect(Line2 l1, Line2 l2)
 		{
-			var v = l1.Intersect(l2);
+			var v = l1.Intersect(l2, roundingDigits);
 			return v.X >= 0 && v.X < 1 && v.Y >= 0 && v.Y < 1;
 		}
 	}
-
-	protected abstract TPoly CreateFromEdges(IList<Line2> edges);
 
 	/// <summary>
 	/// Clip this polygon 
@@ -197,7 +206,7 @@ public abstract class Polygon<TPoly, TCoordinate>
 				else if (Inside(prev_point))
 				{
 					outputList.Add(ComputeIntersection(LineFrom(prev_point, current_point)));
-				}				
+				}
 			}
 
 			#region Algorithm Functions

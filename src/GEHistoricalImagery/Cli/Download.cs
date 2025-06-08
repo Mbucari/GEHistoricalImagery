@@ -4,6 +4,7 @@ using LibGoogleEarth;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 using OSGeo.GDAL;
+using System.ComponentModel;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -90,77 +91,32 @@ internal class Download : AoiVerb
 	private async Task Run_Esri(FileInfo saveFile, DateOnly desiredDate)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
+		var webMerc = Region.ToWebMercator();
+		var stats = webMerc.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
 
-		var tempFile = Path.GetTempFileName();
-		int tileCount = Region.GetTileCount<EsriTile>(ZoomLevel);
-		int numTilesProcessed = 0;
-		int numTilesDownload = 0;
-		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+		await Run_Common(saveFile, desiredDate, webMerc, stats.TileCount, generateWork());
 
-		try
+		IEnumerable<Task<TileDataset<WebMercator>>> generateWork()
 		{
-			using var image = new EarthImage<WebMercator>(Region, ZoomLevel, tempFile);
-
-			await foreach (var tds in processor.EnumerateResults(generateWork()))
-				using (tds)
-				{
-					if (tds.Dataset is not null)
-					{
-						image.AddTile(tds.Tile, tds.Dataset);
-						numTilesDownload++;
-					}
-
-					if (tds.Message is not null)
-						Console.Error.WriteLine($"\r\n{tds.Message}");
-
-					ReportProgress(++numTilesProcessed / (double)tileCount);
-				}
-
-			ReplaceProgress("Done!\r\n");
-			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
-
-			if (numTilesDownload == 0)
-			{
-				if (saveFile.Exists)
-					saveFile.Delete();
-				return;
-			}
-
-			Console.Write("Saving Image: ");
-			Progress = 0;
-
-			image.Saving += Image_Saving;
-			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
-			ReplaceProgress("Done!\r\n");
-		}
-		finally
-		{
-			if (File.Exists(tempFile))
-				File.Delete(tempFile);
-		}
-
-
-		IEnumerable<Task<TileDataset>> generateWork()
-		{
-			var aoi = Region.ToWebMercator().ToPixelPolygon(ZoomLevel);
+			var aoi = webMerc.ToPixelPolygon(ZoomLevel);
 			if (LayerDate)
 			{
 				var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
 
 				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
 				ReportProgress(0);
-				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, layer)));
+				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, layer)));
 			}
 			else
 			{
 				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
 				ReportProgress(0);
-				return Region.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDate)));
+				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDate)));
 			}
 		}
 	}
 
-	private async Task<TileDataset> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, DateOnly desiredDate)
+	private async Task<TileDataset<WebMercator>> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, DateOnly desiredDate)
 	{
 		try
 		{
@@ -173,8 +129,8 @@ internal class Download : AoiVerb
 			return new()
 			{
 				Tile = tile,
-				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Center}",
-				Dataset = OpenDataset<WebMercator>(aoi, tile, bytes)
+				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Wgs84Center}",
+				Dataset = OpenDataset(aoi, tile, bytes)
 			};
 		}
 		catch (HttpRequestException)
@@ -183,7 +139,7 @@ internal class Download : AoiVerb
 		return EmptyDataset(tile);
 	}
 
-	private async Task<TileDataset> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, Layer layer)
+	private async Task<TileDataset<WebMercator>> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, Layer layer)
 	{
 		try
 		{
@@ -193,7 +149,7 @@ internal class Download : AoiVerb
 			{
 				Tile = tile,
 				Message = null,
-				Dataset = OpenDataset<WebMercator>(aoi, tile, bytes)
+				Dataset = OpenDataset(aoi, tile, bytes)
 			};
 		}
 		catch (HttpRequestException)
@@ -207,65 +163,22 @@ internal class Download : AoiVerb
 
 	private async Task Run_Keyhole(FileInfo saveFile, DateOnly desiredDate)
 	{
-		Console.Write("Grabbing Image Tiles: ");
-		ReportProgress(0);
-
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var tempFile = Path.GetTempFileName();
-		int tileCount = Region.GetTileCount<KeyholeTile>(ZoomLevel);
-		int numTilesProcessed = 0;
-		int numTilesDownload = 0;
-		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+		var stats = Region.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
 
-		try
+		await Run_Common(saveFile, desiredDate, Region, stats.TileCount, generateWork());
+
+		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
-			using var image = new EarthImage<Wgs1984>(Region, ZoomLevel, tempFile);
+			var aoi = Region.ToPixelPolygon(ZoomLevel);
+			Console.Write("Grabbing Image Tiles: ");
+			ReportProgress(0);
 
-			await foreach (var tds in processor.EnumerateResults(generateWork()))
-				using (tds)
-				{
-					if (tds.Dataset is not null)
-					{
-						image.AddTile(tds.Tile, tds.Dataset);
-						numTilesDownload++;
-					}
-
-					if (tds.Message is not null)
-						Console.Error.WriteLine($"\r\n{tds.Message}");
-
-					ReportProgress(++numTilesProcessed / (double)tileCount);
-				}
-
-			ReplaceProgress("Done!\r\n");
-			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
-
-			if (numTilesDownload == 0)
-			{
-				if (saveFile.Exists)
-					saveFile.Delete();
-				return;
-			}
-
-			Console.Write("Saving Image: ");
-			Progress = 0;
-
-			image.Saving += Image_Saving;
-			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
-			ReplaceProgress("Done!\r\n");
+			return Region.GetTiles<KeyholeTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDate)));
 		}
-		finally
-		{
-			if (File.Exists(tempFile))
-				File.Delete(tempFile);
-		}
-
-		IEnumerable<Task<TileDataset>> generateWork()
-			=> Region
-			.GetTiles<KeyholeTile>(ZoomLevel)
-			.Select(t => Task.Run(() => DownloadTile(Region.ToPixelPolygon(ZoomLevel), root, t, desiredDate)));
 	}
 
-	private async Task<TileDataset> DownloadTile(PixelPointPoly aoi, DbRoot root, KeyholeTile tile, DateOnly desiredDate)
+	private async Task<TileDataset<Wgs1984>> DownloadTile(PixelPointPoly aoi, DbRoot root, KeyholeTile tile, DateOnly desiredDate)
 	{
 		if (await root.GetNodeAsync(tile) is not TileNode node)
 			return EmptyDataset(tile);
@@ -281,8 +194,8 @@ internal class Download : AoiVerb
 				return new()
 				{
 					Tile = tile,
-					Dataset = OpenDataset<Wgs1984>(aoi, tile, imageBts),
-					Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Center}"
+					Dataset = OpenDataset(aoi, tile, imageBts),
+					Message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}"
 				};
 			}
 			catch (HttpRequestException)
@@ -296,7 +209,57 @@ internal class Download : AoiVerb
 
 	#region Common
 
-	private Dataset OpenDataset<T>(PixelPointPoly aoi, ITile tile, byte[] jpgBytes) where T : ICoordinate<T>
+	private async Task Run_Common<T>(FileInfo saveFile, DateOnly desiredDate, GeoPolygon<T> region, double tileCount, IEnumerable<Task<TileDataset<T>>> generator)
+		where T : IGeoCoordinate<T>
+	{
+		var tempFile = Path.GetTempFileName();
+		int numTilesProcessed = 0;
+		int numTilesDownload = 0;
+		var processor = new ParallelProcessor<TileDataset<T>>(ConcurrentDownload);
+
+		try
+		{
+			using var image = new EarthImage<T>(region, ZoomLevel, tempFile);
+			using Dataset? missingTile = CreateMissingTile();
+
+			await foreach (var tds in processor.EnumerateResults(generator))
+				using (tds)
+				{
+					image.AddTile(tds.Tile, tds.Dataset ?? missingTile);
+					numTilesDownload++;
+
+					if (tds.Message is not null)
+						Console.Error.WriteLine($"\r\n{tds.Message}");
+
+					ReportProgress(++numTilesProcessed / tileCount);
+				}
+
+			ReplaceProgress("Done!\r\n");
+			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+
+			if (numTilesDownload == 0)
+			{
+				if (saveFile.Exists)
+					saveFile.Delete();
+				return;
+			}
+
+			Console.Write("Saving Image: ");
+			Progress = 0;
+
+			image.Saving += Image_Saving;
+			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
+			ReplaceProgress("Done!\r\n");
+		}
+		finally
+		{
+			if (File.Exists(tempFile))
+				File.Delete(tempFile);
+		}
+	}
+
+	private Dataset OpenDataset<TTile, T>(PixelPointPoly aoi, ITile<TTile, T> tile, byte[] jpgBytes)
+		where T : IGeoCoordinate<T>
 	{
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
 		string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
@@ -306,12 +269,12 @@ internal class Download : AoiVerb
 			Gdal.FileFromMemBuffer(memFile, jpgBytes);
 
 			var image =  Gdal.OpenEx(memFile, (uint)openOptions, ["JPEG"], null, []);
-
-			if (aoi.TileOnBroder(tile))
+			
+			if (aoi.PolygonIntersects(tile.GetGeoPolygon().ToPixelPolygon(tile.Level)))
 			{
 				//Blank all pixels outside of the region
 
-				var gpx = tile.GetTopLeftPixel<T>();
+				var gpx = tile.GetTopLeftPixel();
 
 				var tileImage = new TileImage(image);
 				var zeroPixel = Enumerable.Repeat((byte)0, image.RasterCount).ToArray();
@@ -340,15 +303,36 @@ internal class Download : AoiVerb
 		ReportProgress(e.Progress);
 	}
 
-	private static TileDataset EmptyDataset(ITile tile) => new()
+	private static Dataset CreateMissingTile()
+	{
+		//The jpeg driver fails when a large number of empty tiles are written.
+		//Empirically determined that three, non-zero pixels on the top and left
+		//side of each tile is enough to successfully compress the jpeg.
+		const int TILE_SIZE = 256;
+		const int NUM_BANDS = 3;
+		int pixelSpacing = (int)Math.Ceiling(TILE_SIZE / 3d);
+
+		using var memDriver = Gdal.GetDriverByName("MEM");
+		using var emptyDataset = memDriver.Create("", TILE_SIZE, TILE_SIZE, NUM_BANDS, DataType.GDT_Byte, null);
+		var image = new TileImage(emptyDataset);
+		byte[] color = [0, 0, 1];
+		for (int i = 0; i < TILE_SIZE; i += pixelSpacing)
+		{
+			image.SetPixel(0, i, color);
+			image.SetPixel(i, 0, color);
+		}
+		return image.ToDataset();
+	}
+
+	private static TileDataset<T> EmptyDataset<T>(ITile<T> tile) where T : IGeoCoordinate<T> => new()
 	{
 		Tile = tile,
-		Message = $"No imagery available for tile at {tile.Center}"
+		Message = $"No imagery available for tile at {tile.Wgs84Center}"
 	};
 
-	private class TileDataset : IDisposable
+	private class TileDataset<T> : IDisposable where T : IGeoCoordinate<T>
 	{
-		public required ITile Tile { get; init; }
+		public required ITile<T> Tile { get; init; }
 		public Dataset? Dataset { get; init; }
 		public required string? Message { get; init; }
 

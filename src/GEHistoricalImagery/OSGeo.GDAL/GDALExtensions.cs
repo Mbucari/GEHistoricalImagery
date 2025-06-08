@@ -36,7 +36,7 @@ internal static class GDALExtensions
 		dataset.SetGeoTransform(transform.Transformation);
 	}
 
-	public record ShapePolygon(Wgs1984Poly Polygon, Dictionary<string, string> Features);
+	public record ShapePolygon(GeoPolygon<Wgs1984> Polygon, Dictionary<string, string> Features);
 	public static IEnumerable<ShapePolygon> GetPolygons(this DataSource shp)
 	{
 		if (shp.GetLayerCount() == 0)
@@ -89,7 +89,7 @@ internal static class GDALExtensions
 					Array.Resize(ref points, points.Length - 1);
 				}
 
-				yield return new ShapePolygon(new Wgs1984Poly(points), features);
+				yield return new ShapePolygon(new GeoPolygon<Wgs1984>(points), features);
 			}
 		}
 	}

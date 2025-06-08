@@ -2,6 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using LibEsri;
 using LibGoogleEarth;
+using LibMapCommon;
 using LibMapCommon.Geometry;
 using System.Text;
 
@@ -54,17 +55,14 @@ internal class Availability : AoiVerb
 		new OptionChooser<EsriRegion>().WaitForOptions(all);
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, Wgs1984Poly aoi, int zoomLevel)
+	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoPolygon<Wgs1984> aoi, int zoomLevel)
 	{
 		int count = 0;
 		int numTiles = wayBack.Layers.Count;
 		ReportProgress(0);
 
 		var mercAoi = aoi.ToWebMercator();
-		var rect = aoi.GetBoundingRectangle();
-		var ll = rect.LowerLeft.GetTile<EsriTile>(ZoomLevel);
-		var ur = rect.UpperRight.GetTile<EsriTile>(ZoomLevel);
-		rect.GetNumRowsAndColumns<EsriTile>(ZoomLevel, out int nRows, out int nColumns);
+		var stats = mercAoi.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
 
 		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
 		List<EsriRegion> allLayers = new();
@@ -100,12 +98,12 @@ internal class Availability : AoiVerb
 
 			for (int i = 0; i < regions.Length; i++)
 			{
-				var availability = new RegionAvailability(regions[i].Date, nRows, nColumns);
+				var availability = new RegionAvailability(regions[i].Date, stats.NumRows, stats.NumColumns);
 
-				foreach (var tile in Region.GetTiles<EsriTile>(ZoomLevel))
+				foreach (var tile in mercAoi.GetTiles<EsriTile>(ZoomLevel))
 				{
-					var cIndex = tile.Column - ll.Column;
-					var rIndex = tile.Row - ur.Row;
+					var cIndex = tile.Column - stats.MinColumn;
+					var rIndex = tile.Row - stats.MinRow;
 					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
 				}
 
@@ -165,19 +163,13 @@ internal class Availability : AoiVerb
 		new OptionChooser<RegionAvailability>().WaitForOptions(all);
 	}
 
-	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, Wgs1984Poly reg, int zoomLevel)
+	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoPolygon<Wgs1984> reg, int zoomLevel)
 	{
 		int count = 0;
-		int numTiles = reg.GetTileCount<KeyholeTile>(zoomLevel);
+		var stats = reg.GetPolygonalRegionStats<KeyholeTile>(zoomLevel);
 		ReportProgress(0);
 
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
-
-		var aoi = reg.GetBoundingRectangle();
-
-		aoi.GetNumRowsAndColumns<KeyholeTile>(zoomLevel, out int nRows, out int nColumns);
-		var ll = aoi.LowerLeft.GetTile<KeyholeTile>(ZoomLevel);
-		var ur = aoi.UpperRight.GetTile<KeyholeTile>(ZoomLevel);
 
 		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();
 		HashSet<Tuple<int, int>> uniquePoints = new();
@@ -188,19 +180,19 @@ internal class Availability : AoiVerb
 			{
 				if (!uniqueDates.ContainsKey(d.Date))
 				{
-					uniqueDates.Add(d.Date, new RegionAvailability(d.Date, nRows, nColumns));
+					uniqueDates.Add(d.Date, new RegionAvailability(d.Date, stats.NumRows, stats.NumColumns));
 				}
 
 				var region = uniqueDates[d.Date];
 
-				var cIndex = d.Tile.Column - ll.Column;
-				var rIndex = ur.Row - d.Tile.Row;
+				var cIndex = d.Tile.Column - stats.MinColumn;
+				var rIndex = stats.MaxRow - d.Tile.Row;
 
 				uniquePoints.Add(new Tuple<int, int>(rIndex, cIndex));
 				region[rIndex, cIndex] = await root.GetNodeAsync(d.Tile) is TileNode;
 			}
 
-			ReportProgress(++count / (double)numTiles);
+			ReportProgress(++count / (double)stats.TileCount);
 		}
 
 		//Go back and mark unavailable tiles within the region of interest

@@ -7,7 +7,7 @@ namespace LibEsri;
 
 public static class EsriExtensions
 {
-	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer, WebMercatorPoly region)
+	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer, GeoPolygon<WebMercator> region)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -17,7 +17,7 @@ public static class EsriExtensions
 			if (f?["attributes"]?["SRC_DATE2"]?.GetValue<long>() is not long dateNum)
 				continue;
 
-			if (f?["geometry"]?["rings"]?.AsArray().ToRings().ToArray() is not WebMercatorPoly[] rings)
+			if (f?["geometry"]?["rings"]?.AsArray().ToRings().ToArray() is not GeoPolygon<WebMercator>[] rings)
 				continue;
 
 			var dateOnly = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(dateNum).DateTime);
@@ -25,7 +25,7 @@ public static class EsriExtensions
 		}
 	}
 
-	private static IEnumerable<WebMercatorPoly> ToRings(this JsonArray? jsonArray)
+	private static IEnumerable<GeoPolygon<WebMercator>> ToRings(this JsonArray? jsonArray)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -35,7 +35,7 @@ public static class EsriExtensions
 			var coordinates = r.ToCoordinates();
 
 			if (coordinates.Any())
-				yield return new WebMercatorPoly(coordinates);
+				yield return new GeoPolygon<WebMercator>(coordinates.ToArray());
 		}
 	}
 

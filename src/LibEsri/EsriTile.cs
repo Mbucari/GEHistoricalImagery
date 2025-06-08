@@ -1,9 +1,11 @@
 ﻿using LibMapCommon;
+using LibMapCommon.Geometry;
 
 namespace LibEsri;
 
-public class EsriTile : ITile<EsriTile>
+public class EsriTile : ITile<EsriTile, WebMercator>
 {
+	
 	public int Level { get; }
 	/// <summary> The number of <see cref="EsriTile"/> rows from the top-most (north-most) edge of the map. </summary>
 	public int Row { get; }
@@ -28,11 +30,13 @@ public class EsriTile : ITile<EsriTile>
 		return new Wgs1984(lat_deg, lon_deg);
 	}
 
-	public Wgs1984 LowerLeft => ToCoordinate(Column, Row + 1);
-	public Wgs1984 LowerRight => ToCoordinate(Column + 1, Row + 1);
-	public Wgs1984 UpperLeft => ToCoordinate(Column, Row);
-	public Wgs1984 UpperRight => ToCoordinate(Column + 1, Row);
-	public Wgs1984 Center => ToCoordinate(Column + 0.5, Row + 0.5);
+	public Wgs1984 Wgs84Center => ToCoordinate(Column + 0.5, Row + 0.5);
+	public WebMercator Center => Wgs84Center.ToWebMercator();
+	public WebMercator LowerLeft => ToCoordinate(Column, Row + 1).ToWebMercator();
+	public WebMercator LowerRight => ToCoordinate(Column + 1, Row + 1).ToWebMercator();
+	public WebMercator UpperLeft => ToCoordinate(Column, Row).ToWebMercator();
+	public WebMercator UpperRight => ToCoordinate(Column + 1, Row).ToWebMercator();
+	public GeoPolygon<WebMercator> GetGeoPolygon() => new GeoPolygon<WebMercator>([LowerLeft, UpperLeft, UpperRight, LowerRight]);
 
 	/// <summary>
 	/// Gets the number of columns between teo <see cref="EsriTile"/>s. May span 180/-180
@@ -49,22 +53,14 @@ public class EsriTile : ITile<EsriTile>
 		return Util.Mod(rightTile.Column - leftTile.Column, 1 << rightTile.Level);
 	}
 
-	public static EsriTile GetTile(Wgs1984 coordinate, int level)
+	public static EsriTile GetTile(WebMercator webCoord, int level)
 	{
 		var size = Util.ValidateLevel(level, MaxLevel);
 
-		var webCoord = coordinate.ToWebMercator();
 		var column = (0.5 + webCoord.X / WebMercator.Equator) * size;
 		var row = (0.5 - webCoord.Y / WebMercator.Equator) * size;
 
 		return new EsriTile((int)row, (int)column, level);
-	}
-
-	public static EsriTile GetMinimumCorner(Wgs1984 c1, Wgs1984 c2, int level)
-	{
-		var topMost = Math.Max(c1.Latitude, c2.Latitude);
-		var leftMost = Math.Min(c1.Longitude, c2.Longitude);
-		return GetTile(new Wgs1984(topMost, leftMost), level);
 	}
 
 	public static EsriTile Create(int row, int col, int level)

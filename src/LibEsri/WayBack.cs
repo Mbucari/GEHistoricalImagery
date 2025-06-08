@@ -50,7 +50,7 @@ public class WayBack
 		return layer.Date;
 	}
 
-	public async Task<DatedRegion[]> GetDateRegionsAsync(Layer layer, WebMercatorPoly region, int zoom)
+	public async Task<DatedRegion[]> GetDateRegionsAsync(Layer layer, GeoPolygon<WebMercator> region, int zoom)
 	{
 		var metadataUrl = layer.GetEnvelopeQueryUrl(region, zoom);
 

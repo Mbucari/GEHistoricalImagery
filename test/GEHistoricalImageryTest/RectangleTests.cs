@@ -1,5 +1,6 @@
 ﻿using LibGoogleEarth;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 
 namespace GEHistoricalImageryTest;
 
@@ -12,31 +13,42 @@ public class RectangleTests
 		var ll = new Wgs1984(-90, 0);
 		var ur = new Wgs1984(90, -0.0000001);
 
-		var rec = new Rectangle(ll, ur);
-		for (int i = 1; i <= KeyholeTile.MaxLevel; i++)
+		var rec = new GeoPolygon<Wgs1984>(new Wgs1984(-89.99999999, 90), new Wgs1984(89.99999999, 90), new Wgs1984(89.99999999, -90.0000001), new Wgs1984(-89.99999999, -90.0000001));
+		for (int i = 2; i <= KeyholeTile.MaxLevel; i++)
 		{
 			var numTiles = 1 << i;
-			rec.GetNumRowsAndColumns<KeyholeTile>(i, out var nRows, out var nColumns);
-			Assert.AreEqual(numTiles, nColumns);
-			Assert.AreEqual(numTiles / 2 + 1, nRows);
+			var stats = rec.GetRectangularRegionStats<KeyholeTile>(i);
+			Assert.AreEqual(numTiles / 2, stats.NumColumns);
+			Assert.AreEqual(numTiles / 2, stats.NumRows);
 		}
 	}
 
 	[DataTestMethod]
 	//Valid web mercater coordinates, but invalid geographic coordinates
-	[DataRow(0, 0, 180, 0)]
-	[DataRow(180, 0, 0, 0)]
-	[DataRow(0, 0, 90 + double.Epsilon, 0)]
-	[DataRow(90 + double.Epsilon, 0, 0, 0)]
+	[DataRow(0, 0, 180, 1)]
+	[DataRow(180, 0, 0, 1)]
+	[DataRow(0, 0, 90 + 0.000000001, 1)]
+	[DataRow(90 + 0.000000001, 0, 0, 1)]
+	public void InvalidCoordinates(double ll_lat, double ll_long, double ur_lat, double ur_long)
+	{
+		var ll = new Wgs1984(ll_lat, ll_long);
+		var ul = new Wgs1984(ur_lat, ll_long);
+		var ur = new Wgs1984(ur_lat, ur_long);
+		var lr = new Wgs1984(ll_lat, ur_long);
+		Assert.IsFalse(ll.IsValidGeographicCoordinate && ul.IsValidGeographicCoordinate && ur.IsValidGeographicCoordinate && lr.IsValidGeographicCoordinate);
+	}
+
+	[DataTestMethod]
 	//Invalid regions
 	[DataRow(0, 0, 0, 0)] // zero area
-	[DataRow(0, -10, 0, 10)] //zero height
-	[DataRow(-10, 0, 10, 0)] //zero width
-	[DataRow(1, -10, 0, 10)] //negative height (negative width is allowed for wrapping around 180/-180)
+	[DataRow(0, -10, 0, 9)] //zero height
+	[DataRow(-10, 0, 9, 0)] //zero width
 	public void InvalidRectangles(double ll_lat, double ll_long, double ur_lat, double ur_long)
 	{
 		var ll = new Wgs1984(ll_lat, ll_long);
+		var ul = new Wgs1984(ur_lat, ll_long);
 		var ur = new Wgs1984(ur_lat, ur_long);
-		Assert.ThrowsException<ArgumentException>(() => new Rectangle(ll, ur));
+		var lr = new Wgs1984(ll_lat, ur_long);
+		Assert.ThrowsException<InvalidOperationException>(() => new GeoPolygon<Wgs1984>(ll, ul, ur, lr));
 	}
 }

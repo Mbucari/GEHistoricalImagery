@@ -5,7 +5,7 @@ using OSGeo.OSR;
 
 namespace GEHistoricalImagery;
 
-internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
+internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 {
 	public const int TILE_SZ = 256;
 	protected int Width { get; init; }
@@ -29,21 +29,17 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 
-	public EarthImage(Wgs1984Poly region, int level, string? cacheFile = null)
+	public EarthImage(GeoPolygon<T> region, int level, string? cacheFile = null)
 	{
-		var rectangle = region.GetBoundingRectangle();
 		long globalPixels = TILE_SZ * (1L << level);
 
-		var upperLeft = rectangle.GetUpperLeft<T>();
+		var pixels = region.ToPixelPolygon(level);
 
-		var pxUl = upperLeft.GetGlobalPixelCoordinate(level);
-		var pxLr = rectangle.GetLowerRight<T>().GetGlobalPixelCoordinate(level);
+		RasterX = pixels.LeftMostX.ToRoundedInt();
+		RasterY = pixels.MinY.ToRoundedInt();
 
-		RasterX = pxUl.X.ToRoundedInt();
-		RasterY = pxUl.Y.ToRoundedInt();
-
-		Width = (pxLr.X - pxUl.X).ToRoundedInt();
-		Height = (pxLr.Y - pxUl.Y).ToRoundedInt();
+		Width = (pixels.RightMostX - pixels.LeftMostX).ToRoundedInt();
+		Height = (pixels.MaxY - pixels.MinY).ToRoundedInt();
 		//Allow wrapping around 180/-180
 		if (Width < 0)
 			Width = (int)(Width + globalPixels);
@@ -53,35 +49,35 @@ internal class EarthImage<T> : IDisposable where T : ICoordinate<T>
 
 		var geoTransform = new GeoTransform
 		{
-			UpperLeft_X = upperLeft.X,
-			UpperLeft_Y = upperLeft.Y,
+			UpperLeft_X = region.LeftMostX,
+			UpperLeft_Y = region.MaxY,
 			PixelWidth = T.Equator / globalPixels,
 			PixelHeight = -T.Equator / globalPixels
 		};
 
-		TempDataset = CreateEmptyDataset(cacheFile);
+		TempDataset = CreateEmptyDataset(Width, Height, cacheFile);
 		TempDataset.SetSpatialRef(sourceSr);
 		TempDataset.SetGeoTransform(geoTransform);
 	}
 
-	protected Dataset CreateEmptyDataset(string? fileName)
+	public static Dataset CreateEmptyDataset(int width, int height, string? fileName)
 	{
 		if (string.IsNullOrWhiteSpace(fileName))
 		{
 			using var tifDriver = Gdal.GetDriverByName("MEM");
-			return tifDriver.Create("", Width, Height, 3, DataType.GDT_Byte, null);
+			return tifDriver.Create("", width, height, 3, DataType.GDT_Byte, null);
 		}
 		else
 		{
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			return tifDriver.Create(fileName, Width, Height, 3, DataType.GDT_Byte, null);
+			return tifDriver.Create(fileName, width, height, 3, DataType.GDT_Byte, null);
 		}
 	}
 
-	public void AddTile(ITile tile, Dataset image)
+	public void AddTile(ITile<T> tile, Dataset image)
 	{
 		//Tile's global pixel coordinates of the tile's top-left corner.
-		var gpx = tile.GetTopLeftPixel<T>();
+		var gpx = tile.GetTopLeftPixel();
 
 		int gpx_x = (int)gpx.X;
 		int gpx_y = (int)gpx.Y;

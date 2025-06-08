@@ -5,18 +5,16 @@ namespace LibMapCommon;
 /// <summary>
 /// A Web Mercator coordinate
 /// </summary>
-public readonly struct WebMercator : IEquatable<WebMercator>, ICoordinate<WebMercator>
+public readonly struct WebMercator : IEquatable<WebMercator>, IGeoCoordinate<WebMercator>
 {
 	public static double Equator => 40075016.68557849;
 	public static int EpsgNumber => 3857;
 
-	private readonly double _Y;
-	private readonly double _X;
-
 	/// <summary> The X coordinate (meters)</summary>
-	public double X => _X;
+	public double X { get; }
 	/// <summary> The Y coordinate (meters)</summary>
-	public double Y => _Y;
+	public double Y { get; }
+	public static WebMercator Create(double x, double y) => new WebMercator(x, y);
 
 	/// <summary>
 	/// Initialize a new <see cref="WebMercator"/> instance.
@@ -29,8 +27,8 @@ public readonly struct WebMercator : IEquatable<WebMercator>, ICoordinate<WebMer
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(double.Abs(x), Equator / 2, nameof(x));
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(double.Abs(y), Equator / 2, nameof(y));
 
-		_X = x;
-		_Y = y;
+		X = x;
+		Y = y;
 	}
 
 	/// <summary>
@@ -48,9 +46,9 @@ public readonly struct WebMercator : IEquatable<WebMercator>, ICoordinate<WebMer
 	public bool Equals(WebMercator other)
 		=> other.X == X && other.Y == Y;
 	public override int GetHashCode()
-		=> HashCode.Combine(_X, _Y);
+		=> HashCode.Combine(X, Y);
 	public override bool Equals([NotNullWhen(true)] object? obj)
 		=> obj is WebMercator other && Equals(other);
-
-	public static WebMercator FromWgs84(Wgs1984 wgs1984) => wgs1984.ToWebMercator();
+	public static bool operator ==(WebMercator left, WebMercator right) => left.Equals(right);
+	public static bool operator !=(WebMercator left, WebMercator right) => !left.Equals(right);
 }

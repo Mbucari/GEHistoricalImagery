@@ -4,10 +4,8 @@ namespace LibMapCommon;
 
 public readonly struct PixelPoint : IEquatable<PixelPoint>, ICoordinate
 {
-	private readonly double _X, _Y;
-	public double X => _X;
-
-	public double Y => _Y;
+	public double X { get; }
+	public double Y { get; }
 
 	/// <summary>
 	/// Initialize a new <see cref="PixelPoint"/> instance.
@@ -18,17 +16,19 @@ public readonly struct PixelPoint : IEquatable<PixelPoint>, ICoordinate
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(level, nameof(level));
 		var equator = 256 << level;
-		ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(double.Abs(x), equator, nameof(x));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(double.Abs(x), equator, nameof(x));
 		ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(double.Abs(y), equator, nameof(y));
 
-		_X = x;
-		_Y = y;
+		X = x;
+		Y = y;
 	}
 
 	public override int GetHashCode()
-		=> HashCode.Combine(_X, _Y);
+		=> HashCode.Combine(X, Y);
 	public bool Equals(PixelPoint other)
 		=> other.X == X && other.Y == Y;
 	public override bool Equals([NotNullWhen(true)] object? obj)
 		=> obj is PixelPoint other && Equals(other);
+	public static bool operator ==(PixelPoint left, PixelPoint right) => left.Equals(right);
+	public static bool operator !=(PixelPoint left, PixelPoint right) => !left.Equals(right);
 }

@@ -7,35 +7,21 @@ namespace LibMapCommon;
 /// A WGS 1984 geographic coordinate
 /// </summary>
 [TypeConverter(typeof(Wgs1984TypeConverter))]
-public readonly struct Wgs1984 : IEquatable<Wgs1984>, ICoordinate<Wgs1984>
+public readonly struct Wgs1984 : IEquatable<Wgs1984>, IGeoCoordinate<Wgs1984>
 {
 	public static double Equator => 360d;
 	public static int EpsgNumber => 4326;
 
-	private readonly double _Y;
-	private readonly double _X;
-
-	public double X => _X;
-	public double Y => _Y;
+	public double X { get; }
+	public double Y { get; }
 
 	/// <summary> The <see cref="Wgs1984"/>'s longitude </summary>
-	public double Longitude => _X;
+	public double Longitude => X;
 	/// <summary> The <see cref="Wgs1984"/>'s latitude </summary>
-	public double Latitude => _Y;
+	public double Latitude => Y;
 	/// <summary> Indicates whether this instance is a valid geographic coordinate </summary>
 	public readonly bool IsValidGeographicCoordinate => Math.Abs(Latitude) <= 90 && Math.Abs(Longitude) <= 180;
-
-
-	/// <summary>
-	/// Gets the <see cref="ITile"/> containing this <see cref="Wgs1984"/> at a specified zoom level.
-	/// </summary>
-	/// <typeparam name="T">An <see cref="ITile"/> type</typeparam>
-	/// <param name="level">The <see cref="ITile"/>'s zoom level</param>
-	/// <returns></returns>
-	public T GetTile<T>(int level) where T : ITile<T>
-	{
-		return T.GetTile(this, level);
-	}
+	public static Wgs1984 Create(double x, double y) => new Wgs1984(y, x);
 
 	/// <summary>
 	/// Initialize a new <see cref="Wgs1984"/> instance.
@@ -47,8 +33,8 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, ICoordinate<Wgs1984>
 	{
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(latitude), 180, nameof(latitude));
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(longitude), 180, nameof(longitude));
-		_Y = latitude;
-		_X = longitude;
+		Y = latitude;
+		X = longitude;
 	}
 
 	public override string ToString() => ToString(CoordinateFormat.DecimalDegrees);
@@ -103,11 +89,11 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, ICoordinate<Wgs1984>
 	public bool Equals(Wgs1984 other)
 		=> Latitude == other.Latitude && Longitude == other.Longitude;
 	public override int GetHashCode()
-		=> HashCode.Combine(_X, _Y);
+		=> HashCode.Combine(X, Y);
 	public override bool Equals([NotNullWhen(true)] object? obj)
 		=> obj is Wgs1984 other && Equals(other);
-
-	public static Wgs1984 FromWgs84(Wgs1984 wgs1984) => wgs1984;
+	public static bool operator ==(Wgs1984 left, Wgs1984 right) => left.Equals(right);
+	public static bool operator !=(Wgs1984 left, Wgs1984 right) => !left.Equals(right);
 }
 
 public enum CoordinateFormat

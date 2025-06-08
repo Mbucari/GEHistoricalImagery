@@ -32,19 +32,19 @@ internal class Info : OptionsBase
 		int startLevel = ZoomLevel ?? 1;
 		int endLevel = ZoomLevel ?? 23;
 
-		var task = Provider is Provider.Wayback ? Run_Esri(Coordinate.Value, startLevel, endLevel)
+		var task = Provider is Provider.Wayback ? Run_Esri(Coordinate.Value.ToWebMercator(), startLevel, endLevel)
 			: Run_Keyhole(Coordinate.Value, startLevel, endLevel);
 
 		await task;
 	}
 
-	private async Task Run_Esri(Wgs1984 coordinate, int startLevel, int endLevel)
+	private async Task Run_Esri(WebMercator coordinate, int startLevel, int endLevel)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
 		for (int i = startLevel; i <= endLevel; i++)
 		{
-			var tile = coordinate.GetTile<EsriTile>(i);
+			var tile = EsriTile.GetTile(coordinate, i);
 
 			Console.WriteLine($"  Level = {i}");
 			int count = 0;
@@ -68,7 +68,7 @@ internal class Info : OptionsBase
 
 		for (int i = startLevel; i <= endLevel; i++)
 		{
-			var tile = coordinate.GetTile<KeyholeTile>(i);
+			var tile = KeyholeTile.GetTile(coordinate, i);
 			var node = await root.GetNodeAsync(tile);
 
 			Console.WriteLine($"  Level = {i}, Path = {tile.Path}");

@@ -93,7 +93,7 @@ public abstract class Polygon<TPoly, TCoordinate>
 	}
 
 	private const int roundingDigits = 15;
-	
+
 	/// <summary>
 	/// Indicates whether any edges of the supplied polygon intersect any edges of this polygon
 	/// </summary>

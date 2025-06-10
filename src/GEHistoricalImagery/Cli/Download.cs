@@ -219,7 +219,7 @@ internal class Download : AoiVerb
 		KeyholeTile gotTile = tile;
 		TileNode? node;
 
-		while((node = await root.GetNodeAsync(gotTile)) is null)
+		while ((node = await root.GetNodeAsync(gotTile)) is null)
 		{
 			if (tile.Level - gotTile.Level > 1 || gotTile.Level < 3)
 				break;
@@ -239,7 +239,7 @@ internal class Download : AoiVerb
 
 				var dataset = OpenDataset(imageBts);
 				var message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
-				
+
 				if (gotTile.Level != tile.Level)
 				{
 					dataset = ResizeTile(gotTile, dataset, tile, false);
@@ -370,7 +370,7 @@ internal class Download : AoiVerb
 			Gdal.Unlink(memFile);
 		}
 	}
-	
+
 
 	private Dataset TrimDataset<TTile, T>(Dataset image, PixelPointPoly aoi, ITile<TTile, T> tile)
 		where T : IGeoCoordinate<T>

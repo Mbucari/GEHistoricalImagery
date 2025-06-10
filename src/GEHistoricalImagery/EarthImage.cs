@@ -159,7 +159,7 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 			if (!scaleFirst)
 				geoTransform.Scale(scale);
 
-            saved.SetGeoTransform(geoTransform);
+			saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();
 
 			var worldFileExtension = Path.GetExtension(path) switch
@@ -173,14 +173,14 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 			};
 
 			var worldFile = Path.ChangeExtension(path, worldFileExtension);
-            using var sw = new StreamWriter(worldFile);
-            sw.WriteLine(geoTransform.PixelWidth);
-            sw.WriteLine(geoTransform.ColumnRotation);
-            sw.WriteLine(geoTransform.RowRotation);
-            sw.WriteLine(geoTransform.PixelHeight);
-            sw.WriteLine(geoTransform.UpperLeft_X);
-            sw.WriteLine(geoTransform.UpperLeft_Y);
-        }		
+			using var sw = new StreamWriter(worldFile);
+			sw.WriteLine(geoTransform.PixelWidth);
+			sw.WriteLine(geoTransform.ColumnRotation);
+			sw.WriteLine(geoTransform.RowRotation);
+			sw.WriteLine(geoTransform.PixelHeight);
+			sw.WriteLine(geoTransform.UpperLeft_X);
+			sw.WriteLine(geoTransform.UpperLeft_Y);
+		}
 
 		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
 		{

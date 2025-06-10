@@ -1,5 +1,5 @@
-﻿using LibMapCommon.Geometry;
-using LibMapCommon;
+﻿using LibMapCommon;
+using LibMapCommon.Geometry;
 using OSGeo.OGR;
 using OSGeo.OSR;
 

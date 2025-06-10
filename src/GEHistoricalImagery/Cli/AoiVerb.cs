@@ -31,7 +31,7 @@ internal abstract class AoiVerb : OptionsBase
 
 		if (RegionCoordinates?.Count > 0)
 		{
-			var converter = TypeDescriptor.GetConverter(typeof(Wgs1984));
+			var converter = new Wgs1984TypeConverter();
 			var coords = new Wgs1984[RegionCoordinates.Count];
 			for (int i = 0; i < RegionCoordinates.Count; i++)
 			{

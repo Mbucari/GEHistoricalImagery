@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using Google.Protobuf.WellKnownTypes;
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;

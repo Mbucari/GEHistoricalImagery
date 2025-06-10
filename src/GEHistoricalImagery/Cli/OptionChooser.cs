@@ -2,8 +2,8 @@
 {
 	public interface IDatedOption
 	{
-		public DateOnly Date { get; }
-		public void DrawOption();
+		DateOnly Date { get; }
+		void DrawOption();
 	}
 
 	internal class OptionChooser<T> where T : IDatedOption

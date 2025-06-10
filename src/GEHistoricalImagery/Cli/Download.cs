@@ -1,11 +1,9 @@
 ﻿using CommandLine;
-using Google.Protobuf.WellKnownTypes;
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 using OSGeo.GDAL;
-using System.Data;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -265,8 +263,8 @@ internal class Download : AoiVerb
 
 	#region Common
 
-	const int TILE_SIZE = 256;
-	const int NUM_BANDS = 3;
+	private const int TILE_SIZE = 256;
+	private const int NUM_BANDS = 3;
 	private static Dataset ResizeTile(ITile gotTile, Dataset gotDataset, ITile tile)
 	{
 		var dimScale = 1 << (tile.Level - gotTile.Level);

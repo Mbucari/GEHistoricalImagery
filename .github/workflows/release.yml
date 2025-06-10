@@ -36,9 +36,9 @@ jobs:
 
       - name: Release
         id: release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
-          name: GEHistoricalImagery ${{ needs.prerelease.outputs.version }}
+          name: GEHistoricalImagery v${{ needs.prerelease.outputs.version }}
           body: <Put a body here>
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           draft: true

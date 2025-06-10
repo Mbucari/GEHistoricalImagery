@@ -1,8 +1,6 @@
 ﻿using CommandLine;
-using Google.Protobuf.WellKnownTypes;
 using LibMapCommon;
 using LibMapCommon.Geometry;
-using System.ComponentModel;
 
 namespace GEHistoricalImagery.Cli;
 

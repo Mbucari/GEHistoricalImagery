@@ -5,7 +5,6 @@ namespace LibEsri;
 
 public class EsriTile : ITile<EsriTile, WebMercator>
 {
-
 	public int Level { get; }
 	/// <summary> The number of <see cref="EsriTile"/> rows from the top-most (north-most) edge of the map. </summary>
 	public int Row { get; }
@@ -15,27 +14,27 @@ public class EsriTile : ITile<EsriTile, WebMercator>
 
 	public EsriTile(int rowIndex, int colIndex, int level)
 	{
+		Util.ValidateLevel(level, MaxLevel);
 		Level = level;
 		Row = rowIndex;
 		Column = colIndex;
 	}
 
-	private Wgs1984 ToCoordinate(double column, double row)
+	public WebMercator ToCoordinate(double column, double row)
 	{
-		var n = Math.Pow(2, Level);
+		var n = 1 << Level;
+		var x = (column / n - 0.5) * WebMercator.Equator;
+		var y = (0.5 - row / n) * WebMercator.Equator;
 
-		var lon_deg = column / n * 360d - 180d;
-		var lat_rad = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * row / n)));
-		var lat_deg = lat_rad * 180.0 / Math.PI;
-		return new Wgs1984(lat_deg, lon_deg);
+		return new WebMercator(x, y);
 	}
 
-	public Wgs1984 Wgs84Center => ToCoordinate(Column + 0.5, Row + 0.5);
-	public WebMercator Center => Wgs84Center.ToWebMercator();
-	public WebMercator LowerLeft => ToCoordinate(Column, Row + 1).ToWebMercator();
-	public WebMercator LowerRight => ToCoordinate(Column + 1, Row + 1).ToWebMercator();
-	public WebMercator UpperLeft => ToCoordinate(Column, Row).ToWebMercator();
-	public WebMercator UpperRight => ToCoordinate(Column + 1, Row).ToWebMercator();
+	public Wgs1984 Wgs84Center => Center.ToWgs1984();
+	public WebMercator Center => ToCoordinate(Column + 0.5, Row + 0.5);
+	public WebMercator LowerLeft => ToCoordinate(Column, Row + 1);
+	public WebMercator LowerRight => ToCoordinate(Column + 1, Row + 1);
+	public WebMercator UpperLeft => ToCoordinate(Column, Row);
+	public WebMercator UpperRight => ToCoordinate(Column + 1, Row);
 	public GeoPolygon<WebMercator> GetGeoPolygon() => new GeoPolygon<WebMercator>([LowerLeft, UpperLeft, UpperRight, LowerRight]);
 
 	/// <summary>

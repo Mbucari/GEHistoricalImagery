@@ -37,7 +37,7 @@ public readonly struct WebMercator : IEquatable<WebMercator>, IGeoCoordinate<Web
 	public Wgs1984 ToWgs1984()
 	{
 		var longitude = X * 360 / Equator;
-		var latitude = double.Atan(double.Exp(Y * 2 * double.Pi / Equator)) * 360 / double.Pi - 90;
+		var latitude = Math.Atan(Math.Exp(Y * 2 * Math.PI / Equator)) * 360 / Math.PI - 90;
 
 		return new Wgs1984(latitude, longitude);
 	}

@@ -82,7 +82,8 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, IGeoCoordinate<Wgs1984>
 		//https://gis.stackexchange.com/questions/153839/how-to-transform-epsg3857-to-tile-pixel-coordinates-at-zoom-factor-0
 
 		var x = Longitude * WebMercator.Equator / 360;
-		var y = Math.Log(Math.Tan((90 + Latitude) * Math.PI / 360)) / (Math.PI / 180) * WebMercator.Equator / 360;
+		var y = Math.Log(Math.Tan((90 + Latitude) * Math.PI / 360)) * WebMercator.Equator / (Math.PI * 2);
+
 		return new WebMercator(x, y);
 	}
 

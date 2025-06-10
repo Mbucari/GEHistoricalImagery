@@ -124,7 +124,7 @@ internal class Download : AoiVerb
 			EsriTile gotTile = tile;
 			DatedEsriTile? node;
 			while ((node = await wayBack.GetNearestDatedTileAsync(gotTile, desiredDate)) is null &&
-				tile.Level - gotTile.Level <= 2 && gotTile.Level >= 2)
+				tile.Level - gotTile.Level < 2 && gotTile.Level >= 2)
 			{
 				gotTile = EsriTile.Create(gotTile.Row / 2, gotTile.Column / 2, gotTile.Level - 1);
 			}
@@ -138,7 +138,7 @@ internal class Download : AoiVerb
 
 			if (gotTile.Level != tile.Level)
 			{
-				dataset = ResizeTile(gotTile, dataset, tile, true);
+				dataset = ResizeTile(gotTile, dataset, tile);
 				message = $"Substituting level {gotTile.Level} imagery from {DateString(node.CaptureDate)} for tile at {tile.Wgs84Center}";
 			}
 
@@ -161,7 +161,7 @@ internal class Download : AoiVerb
 	{
 		EsriTile gotTile = tile;
 
-		while (tile.Level - gotTile.Level <= 2 && gotTile.Level >= 2)
+		while (tile.Level - gotTile.Level < 2 && gotTile.Level >= 2)
 		{
 			try
 			{
@@ -171,7 +171,7 @@ internal class Download : AoiVerb
 
 				if (gotTile.Level != tile.Level)
 				{
-					dataset = ResizeTile(gotTile, dataset, tile, true);
+					dataset = ResizeTile(gotTile, dataset, tile);
 					message = $"Substituting level {gotTile.Level} imagery from {layer.Title} for tile at {tile.Wgs84Center}";
 				}
 
@@ -219,10 +219,9 @@ internal class Download : AoiVerb
 		KeyholeTile gotTile = tile;
 		TileNode? node;
 
-		while ((node = await root.GetNodeAsync(gotTile)) is null)
+		while ((node = await root.GetNodeAsync(gotTile)) is null &&
+				tile.Level - gotTile.Level < 2 && gotTile.Level >= 2)
 		{
-			if (tile.Level - gotTile.Level > 1 || gotTile.Level < 3)
-				break;
 			gotTile = KeyholeTile.Create(gotTile.Row / 2, gotTile.Column / 2, gotTile.Level - 1);
 		}
 
@@ -242,7 +241,7 @@ internal class Download : AoiVerb
 
 				if (gotTile.Level != tile.Level)
 				{
-					dataset = ResizeTile(gotTile, dataset, tile, false);
+					dataset = ResizeTile(gotTile, dataset, tile);
 					message = $"Substituting level {gotTile.Level} imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
 				}
 
@@ -266,23 +265,20 @@ internal class Download : AoiVerb
 
 	#region Common
 
-	static Dataset ResizeTile(ITile gotTile, Dataset gotDataset, ITile tile, bool rowsIncreaseSouth)
+	const int TILE_SIZE = 256;
+	const int NUM_BANDS = 3;
+	private static Dataset ResizeTile(ITile gotTile, Dataset gotDataset, ITile tile)
 	{
-		const int TILE_SIZE = 256;
-		const int NUM_BANDS = 3;
-
 		var dimScale = 1 << (tile.Level - gotTile.Level);
 		var diffX = tile.Column - gotTile.Column * dimScale;
 		var diffY = tile.Row - gotTile.Row * dimScale;
 
 		int side = TILE_SIZE / dimScale;
 
-		int xstart = diffX * side, xend = xstart + side;
+		int xstart = diffX * side, xend = xstart + side, ystart = diffY * side, yend = ystart + side;
 
-		//Esri tiles' Row number increases to the south, whereas keyhole tiles' Row number increases to the north.
-		(int ystart, int yend)
-			= rowsIncreaseSouth ? (diffY * side, (diffY + 1) * side)
-			: ((dimScale - diffY - 1) * side, (dimScale - diffY) * side);
+		if (!gotTile.RowsIncreaseToSouth)
+			(ystart, yend) = (TILE_SIZE - yend, TILE_SIZE - ystart);
 
 		var image = new TileImage(gotDataset);
 		var enlarged = new TileImage(TILE_SIZE, TILE_SIZE, NUM_BANDS);
@@ -371,8 +367,7 @@ internal class Download : AoiVerb
 		}
 	}
 
-
-	private Dataset TrimDataset<TTile, T>(Dataset image, PixelPointPoly aoi, ITile<TTile, T> tile)
+	private Dataset TrimDataset<T>(Dataset image, PixelPointPoly aoi, ITile<T> tile)
 		where T : IGeoCoordinate<T>
 	{
 		if (aoi.PolygonIntersects(tile.GetGeoPolygon().ToPixelPolygon(tile.Level)))
@@ -407,13 +402,9 @@ internal class Download : AoiVerb
 		//The jpeg driver fails when a large number of empty tiles are written.
 		//Empirically determined that three, non-zero pixels on the top and left
 		//side of each tile is enough to successfully compress the jpeg.
-		const int TILE_SIZE = 256;
-		const int NUM_BANDS = 3;
 		int pixelSpacing = (int)Math.Ceiling(TILE_SIZE / 3d);
 
-		using var memDriver = Gdal.GetDriverByName("MEM");
-		using var emptyDataset = memDriver.Create("", TILE_SIZE, TILE_SIZE, NUM_BANDS, DataType.GDT_Byte, null);
-		var image = new TileImage(emptyDataset);
+		var image = new TileImage(TILE_SIZE, TILE_SIZE, NUM_BANDS);
 		byte[] color = [0, 0, 1];
 		for (int i = 0; i < TILE_SIZE; i += pixelSpacing)
 		{

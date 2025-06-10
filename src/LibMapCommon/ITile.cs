@@ -25,6 +25,10 @@ public interface ITile<TCoordinate> : ITile where TCoordinate : IGeoCoordinate<T
 
 public interface ITile
 {
+	/// <summary>
+	/// If <see cref="RowsIncreaseToSouth"/>, the number of rows from the top-most (north-most) edge of the map.
+	/// Otherwise the number of rows from the bottom-most (south-most) edge of the map.
+	/// </summary>
 	int Row { get; }
 	/// <summary> The number of <see cref="ITile"/> columns from the left-most (west-most) edge of the map. </summary>
 	int Column { get; }
@@ -32,4 +36,8 @@ public interface ITile
 	int Level { get; }
 	/// <summary> coordinate of the center of this <see cref="ITile{TCoordinate}"/> </summary>
 	Wgs1984 Wgs84Center { get; }
+	/// <summary>
+	/// True if the row numbers increase from north to south, false if they increase from south to north. 
+	/// </summary>
+	bool RowsIncreaseToSouth { get; }
 }

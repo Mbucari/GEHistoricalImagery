@@ -9,6 +9,7 @@ public class EsriTile : ITile<EsriTile, WebMercator>
 	/// <summary> The number of <see cref="EsriTile"/> rows from the top-most (north-most) edge of the map. </summary>
 	public int Row { get; }
 	public int Column { get; }
+	public bool RowsIncreaseToSouth => true;
 
 	public const int MaxLevel = 23;
 
@@ -20,7 +21,7 @@ public class EsriTile : ITile<EsriTile, WebMercator>
 		Column = colIndex;
 	}
 
-	public WebMercator ToCoordinate(double column, double row)
+	private WebMercator ToCoordinate(double column, double row)
 	{
 		var n = 1 << Level;
 		var x = (column / n - 0.5) * WebMercator.Equator;

@@ -112,7 +112,6 @@ r0	|  0  |  1  |
 	public Wgs1984 LowerRight => new(RowColToLatLong(Row), RowColToLatLong(Column + 1));
 	public Wgs1984 UpperLeft => new(RowColToLatLong(Row + 1), RowColToLatLong(Column));
 	public Wgs1984 UpperRight => new(RowColToLatLong(Row + 1), RowColToLatLong(Column + 1));
-	public GeoPolygon<Wgs1984> GetGeoPolygon() => new GeoPolygon<Wgs1984>([LowerLeft, UpperLeft, UpperRight, LowerRight]);
 	#endregion
 
 	#region Helpers

@@ -36,7 +36,6 @@ public class EsriTile : ITile<EsriTile, WebMercator>
 	public WebMercator LowerRight => ToCoordinate(Column + 1, Row + 1);
 	public WebMercator UpperLeft => ToCoordinate(Column, Row);
 	public WebMercator UpperRight => ToCoordinate(Column + 1, Row);
-	public GeoPolygon<WebMercator> GetGeoPolygon() => new GeoPolygon<WebMercator>([LowerLeft, UpperLeft, UpperRight, LowerRight]);
 
 	/// <summary>
 	/// Gets the number of columns between teo <see cref="EsriTile"/>s. May span 180/-180

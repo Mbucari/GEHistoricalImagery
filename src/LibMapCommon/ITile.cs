@@ -20,7 +20,9 @@ public interface ITile<TCoordinate> : ITile where TCoordinate : IGeoCoordinate<T
 	TCoordinate UpperRight { get; }
 	/// <summary> coordinate of the center of this <see cref="ITile{TCoordinate}"/> </summary>
 	TCoordinate Center { get; }
-	GeoPolygon<TCoordinate> GetGeoPolygon();
+	/// <summary> Create a GeoPolygon from the <see cref="ITile{TCoordinate}"/>'s four corners </summary>
+	public GeoPolygon<TCoordinate> GetGeoPolygon()
+		=> new(LowerLeft, UpperLeft, UpperRight, LowerRight);
 }
 
 public interface ITile

@@ -55,7 +55,11 @@ public class TileNode
 			.DatedTile;
 
 		if (datesLayer == null)
+		{
+			if (GetDefaultImagery() is DatedTile dt)
+				yield return dt;
 			yield break;
+		}
 
 		foreach (var dt in datesLayer)
 		{
@@ -64,8 +68,13 @@ public class TileNode
 			else if (dt.Provider != 0)
 				yield return new DatedTile(Tile, dt);
 			//When Provider is zero, that tile's imagery is being used as the default and is in the Imagery layer.
-			else if (node?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery)
-				yield return new DatedTile(Tile, dt.DateOnly, regImagery);
+			else if (GetDefaultImagery(dt.DateOnly) is DatedTile datedTile)
+				yield return datedTile;
 		}
 	}
+
+	private DatedTile? GetDefaultImagery(DateOnly imageDate = default)
+		=> (QuadtreeNode as QuadtreeNode)?.Layer ?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery
+		? new DatedTile(Tile, imageDate, regImagery)
+		: null;
 }

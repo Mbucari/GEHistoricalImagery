@@ -235,7 +235,9 @@ internal class Download : AoiVerb
 					continue;
 
 				var dataset = OpenDataset(imageBts);
-				var message = dt.Date == desiredDate ? null : $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
+				var message = dt.Date == desiredDate ? null
+					: dt.Date == default ? $"Substituting default imagery of unknown date for tile at {tile.Wgs84Center}"
+					: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
 
 				if (gotTile.Level != tile.Level)
 				{
@@ -308,6 +310,7 @@ internal class Download : AoiVerb
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset<T>>(ConcurrentDownload);
 
+		using var fileLock = saveFile.Create();
 		try
 		{
 			using var image = new EarthImage<T>(region, ZoomLevel, tempFile);
@@ -316,6 +319,7 @@ internal class Download : AoiVerb
 			await foreach (var tds in processor.EnumerateResults(generator))
 				using (tds)
 				{
+					if (tds.Dataset is null) ;
 					image.AddTile(tds.Tile, tds.Dataset ?? missingTile);
 					numTilesDownload++;
 
@@ -327,6 +331,9 @@ internal class Download : AoiVerb
 
 			ReplaceProgress("Done!\r\n");
 			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+
+			//Release the lock for either saving or deleting
+			fileLock.Dispose();
 
 			if (numTilesDownload == 0)
 			{

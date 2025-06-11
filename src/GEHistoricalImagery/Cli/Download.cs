@@ -235,15 +235,19 @@ internal class Download : AoiVerb
 					continue;
 
 				var dataset = OpenDataset(imageBts);
-				var message = dt.Date == desiredDate ? null
-					: dt.Date == default ? $"Substituting default imagery of unknown date for tile at {tile.Wgs84Center}"
-					: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
+				string? message = null;
 
 				if (gotTile.Level != tile.Level)
 				{
 					dataset = ResizeTile(gotTile, dataset, tile);
-					message = $"Substituting level {gotTile.Level} imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
+					message = dt.Date == default
+						? $"Substituting level {gotTile.Level} default imagery of unknown date for tile at {tile.Wgs84Center}"
+						: $"Substituting level {gotTile.Level} imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
 				}
+				else if (dt.Date != desiredDate)
+					message = dt.Date == default
+						? $"Substituting default imagery of unknown date for tile at {tile.Wgs84Center}"
+						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
 
 				dataset = TrimDataset(dataset, aoi, tile);
 

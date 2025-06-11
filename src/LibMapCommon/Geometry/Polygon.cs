@@ -9,20 +9,26 @@ public abstract class Polygon<TPoly, TCoordinate>
 	public double LeftMostX { get; }
 	public double RightMostX { get; }
 	public IList<Line2> Edges { get; }
+	protected double SmallestX { get; }
+	protected double LargestX { get; }
 
 	protected Polygon(double smallestX, double largestX, params TCoordinate[] coords)
 	{
+		SmallestX = smallestX;
+		LargestX = largestX;
 		Edges = CreateEdges(coords);
-		(LeftMostX, RightMostX, MinY, MaxY) = Validate(smallestX, largestX);
+		(LeftMostX, RightMostX, MinY, MaxY) = Validate();
 	}
 
 	protected Polygon(double smallestX, double largestX, IList<Line2> edges)
 	{
+		SmallestX = smallestX;
+		LargestX = largestX;
 		Edges = edges;
-		(LeftMostX, RightMostX, MinY, MaxY) = Validate(smallestX, largestX);
+		(LeftMostX, RightMostX, MinY, MaxY) = Validate();
 	}
 
-	private (double leftMostX, double rightMostX, double minY, double maxY) Validate(double smallestX, double largestX)
+	private (double leftMostX, double rightMostX, double minY, double maxY) Validate()
 	{
 		if (Edges.Count < 3)
 			throw new ArgumentException("Polygon must contain at least three edges");
@@ -38,9 +44,9 @@ public abstract class Polygon<TPoly, TCoordinate>
 		if (leftMostX == rightMostX)
 			throw new InvalidOperationException("Polygon cannot have zero width");
 
-		if (leftMostX == smallestX && rightMostX == largestX)
+		if (leftMostX == SmallestX && rightMostX == LargestX)
 		{
-			var midpoint = (largestX + smallestX) / 2;
+			var midpoint = (LargestX + SmallestX) / 2;
 			leftMostX = Edges.Select(e => e.Origin.X).Where(x => x >= midpoint).Min();
 			rightMostX = Edges.Select(e => e.Origin.X).Where(x => x < midpoint).Max();
 		}
@@ -48,21 +54,48 @@ public abstract class Polygon<TPoly, TCoordinate>
 		return (leftMostX, rightMostX, minY, maxY);
 	}
 
-	protected virtual IList<Line2> CreateEdges<T>(IList<T> coords) where T : ICoordinate
+	private IList<Line2> CreateEdges<T>(IList<T> coords) where T : ICoordinate
 	{
-		var edges = new Line2[coords.Count];
+		var edges = new List<Line2>(coords.Count);
 		for (int i = 0; i < coords.Count; i++)
 		{
 			var origin = coords[i];
 			var next = coords[(i + 1) % coords.Count];
-			edges[i] = LineFrom(origin, next);
+			var newEdge = LineFrom(origin, next);
+
+			var dx = newEdge.Origin.X + newEdge.Direction.X;
+			if (dx > LargestX || dx < SmallestX)
+			{
+				//line segment crosses the antimeridian. Split into two edges.
+				// First edge goes to the antimeridian and stops.
+				//Second edge picks up at the other side of the antimeridian and continues to original end.
+				var halfEquator = Math.Sign(dx) * LargestX;
+				var distTo180 = halfEquator - origin.X;
+
+				var frac = distTo180 / newEdge.Direction.X;
+
+				var firstPart = new Line2(new(origin.X, origin.Y), new(distTo180, (next.Y - origin.Y) * frac));
+				var secondPart = new Line2(new(-halfEquator, firstPart.Origin.Y + firstPart.Direction.Y), new(newEdge.Direction.X - distTo180, next.Y - origin.Y - firstPart.Direction.Y));
+				edges.Add(firstPart);
+				edges.Add(secondPart);
+			}
+			else
+				edges.Add(newEdge);
 		}
 		return edges;
 	}
 
-	protected virtual Line2 LineFrom<T>(T origin, T destination) where T : ICoordinate
-		=> new Line2(new Vector2(origin.X, origin.Y),
-			new Vector2(destination.X - origin.X, destination.Y - origin.Y));
+	private Line2 LineFrom<T>(T origin, T destination) where T : ICoordinate
+	{
+		var dx = destination.X - origin.X;
+		//Handle crossing the antimeridian
+		if (dx > LargestX)
+			dx -= (LargestX - SmallestX);
+		else if (dx < SmallestX)
+			dx += (LargestX - SmallestX);
+
+		return new Line2(new Vector2(origin.X, origin.Y), new Vector2(dx, destination.Y - origin.Y));
+	}
 
 	protected abstract TPoly CreateFromEdges(IList<Line2> edges);
 

@@ -25,48 +25,6 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 			ContainsPoint(tile.UpperRight) ||
 			PolygonIntersects(tile.GetGeoPolygon());
 
-	protected override IList<Line2> CreateEdges<T>(IList<T> coords)
-	{
-		var edges = new List<Line2>(coords.Count);
-		for (int i = 0; i < coords.Count; i++)
-		{
-			var origin = coords[i];
-			var next = coords[(i + 1) % coords.Count];
-			var newEdge = LineFrom(origin, next);
-
-			var dx = newEdge.Origin.X + newEdge.Direction.X;
-
-			if (dx > HalfEquator || dx < -HalfEquator)
-			{
-				//line segment crosses the antimeridian
-				var halfEquator = Math.Sign(dx) * HalfEquator;
-				var distTo180 = halfEquator - origin.X;
-
-				var frac = distTo180 / newEdge.Direction.X;
-
-				var firstPart = new Line2(new Vector2(origin.X, origin.Y), new Vector2(distTo180, (next.Y - origin.Y) * frac));
-				var secondPart = new Line2(new(-halfEquator, firstPart.Origin.Y + firstPart.Direction.Y), new(newEdge.Direction.X - distTo180, next.Y - origin.Y - firstPart.Direction.Y));
-				edges.Add(firstPart);
-				edges.Add(secondPart);
-			}
-			else
-				edges.Add(newEdge);
-		}
-		return edges;
-	}
-
-	protected override Line2 LineFrom<T>(T origin, T destination)
-	{
-		var dx = destination.X - origin.X;
-
-		if (dx > HalfEquator)
-			dx -= TCoordinate.Equator;
-		else if (dx < -HalfEquator)
-			dx += TCoordinate.Equator;
-
-		return new Line2(new Vector2(origin.X, origin.Y), new Vector2(dx, destination.Y - origin.Y));
-	}
-
 	/// <summary>
 	/// Convert to the global pixel space for the current polygon's coordinate system.
 	/// </summary>

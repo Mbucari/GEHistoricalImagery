@@ -101,8 +101,9 @@ internal class Availability : AoiVerb
 
 				foreach (var tile in mercAoi.GetTiles<EsriTile>(ZoomLevel))
 				{
-					var cIndex = tile.Column - stats.MinColumn;
+					var cIndex = LibMapCommon.Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
 					var rIndex = tile.Row - stats.MinRow;
+
 					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
 				}
 
@@ -186,7 +187,7 @@ internal class Availability : AoiVerb
 
 				var region = uniqueDates[d.Date];
 
-				var cIndex = d.Tile.Column - stats.MinColumn;
+				var cIndex = LibMapCommon.Util.Mod(d.Tile.Column - stats.MinColumn, 1 << d.Tile.Level);
 				var rIndex = stats.MaxRow - d.Tile.Row;
 
 				uniquePoints.Add(new Tuple<int, int>(rIndex, cIndex));

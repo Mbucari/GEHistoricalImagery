@@ -29,14 +29,31 @@ public class GeoRegion<TCoordinate> : Region<GeoPolygon<TCoordinate>, TCoordinat
 	/// </summary>
 	/// <param name="level">The zoom level of interest</param>
 	public TileStats GetPolygonalRegionStats<TTile>(int level) where TTile : ITile<TTile, TCoordinate>
-		=> Polygons.Select(p => p.GetPolygonalRegionStats<TTile>(level)).Aggregate((a, b) => a + b);
+	{
+		var stats = GetRectangularRegionStats<TTile>(level);
+		var tileCount = Polygons.Sum(p => p.EnumerateTiles<TTile>(stats).Count());
+		return stats with { TileCount = tileCount };
+	}
 
 	/// <summary>
 	/// Gets the tile statistics for the region defined by this polygon's rectangular envelope
 	/// </summary>
 	/// <param name="level">The zoom level of interest</param>
 	public TileStats GetRectangularRegionStats<TTile>(int level) where TTile : ITile<TTile, TCoordinate>
-		=> Polygons.Select(p => p.GetRectangularRegionStats<TTile>(level)).Aggregate((a, b) => a + b);
+	{
+		var llCoord = TCoordinate.Create(LeftMostX, MinY);
+		var urCoord = TCoordinate.Create(RightMostX, MaxY);
+		var ll = TTile.GetTile(llCoord, level);
+		var ur = TTile.GetTile(urCoord, level);
+
+		var (minColumn, maxColumn) = (ll.Column, ur.Column);
+		var (minRow, maxRow) = ur.Row < ll.Row ? (ur.Row, ll.Row) : (ll.Row, ur.Row);
+
+		var nColumns = Util.Mod(ur.Column - ll.Column, 1 << level) + 1;
+		var nRows = maxRow - minRow + 1;
+
+		return new TileStats(level, nColumns, nRows, minRow, maxRow, minColumn, maxColumn, nColumns * nRows);
+	}
 
 	/// <summary>
 	/// Enumerates the tiles covering this <see cref="Rectangle"/>

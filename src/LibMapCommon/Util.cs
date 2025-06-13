@@ -14,6 +14,14 @@ public static class Util
 	public static GeoPolygon<Wgs1984> ToWgs1984(this GeoPolygon<WebMercator> geoPolygon)
 		=> geoPolygon.ConvertTo(c => c.ToWgs1984());
 
+	public static Vector3 ToRectangular(this Wgs1984 wgs84)
+	{
+		var lat = wgs84.Latitude * Math.PI / 180;
+		var lon = wgs84.Longitude * Math.PI / 180;
+		var cosLat = Math.Cos(lat);
+		return new Vector3(cosLat * Math.Cos(lon), cosLat * Math.Sin(lon), Math.Sin(lat));
+	}
+
 	public static int Mod(int value, int modulus)
 	{
 		var result = value % modulus;

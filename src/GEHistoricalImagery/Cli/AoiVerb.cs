@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using GEHistoricalImagery.Kml;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 
@@ -6,6 +7,9 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class AoiVerb : OptionsBase
 {
+	[Option("region-file", SetName = "Region-File", HelpText = "Path to a kmz or kml file containing the region geometry (polyline or polygon)")]
+	public string? RegionFile { get; set; }
+
 	[Option("region", SetName = "Region", Separator = '+', HelpText = "A list of geographic coordinates which are the vertices of the polygonal area of interest. Vertex coordinates delimiter with a '+'. ", MetaValue = "Lat0,Long0+Lat1,Long1+Lat2,Long2")]
 	public IList<string>? RegionCoordinates { get; set; }
 
@@ -27,7 +31,24 @@ internal abstract class AoiVerb : OptionsBase
 		else if (ZoomLevel < 1)
 			yield return $"Zoom level: {ZoomLevel} is too small. Min zoom is 1";
 
-		if (RegionCoordinates?.Count > 0)
+		if (RegionFile != null)
+		{
+			var placemarks = Placemark.LoadFromKeyhole(RegionFile)?.Where(p => p.Type is PlacemarkType.LineString or PlacemarkType.Polygon).ToArray();
+			if (placemarks is null)
+				yield return "Invalid KMZ file";
+			else if (placemarks.Length == 0)
+				yield return "Keyhole file doesn't contain any enclosed regions";
+			else
+			{
+				var placemark = placemarks.Length == 1 ? placemarks[0]
+					: new OptionChooser<PlacemarkOption>().WaitForOptions(placemarks.Select(p => new PlacemarkOption(p)).ToArray())?.Placemark;
+				if (placemark is null)
+					yield return "No placemark was selected";
+				else
+					Region = GeoRegion<Wgs1984>.Create(placemark.Coordinates);
+			}
+		}
+		else if (RegionCoordinates?.Count > 0)
 		{
 			var converter = new Wgs1984TypeConverter();
 			var coords = new Wgs1984[RegionCoordinates.Count];
@@ -74,5 +95,20 @@ internal abstract class AoiVerb : OptionsBase
 			if (errorMessage != null)
 				yield return errorMessage;
 		}
+	}
+
+	private class PlacemarkOption : IConsoleOption
+	{
+		public string DisplayValue { get; }
+		public Placemark Placemark { get; }
+
+		public PlacemarkOption(Placemark placemark)
+		{
+			Placemark = placemark;
+			var area = placemark.GetArea() / 1000000;
+			DisplayValue = $"<{placemark.Type}> '{placemark.Name}' ({area:F2} km^2)  ";
+		}
+
+		public bool DrawOption() => true;
 	}
 }

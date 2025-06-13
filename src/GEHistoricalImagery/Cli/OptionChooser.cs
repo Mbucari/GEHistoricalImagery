@@ -1,27 +1,27 @@
 ﻿namespace GEHistoricalImagery.Cli
 {
-	public interface IDatedOption
+	public interface IConsoleOption
 	{
-		DateOnly Date { get; }
-		void DrawOption();
+		public string DisplayValue { get; }
+
+		/// <returns>True if option choice is final, otherwise false to continue.</returns>
+		bool DrawOption();
 	}
 
-	internal class OptionChooser<T> where T : IDatedOption
+	internal class OptionChooser<T> where T : class, IConsoleOption
 	{
 		private static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
 		public OptionChooser() { }
 
 		protected static string DateString(DateOnly date) => date.ToString("yyyy/MM/dd");
 
-		public void WaitForOptions(T[] options)
-		{
-			if (options.Length <= INDICES.Length)
-				WaitForSingleCharSelection(options);
-			else
-				WaitForMultiCharSelection(options);
-		}
+		public T? WaitForOptions(T[] options)		
+			=> options.Length <= INDICES.Length
+			? WaitForSingleCharSelection(options)
+			: WaitForMultiCharSelection(options);
 
-		private void WaitForSingleCharSelection(T[] options)
+
+		private T? WaitForSingleCharSelection(T[] options)
 		{
 			const string finalOption = "[Esc]  Exit";
 			var dateDict = options.Select((d, i) => new KeyValuePair<char, T>(INDICES[i], d)).ToDictionary();
@@ -32,14 +32,16 @@
 			{
 				if (dateDict.TryGetValue(key.KeyChar, out var option))
 				{
-					option.DrawOption();
+					if (option.DrawOption())
+						return option;
 					Console.WriteLine();
 					WriteDateOptions(dateDict, finalOption);
 				}
 			}
+			return null;
 		}
 
-		private void WaitForMultiCharSelection(T[] options)
+		private T? WaitForMultiCharSelection(T[] options)
 		{
 			const string finalOption = "[E]  Exit";
 
@@ -52,18 +54,20 @@
 			{
 				if (dateDict.TryGetValue(key, out var option))
 				{
-					option.DrawOption();
+					if (option.DrawOption())
+						return option;
 					Console.WriteLine();
 					WriteDateOptions(dateDict, finalOption);
 				}
 			}
+			return null;
 		}
 
 		private static void WriteDateOptions<S>(IEnumerable<KeyValuePair<S, T>> dateDict, string finalOption) where S : notnull
 		{
 			const string spacer = "  ";
 
-			foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {DateString(kvp.Value.Date)}").Append(finalOption))
+			foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value.DisplayValue}").Append(finalOption))
 			{
 				Console.Write(entry);
 

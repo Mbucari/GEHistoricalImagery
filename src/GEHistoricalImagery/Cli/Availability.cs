@@ -114,14 +114,15 @@ internal class Availability : AoiVerb
 		}
 	}
 
-	private class EsriRegion(Layer layer, RegionAvailability[] regions) : IDatedOption
+	private class EsriRegion(Layer layer, RegionAvailability[] regions) : IConsoleOption
 	{
 		public Layer Layer { get; } = layer;
 		public RegionAvailability[] Availabilities { get; } = regions;
 
 		public DateOnly Date => Layer.Date;
+		public string DisplayValue => DateString(Date);
 
-		public void DrawOption()
+		public bool DrawOption()
 		{
 			if (Availabilities.Length == 1)
 			{
@@ -139,6 +140,7 @@ internal class Availability : AoiVerb
 
 				new OptionChooser<RegionAvailability>().WaitForOptions(Availabilities);
 			}
+			return false;
 		}
 	}
 
@@ -231,9 +233,10 @@ internal class Availability : AoiVerb
 
 	#region Common
 
-	private class RegionAvailability : IEquatable<RegionAvailability>, IDatedOption
+	private class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOption
 	{
 		public DateOnly Date { get; }
+		public string DisplayValue => DateString(Date);
 		private bool?[,] Availability { get; }
 
 		public int Height => Availability.GetLength(0);
@@ -267,12 +270,13 @@ internal class Availability : AoiVerb
 			return true;
 		}
 
-		public void DrawOption()
+		public bool DrawOption()
 		{
 			var availabilityStr = $"Tile availability on {DateString(Date)}";
 			Console.WriteLine("\r\n" + availabilityStr);
 			Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 			DrawMap();
+			return false;
 		}
 
 		public void DrawMap()

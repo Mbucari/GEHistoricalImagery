@@ -28,13 +28,13 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 	/// <summary>
 	/// Convert to the global pixel space for the current polygon's coordinate system.
 	/// </summary>
-	public PixelPointPoly ToPixelPolygon(int level)
+	public PixelPolygon ToPixelPolygon(int level)
 	{
 		var edges = ConvertEdges(c => c.GetGlobalPixelCoordinate(level));
-		return new PixelPointPoly(level, edges);
+		return new PixelPolygon(level, edges);
 	}
 
-	protected Line2[] ConvertEdges<TOther>(Func<TCoordinate, TOther> converter) where TOther : ICoordinate
+	private Line2[] ConvertEdges<TOther>(Func<TCoordinate, TOther> converter) where TOther : ICoordinate
 	{
 		var edges = new Line2[Edges.Count];
 		for (int i = 0; i < Edges.Count; i++)
@@ -43,13 +43,7 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 			var next = Edges[(i + 1) % Edges.Count];
 
 			var currentVertex = converter(TCoordinate.Create(current.Origin.X, current.Origin.Y));
-
-			var nextX
-				= next.Origin.X == -HalfEquator ? HalfEquator
-				: next.Origin.X == HalfEquator ? -HalfEquator
-				: next.Origin.X;
-
-			var nextVertex = converter(TCoordinate.Create(nextX, next.Origin.Y));
+			var nextVertex = converter(TCoordinate.Create(next.Origin.X, next.Origin.Y));
 
 			var edge = new Line2(new(currentVertex.X, currentVertex.Y), new(nextVertex.X - currentVertex.X, nextVertex.Y - currentVertex.Y));
 			edges[i] = edge;
@@ -74,19 +68,18 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 	/// <param name="level">The zoom level of interest</param>
 	public TileStats GetRectangularRegionStats<TTile>(int level) where TTile : ITile<TTile, TCoordinate>
 	{
-		var llCoord = TCoordinate.Create(LeftMostX, MinY);
-		var urCoord = TCoordinate.Create(RightMostX, MaxY);
+		var llCoord = TCoordinate.Create(MinX, MinY);
+		var urCoord = TCoordinate.Create(MaxX, MaxY);
 		var ll = TTile.GetTile(llCoord, level);
 		var ur = TTile.GetTile(urCoord, level);
 
-		var cross180 = ur.Column < ll.Column;
 		var (minColumn, maxColumn) = (ll.Column, ur.Column);
 		var (minRow, maxRow) = ur.Row < ll.Row ? (ur.Row, ll.Row) : (ll.Row, ur.Row);
 
 		var nColumns = Util.Mod(ur.Column - ll.Column, 1 << level) + 1;
 		var nRows = maxRow - minRow + 1;
 
-		return new TileStats(level, nColumns, nRows, minRow, maxRow, minColumn, maxColumn, nColumns * nRows, cross180);
+		return new TileStats(level, nColumns, nRows, minRow, maxRow, minColumn, maxColumn, nColumns * nRows);
 	}
 
 	/// <summary>
@@ -102,8 +95,14 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 		return EnumerateTiles<TTile>(stats);
 	}
 
-	private IEnumerable<TTile> EnumerateTiles<TTile>(TileStats stats) where TTile : ITile<TTile, TCoordinate>
+	internal IEnumerable<TTile> EnumerateTiles<TTile>(TileStats stats) where TTile : ITile<TTile, TCoordinate>
 	{
+		if (stats.TileCount == 1)
+		{
+			yield return TTile.Create(stats.MinRow, stats.MinColumn, stats.Zoom);
+			yield break;
+		}
+
 		int numTiles = 1 << stats.Zoom;
 
 		for (int r = 0; r < stats.NumRows; r++)

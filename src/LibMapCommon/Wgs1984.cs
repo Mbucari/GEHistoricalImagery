@@ -32,7 +32,7 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, IGeoCoordinate<Wgs1984>
 	public Wgs1984(double latitude, double longitude)
 	{
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(latitude), 180, nameof(latitude));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(longitude), 180, nameof(longitude));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(longitude), 360, nameof(longitude));
 		Y = latitude;
 		X = longitude;
 	}
@@ -75,17 +75,20 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, IGeoCoordinate<Wgs1984>
 	/// </summary>
 	public WebMercator ToWebMercator()
 	{
+		var longitude = NormalizedLongitude();
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(Latitude), 85.05, nameof(Latitude));
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(Longitude), 180, nameof(Longitude));
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(Math.Abs(longitude), 180, nameof(Longitude));
 
 		//https://gis.stackexchange.com/questions/17336/transforming-epsg3857-to-epsg4326
 		//https://gis.stackexchange.com/questions/153839/how-to-transform-epsg3857-to-tile-pixel-coordinates-at-zoom-factor-0
 
-		var x = Longitude * WebMercator.Equator / 360;
+		var x = longitude * WebMercator.Equator / 360;
 		var y = Math.Log(Math.Tan((90 + Latitude) * Math.PI / 360)) * WebMercator.Equator / (Math.PI * 2);
 
 		return new WebMercator(x, y);
 	}
+
+	public double NormalizedLongitude() => Longitude < -180 ? Longitude + 360 : Longitude > 180 ? Longitude - 360 : Longitude;
 
 	public bool Equals(Wgs1984 other)
 		=> Latitude == other.Latitude && Longitude == other.Longitude;

@@ -18,7 +18,7 @@ internal abstract class AoiVerb : OptionsBase
 	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "N", Required = true)]
 	public int ZoomLevel { get; set; }
 
-	protected GeoPolygon<Wgs1984> Region { get; set; } = null!;
+	protected GeoRegion<Wgs1984> Region { get; set; } = null!;
 
 	protected IEnumerable<string> GetAoiErrors()
 	{
@@ -41,7 +41,7 @@ internal abstract class AoiVerb : OptionsBase
 				coords[i] = coord;
 			}
 
-			Region = new GeoPolygon<Wgs1984>(coords);
+			Region = GeoRegion<Wgs1984>.Create(coords);
 		}
 		else if (LowerLeft is null && UpperRight is null)
 			yield return "An area of interest must be specified either with the 'region' option or the 'lower-left' and 'upper-right' options";
@@ -54,11 +54,18 @@ internal abstract class AoiVerb : OptionsBase
 			string? errorMessage = null;
 			try
 			{
-				Region = new GeoPolygon<Wgs1984>(
-					LowerLeft.Value,
-					new Wgs1984(UpperRight.Value.Latitude, LowerLeft.Value.Longitude),
-					UpperRight.Value,
-					new Wgs1984(LowerLeft.Value.Latitude, UpperRight.Value.Longitude));
+				var llX = LowerLeft.Value.Longitude;
+				var llY = LowerLeft.Value.Latitude;
+				var urX = UpperRight.Value.Longitude;
+				var urY = UpperRight.Value.Latitude;
+				if (urX < llX)
+					urX += 360;
+
+				Region = GeoRegion<Wgs1984>.Create(
+					new Wgs1984(llY, llX),
+					new Wgs1984(urY, llX),
+					new Wgs1984(urY, urX),
+					new Wgs1984(llY, urX));
 			}
 			catch (Exception e)
 			{

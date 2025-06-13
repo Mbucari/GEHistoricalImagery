@@ -54,7 +54,7 @@ internal class Availability : AoiVerb
 		new OptionChooser<EsriRegion>().WaitForOptions(all);
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoPolygon<Wgs1984> aoi, int zoomLevel)
+	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<Wgs1984> aoi, int zoomLevel)
 	{
 		int count = 0;
 		int numTiles = wayBack.Layers.Count;
@@ -162,7 +162,7 @@ internal class Availability : AoiVerb
 		new OptionChooser<RegionAvailability>().WaitForOptions(all);
 	}
 
-	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoPolygon<Wgs1984> reg, int zoomLevel)
+	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoRegion<Wgs1984> reg, int zoomLevel)
 	{
 		int count = 0;
 		var stats = reg.GetPolygonalRegionStats<KeyholeTile>(zoomLevel);

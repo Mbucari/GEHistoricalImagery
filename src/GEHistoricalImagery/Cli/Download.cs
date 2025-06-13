@@ -97,7 +97,7 @@ internal class Download : AoiVerb
 
 		IEnumerable<Task<TileDataset<WebMercator>>> generateWork()
 		{
-			var aoi = webMerc.ToPixelPolygon(ZoomLevel);
+			var aoi = webMerc.ToPixelRegion(ZoomLevel);
 			if (LayerDate)
 			{
 				var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
@@ -115,7 +115,7 @@ internal class Download : AoiVerb
 		}
 	}
 
-	private async Task<TileDataset<WebMercator>> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, DateOnly desiredDate)
+	private async Task<TileDataset<WebMercator>> DownloadTile(PixelRegion aoi, WayBack wayBack, EsriTile tile, DateOnly desiredDate)
 	{
 		try
 		{
@@ -155,7 +155,7 @@ internal class Download : AoiVerb
 		return EmptyDataset(tile);
 	}
 
-	private async Task<TileDataset<WebMercator>> DownloadTile(PixelPointPoly aoi, WayBack wayBack, EsriTile tile, Layer layer)
+	private async Task<TileDataset<WebMercator>> DownloadTile(PixelRegion aoi, WayBack wayBack, EsriTile tile, Layer layer)
 	{
 		EsriTile gotTile = tile;
 
@@ -204,7 +204,7 @@ internal class Download : AoiVerb
 
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
-			var aoi = Region.ToPixelPolygon(ZoomLevel);
+			var aoi = Region.ToPixelRegion(ZoomLevel);
 			Console.Write("Grabbing Image Tiles: ");
 			ReportProgress(0);
 
@@ -212,7 +212,7 @@ internal class Download : AoiVerb
 		}
 	}
 
-	private async Task<TileDataset<Wgs1984>> DownloadTile(PixelPointPoly aoi, DbRoot root, KeyholeTile tile, DateOnly desiredDate)
+	private async Task<TileDataset<Wgs1984>> DownloadTile(PixelRegion aoi, DbRoot root, KeyholeTile tile, DateOnly desiredDate)
 	{
 		KeyholeTile gotTile = tile;
 		TileNode? node;
@@ -306,7 +306,7 @@ internal class Download : AoiVerb
 		return enlarged.ToDataset();
 	}
 
-	private async Task Run_Common<T>(FileInfo saveFile, DateOnly desiredDate, GeoPolygon<T> region, double tileCount, IEnumerable<Task<TileDataset<T>>> generator)
+	private async Task Run_Common<T>(FileInfo saveFile, DateOnly desiredDate, GeoRegion<T> region, double tileCount, IEnumerable<Task<TileDataset<T>>> generator)
 		where T : IGeoCoordinate<T>
 	{
 		var tempFile = Path.GetTempFileName();
@@ -323,7 +323,6 @@ internal class Download : AoiVerb
 			await foreach (var tds in processor.EnumerateResults(generator))
 				using (tds)
 				{
-					if (tds.Dataset is null) ;
 					image.AddTile(tds.Tile, tds.Dataset ?? missingTile);
 					numTilesDownload++;
 
@@ -376,7 +375,7 @@ internal class Download : AoiVerb
 		}
 	}
 
-	private Dataset TrimDataset<T>(Dataset image, PixelPointPoly aoi, ITile<T> tile)
+	private Dataset TrimDataset<T>(Dataset image, PixelRegion aoi, ITile<T> tile)
 		where T : IGeoCoordinate<T>
 	{
 		if (aoi.PolygonIntersects(tile.GetGeoPolygon().ToPixelPolygon(tile.Level)))

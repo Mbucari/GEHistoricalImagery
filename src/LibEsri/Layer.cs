@@ -61,15 +61,9 @@ public class Layer
 		return url;
 	}
 
-	public string GetEnvelopeQueryUrl(GeoPolygon<WebMercator> region, int level)
+	public string GetEnvelopeQueryUrl(GeoRegion<WebMercator> region, int level)
 	{
-		string[] points = new string[region.Edges.Count + 1];
-
-		for (int i = 0; i < region.Edges.Count; i++)
-			points[i] = $"%5B{region.Edges[i].Origin.X},{region.Edges[i].Origin.Y}%5D";
-		points[^1] = points[0];
-
-		var ring = $"%7B%22rings%22%3A%5B%5B{string.Join("%2C", points)}%5D%5D%2C%22spatialReference%22%3A%7B%22wkid%22%3A{WebMercator.EpsgNumber}%7D%7D";
+		var ring = $"%7B%22rings%22%3A{GetRings(region)}%2C%22spatialReference%22%3A%7B%22wkid%22%3A{WebMercator.EpsgNumber}%7D%7D";
 
 		var metadataUrl
 			= GetMetadataUrl(level, returnGeometry: true, "SRC_DATE2")
@@ -78,6 +72,22 @@ public class Layer
 		return metadataUrl;
 	}
 
+	private static string GetRings(GeoRegion<WebMercator> region)
+	{
+		string[] rings = new string[region.Polygons.Length];
+		for (int i = 0; i < region.Polygons.Length; i++)
+		{
+			var poly = region.Polygons[i];
+			string[] points = new string[poly.Edges.Count + 1];
+
+			for (int j = 0; j < poly.Edges.Count; j++)
+				points[j] = $"%5B{poly.Edges[j].Origin.X},{poly.Edges[j].Origin.Y}%5D";
+			points[^1] = points[0];
+
+			rings[i] = "%5B" + string.Join("%2C", points) + "%5D";
+		}
+		return "%5B" + string.Join("%2C", rings) + "%5D";
+	}
 	public string GetPointQueryUrl(EsriTile tile)
 	{
 		var center = tile.Center;

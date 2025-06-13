@@ -29,11 +29,11 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 		Gdal.SetCacheMax(1024 * 1024 * 300);
 	}
 
-	public EarthImage(GeoPolygon<T> region, int level, string? cacheFile = null)
+	public EarthImage(GeoRegion<T> region, int level, string? cacheFile = null)
 	{
 		long globalPixels = TILE_SZ * (1L << level);
 
-		var pixels = region.ToPixelPolygon(level);
+		var pixels = region.ToPixelRegion(level);
 
 		RasterX = pixels.LeftMostX.ToRoundedInt();
 		RasterY = pixels.MinY.ToRoundedInt();
@@ -84,7 +84,7 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 
 		//The tile is entirely to the left of the region, so wrap around the globe.
 		if (gpx_x + TILE_SZ < RasterX)
-			gpx_x += (1 << tile.Level) * TILE_SZ;
+			gpx_x += TILE_SZ << tile.Level;
 
 		//Pixel coordinate to read the tile's data, relative to the tile's top-left corner.
 		int read_x = int.Max(0, RasterX - gpx_x);

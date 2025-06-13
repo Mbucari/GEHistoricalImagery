@@ -5,6 +5,10 @@ namespace LibMapCommon;
 
 public static class Util
 {
+	public static GeoRegion<WebMercator> ToWebMercator(this GeoRegion<Wgs1984> geoPolygon)
+		=> geoPolygon.ConvertTo(c => c.ToWebMercator());
+	public static GeoRegion<Wgs1984> ToWgs1984(this GeoRegion<WebMercator> geoPolygon)
+		=> geoPolygon.ConvertTo(c => c.ToWgs1984());
 	public static GeoPolygon<WebMercator> ToWebMercator(this GeoPolygon<Wgs1984> geoPolygon)
 		=> geoPolygon.ConvertTo(c => c.ToWebMercator());
 	public static GeoPolygon<Wgs1984> ToWgs1984(this GeoPolygon<WebMercator> geoPolygon)

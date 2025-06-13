@@ -7,7 +7,7 @@ namespace LibEsri;
 
 public static class EsriExtensions
 {
-	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer, GeoPolygon<WebMercator> region)
+	internal static IEnumerable<DatedRegion> ToDatedRegions(this JsonArray? jsonArray, Layer layer, GeoRegion<WebMercator> region)
 	{
 		if (jsonArray is null || jsonArray.Count == 0)
 			yield break;
@@ -21,7 +21,7 @@ public static class EsriExtensions
 				continue;
 
 			var dateOnly = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(dateNum).DateTime);
-			yield return new DatedRegion(dateOnly, rings, region);
+			yield return DatedRegion.Create(dateOnly, rings, region);
 		}
 	}
 
@@ -33,9 +33,15 @@ public static class EsriExtensions
 		foreach (var r in jsonArray.OfType<JsonArray>())
 		{
 			var coordinates = r.ToCoordinates();
-
-			if (coordinates.Any())
-				yield return new GeoPolygon<WebMercator>(coordinates.ToArray());
+			GeoPolygon<WebMercator>? polygon = null;
+			try
+			{
+				if (coordinates.Any())
+					polygon = new GeoPolygon<WebMercator>(coordinates.ToArray());
+			}
+			catch { }
+			if (polygon is not null)
+				yield return polygon;
 		}
 	}
 

@@ -50,7 +50,7 @@ public class WayBack
 		return layer.Date;
 	}
 
-	public async Task<DatedRegion[]> GetDateRegionsAsync(Layer layer, GeoPolygon<WebMercator> region, int zoom)
+	public async Task<DatedRegion[]> GetDateRegionsAsync(Layer layer, GeoRegion<WebMercator> region, int zoom)
 	{
 		var metadataUrl = layer.GetEnvelopeQueryUrl(region, zoom);
 
@@ -67,10 +67,10 @@ public class WayBack
 			{
 				if (set.TryGetValue(r.Date, out var dr))
 				{
-					var arr1 = dr.Rings;
-					Array.Resize(ref arr1, arr1.Length + r.Rings.Length);
-					Array.Copy(r.Rings, 0, arr1, dr.Rings.Length, r.Rings.Length);
-					set[r.Date] = new DatedRegion(r.Date, arr1);
+					var arr1 = dr.Polygons;
+					Array.Resize(ref arr1, arr1.Length + r.Polygons.Length);
+					Array.Copy(r.Polygons, 0, arr1, dr.Polygons.Length, r.Polygons.Length);
+					set[r.Date] = DatedRegion.Create(r.Date, arr1);
 				}
 				else
 					set.Add(r.Date, r);

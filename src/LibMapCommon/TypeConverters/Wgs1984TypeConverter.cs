@@ -17,7 +17,7 @@ public class Wgs1984TypeConverter : TypeConverter
 			!double.TryParse(split[1].Trim(), CultureInfo.InvariantCulture, out var lng))
 			return null;
 
-		if (lat < -90 || lat > 90 || lng < -180 || lng > 180)
+		if (lat < -90 || lat > 90 || lng < -360 || lng > 360)
 			return null;
 
 		return new Wgs1984(lat, lng);

@@ -6,52 +6,45 @@ public abstract class Polygon<TPoly, TCoordinate>
 {
 	public double MinY { get; }
 	public double MaxY { get; }
-	public double LeftMostX { get; }
-	public double RightMostX { get; }
+	public double MinX { get; }
+	public double MaxX { get; }
 	public IList<Line2> Edges { get; }
-	protected double SmallestX { get; }
-	protected double LargestX { get; }
 
 	protected Polygon(double smallestX, double largestX, params TCoordinate[] coords)
 	{
-		SmallestX = smallestX;
-		LargestX = largestX;
 		Edges = CreateEdges(coords);
-		(LeftMostX, RightMostX, MinY, MaxY) = Validate();
+		(MinX, MaxX, MinY, MaxY) = Validate(smallestX, largestX);
 	}
 
 	protected Polygon(double smallestX, double largestX, IList<Line2> edges)
 	{
-		SmallestX = smallestX;
-		LargestX = largestX;
 		Edges = edges;
-		(LeftMostX, RightMostX, MinY, MaxY) = Validate();
+		(MinX, MaxX, MinY, MaxY) = Validate(smallestX, largestX);
 	}
 
-	private (double leftMostX, double rightMostX, double minY, double maxY) Validate()
+	private (double minX, double maxX, double minY, double maxY) Validate(double smallestX, double largestX)
 	{
 		if (Edges.Count < 3)
 			throw new ArgumentException("Polygon must contain at least three edges");
 
 		double minY = Edges.Select(v => v.Origin.Y).Min();
 		double maxY = Edges.Select(v => v.Origin.Y).Max();
-		double leftMostX = Edges.Select(v => v.Origin.X).Min();
-		double rightMostX = Edges.Select(v => v.Origin.X).Max();
+		double minX = Edges.Select(v => v.Origin.X).Min();
+		double maxX = Edges.Select(v => v.Origin.X).Max();
 
-		if (minY >= maxY)
+		if (minX < smallestX)
+			throw new InvalidOperationException($"Smallest X value '{minX}' is smaller than the minimum allowed value of '{smallestX}'");
+
+		if (maxX > largestX)
+			throw new InvalidOperationException($"Largest X value '{maxX}' is larger than the maximum allowed value of '{largestX}'");
+
+		if (minY == maxY)
 			throw new InvalidOperationException("Polygon cannot have zero height");
 
-		if (leftMostX == rightMostX)
+		if (minX == maxX)
 			throw new InvalidOperationException("Polygon cannot have zero width");
 
-		if (leftMostX == SmallestX && rightMostX == LargestX)
-		{
-			var midpoint = (LargestX + SmallestX) / 2;
-			leftMostX = Edges.Select(e => e.Origin.X).Where(x => x >= midpoint).Min();
-			rightMostX = Edges.Select(e => e.Origin.X).Where(x => x < midpoint).Max();
-		}
-
-		return (leftMostX, rightMostX, minY, maxY);
+		return (minX, maxX, minY, maxY);
 	}
 
 	private IList<Line2> CreateEdges<T>(IList<T> coords) where T : ICoordinate
@@ -62,25 +55,7 @@ public abstract class Polygon<TPoly, TCoordinate>
 			var origin = coords[i];
 			var next = coords[(i + 1) % coords.Count];
 			var newEdge = LineFrom(origin, next);
-
-			var dx = newEdge.Origin.X + newEdge.Direction.X;
-			if (dx > LargestX || dx < SmallestX)
-			{
-				//line segment crosses the antimeridian. Split into two edges.
-				// First edge goes to the antimeridian and stops.
-				//Second edge picks up at the other side of the antimeridian and continues to original end.
-				var halfEquator = Math.Sign(dx) * LargestX;
-				var distTo180 = halfEquator - origin.X;
-
-				var frac = distTo180 / newEdge.Direction.X;
-
-				var firstPart = new Line2(new(origin.X, origin.Y), new(distTo180, (next.Y - origin.Y) * frac));
-				var secondPart = new Line2(new(-halfEquator, firstPart.Origin.Y + firstPart.Direction.Y), new(newEdge.Direction.X - distTo180, next.Y - origin.Y - firstPart.Direction.Y));
-				edges.Add(firstPart);
-				edges.Add(secondPart);
-			}
-			else
-				edges.Add(newEdge);
+			edges.Add(newEdge);
 		}
 		return edges;
 	}
@@ -88,12 +63,6 @@ public abstract class Polygon<TPoly, TCoordinate>
 	private Line2 LineFrom<T>(T origin, T destination) where T : ICoordinate
 	{
 		var dx = destination.X - origin.X;
-		//Handle crossing the antimeridian
-		if (dx > LargestX)
-			dx -= (LargestX - SmallestX);
-		else if (dx < SmallestX)
-			dx += (LargestX - SmallestX);
-
 		return new Line2(new Vector2(origin.X, origin.Y), new Vector2(dx, destination.Y - origin.Y));
 	}
 
@@ -147,6 +116,8 @@ public abstract class Polygon<TPoly, TCoordinate>
 	/// <returns>A collection of polygons which, combined, span the clipped polygon</returns>
 	public TPoly[] Clip(TPoly clippingPolygon)
 		=> clippingPolygon.TriangulatePolygon().Select(ClipToTriangle).OfType<TPoly>().ToArray();
+
+	public string AutoCad => "pl " + string.Join("\r\n", Edges.Select(e => $"{e.Origin.X},{e.Origin.Y}")) + " c\r\n";
 
 	/// <summary>
 	/// Convert a polygon to a collection of triangular polygons

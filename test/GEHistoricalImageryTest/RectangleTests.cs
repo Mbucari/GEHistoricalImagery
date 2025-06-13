@@ -13,13 +13,22 @@ public class RectangleTests
 		var ll = new Wgs1984(-90, 0);
 		var ur = new Wgs1984(90, -0.0000001);
 
-		var rec = new GeoPolygon<Wgs1984>(new Wgs1984(-89.99999999, 90), new Wgs1984(89.99999999, 90), new Wgs1984(89.99999999, -90.0000001), new Wgs1984(-89.99999999, -90.0000001));
+		var rec = GeoRegion<Wgs1984>.Create(new Wgs1984(-90, 0), new Wgs1984(89.99999999, 0), new Wgs1984(89.99999999, 359.99999999), new Wgs1984(-90, 359.99999999));
 		for (int i = 2; i <= KeyholeTile.MaxLevel; i++)
 		{
 			var numTiles = 1 << i;
 			var stats = rec.GetRectangularRegionStats<KeyholeTile>(i);
-			Assert.AreEqual(numTiles / 2, stats.NumColumns);
-			Assert.AreEqual(numTiles / 2, stats.NumRows);
+			Assert.AreEqual(numTiles, stats.NumColumns);
+			Assert.AreEqual(numTiles, stats.NumRows);
+		}
+
+		rec = GeoRegion<Wgs1984>.Create(new Wgs1984(-90, -0.000000001), new Wgs1984(89.99999999, -0.000000001), new Wgs1984(89.99999999, -360), new Wgs1984(-90, -360));
+		for (int i = 2; i <= KeyholeTile.MaxLevel; i++)
+		{
+			var numTiles = 1 << i;
+			var stats = rec.GetRectangularRegionStats<KeyholeTile>(i);
+			Assert.AreEqual(numTiles, stats.NumColumns);
+			Assert.AreEqual(numTiles, stats.NumRows);
 		}
 	}
 

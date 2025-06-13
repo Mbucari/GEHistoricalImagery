@@ -36,9 +36,9 @@ public class CoordinateTests
 
 	[DataTestMethod]
 	[DataRow(200, 0)]
-	[DataRow(0, 200)]
+	[DataRow(0, 400)]
 	[DataRow(180.00000001, 0)]
-	[DataRow(0, 180.00000001)]
+	[DataRow(0, 360.00000001)]
 	public void InvalidCoordinate(double lat, double lon)
 	{
 		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Wgs1984(lat, lon));

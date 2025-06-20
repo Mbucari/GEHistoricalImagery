@@ -139,7 +139,7 @@ internal class Placemark
 
 		foreach (var (query, parser) in Parsers)
 		{
-			var coordinateList = element.XPathSelectElement(query, nsMgr)?.Value;
+			var coordinateList = element.XPathSelectElement(query, nsMgr)?.Value?.Trim();
 			if (coordinateList is not null && parser(name, coordinateList) is Placemark placemark)
 				return placemark;
 		}

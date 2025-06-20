@@ -1,14 +1,19 @@
 # Availability
 _Get imagery date availability in a specified region._
 
-This command shows a diagram of image tile availablity within the specified region.
-Tiles that are available from a specific date are shaded, and unavailable tiles are represented with a dot.
+This command shows a diagram of image tile availablity within the specified region of interest.
+Tiles that are available from a specific date are shaded, unavailable tiles are represented with a dot, and tiles outside of the region of interest are blank.
 
+
+To learn about defining a region of interest, please refer to the [Regions of Interest article](./regions.md).
 ## Usage
 ```Console
 GEHistoricalImagery availability [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] --zoom [N] [--parallel [N]] [--provider [P]] [--no-cache]
 
--p N, --parallel=N                           (Default: 20) Number of concurrent downloads
+  -p N, --parallel=N                           (Default: 20) Number of concurrent downloads
+
+  --region-file=/path/to/kmzfile.kmz           Path to a kmz or kml file containing the region geometry (polygon or
+                                               polyline with at least three vertices)
 
   --region=Lat0,Long0+Lat1,Long1+Lat2,Long2    A list of geographic coordinates which are the vertices of the
                                                polygonal area of interest. Vertex coordinates delimiter with a '+'.
@@ -207,4 +212,4 @@ Loading Quad Tree Packets: Done!
 This diagram, shown by pressing `5` in the console, shows the tiles with available imagery from 2023/04/29. The shaded areas represent tiles which contain imagery for the selected date, the dots represent tiles which have no imagery for the selected date, and the empty area show space outside of the polygonal region.
 
 ************************
-<p align="center"><i>Updated 2025/06/05</i></p>
+<p align="center"><i>Updated 2025/06/20</i></p>

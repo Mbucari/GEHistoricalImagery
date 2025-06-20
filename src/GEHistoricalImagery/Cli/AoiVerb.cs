@@ -7,7 +7,7 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class AoiVerb : OptionsBase
 {
-	[Option("region-file", SetName = "Region-File", HelpText = "Path to a kmz or kml file containing the region geometry (polyline or polygon)")]
+	[Option("region-file", SetName = "Region-File", HelpText = "Path to a kmz or kml file containing the region geometry (polygon or polyline with at least three vertices)", MetaValue = "/path/to/kmzfile.kmz")]
 	public string? RegionFile { get; set; }
 
 	[Option("region", SetName = "Region", Separator = '+', HelpText = "A list of geographic coordinates which are the vertices of the polygonal area of interest. Vertex coordinates delimiter with a '+'. ", MetaValue = "Lat0,Long0+Lat1,Long1+Lat2,Long2")]
@@ -44,7 +44,7 @@ internal abstract class AoiVerb : OptionsBase
 					Region = GeoRegion<Wgs1984>.Create(placemarks[0].Coordinates);
 				else
 				{
-					var prompt = "Select which KMZ file to use as the region";
+					var prompt = "Select which placemark to use as the region of interest";
 					Console.WriteLine(prompt);
 					Console.WriteLine(new string('=', prompt.Length));
 

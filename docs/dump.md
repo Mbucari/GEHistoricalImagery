@@ -1,12 +1,17 @@
 # Dump
 _Dump historical image tiles into a folder._
 
-This command will download historical imagery from within a region on a specified date and save all 256x256 pixel image tiles to a folder.
+This command will download historical imagery within a region of interest on a specified date and save all 256x256 pixel image tiles to a folder.
 If imagery is not available for the specified date, the downloader will use the image from the next nearest date.
+
+To learn about defining a region of interest, please refer to the [Regions of Interest article](./regions.md).
 
 ## Usage
 ```Console
  GEHistoricalImagery dump [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+...]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache]
+
+  --region-file=/path/to/kmzfile.kmz                Path to a kmz or kml file containing the region geometry (polygon or
+                                                    polyline with at least three vertices)
 
   --region=Lat0,Long0+Lat1,Long1+Lat2,Long2         A list of geographic coordinates which are the vertices of the
                                                     polygonal area of interest. Vertex coordinates delimiter with a '+'.
@@ -116,4 +121,4 @@ Where:
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/06/05</i></p>
+<p align="center"><i>Updated 2025/06/20</i></p>

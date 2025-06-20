@@ -42,7 +42,7 @@ internal class Availability : AoiVerb
 
 		Console.Write("Loading World Atlas WayBack Layer Info: ");
 
-		var all = await GetAllEsriRegions(wayBack, Region, ZoomLevel);
+		var all = await GetAllEsriRegions(wayBack, Region);
 		ReplaceProgress("Done!\r\n");
 
 		if (all.Sum(r => r.Availabilities.Length) == 0)
@@ -51,10 +51,10 @@ internal class Availability : AoiVerb
 			return;
 		}
 
-		new OptionChooser<EsriRegion>().WaitForOptions(all);
+		OptionChooser<EsriRegion>.WaitForOptions(all);
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<Wgs1984> aoi, int zoomLevel)
+	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<Wgs1984> aoi)
 	{
 		int count = 0;
 		int numTiles = wayBack.Layers.Count;
@@ -139,7 +139,7 @@ internal class Availability : AoiVerb
 				Console.WriteLine("\r\n" + availabilityStr);
 				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
 
-				new OptionChooser<RegionAvailability>().WaitForOptions(Availabilities);
+				OptionChooser<RegionAvailability>.WaitForOptions(Availabilities);
 			}
 			return false;
 		}
@@ -153,7 +153,7 @@ internal class Availability : AoiVerb
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		Console.Write("Loading Quad Tree Packets: ");
 
-		var all = await GetAllDatesAsync(root, Region, ZoomLevel);
+		var all = await GetAllDatesAsync(root, Region);
 		ReplaceProgress("Done!\r\n");
 
 		if (all.Length == 0)
@@ -162,13 +162,13 @@ internal class Availability : AoiVerb
 			return;
 		}
 
-		new OptionChooser<RegionAvailability>().WaitForOptions(all);
+		OptionChooser<RegionAvailability>.WaitForOptions(all);
 	}
 
-	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoRegion<Wgs1984> reg, int zoomLevel)
+	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoRegion<Wgs1984> reg)
 	{
 		int count = 0;
-		var stats = reg.GetPolygonalRegionStats<KeyholeTile>(zoomLevel);
+		var stats = reg.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
 		ReportProgress(0);
 
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
@@ -176,22 +176,21 @@ internal class Availability : AoiVerb
 		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();
 		HashSet<Tuple<int, int>> uniquePoints = new();
 
-		await foreach (var dSet in processor.EnumerateResults(reg.GetTiles<KeyholeTile>(zoomLevel).Select(getDatedTiles)))
+		await foreach (var dSet in processor.EnumerateResults(reg.GetTiles<KeyholeTile>(ZoomLevel).Select(getDatedTiles)))
 		{
 			foreach (var d in dSet)
 			{
-				if (!uniqueDates.ContainsKey(d.Date))
+				if (!uniqueDates.TryGetValue(d.Date, out RegionAvailability? region))
 				{
-					uniqueDates.Add(d.Date, new RegionAvailability(d.Date, stats.NumRows, stats.NumColumns));
+					region = new RegionAvailability(d.Date, stats.NumRows, stats.NumColumns);
+					uniqueDates.Add(d.Date, region);
 				}
-
-				var region = uniqueDates[d.Date];
 
 				var cIndex = LibMapCommon.Util.Mod(d.Tile.Column - stats.MinColumn, 1 << d.Tile.Level);
 				var rIndex = stats.MaxRow - d.Tile.Row;
 
 				uniquePoints.Add(new Tuple<int, int>(rIndex, cIndex));
-				region[rIndex, cIndex] = await root.GetNodeAsync(d.Tile) is TileNode;
+				region[rIndex, cIndex] = await root.GetNodeAsync(d.Tile) is not null;
 			}
 
 			ReportProgress(++count / (double)stats.TileCount);
@@ -255,6 +254,11 @@ internal class Availability : AoiVerb
 		}
 
 		public bool HasAnyTiles() => Availability.OfType<bool>().Any(b => b);
+		
+		public static bool operator ==(RegionAvailability a, RegionAvailability b)=> a.Equals(b);
+		public static bool operator !=(RegionAvailability a, RegionAvailability b)=> !a.Equals(b);
+		public override int GetHashCode() => HashCode.Combine(Date, Availability);
+		public override bool Equals(object? obj) => Equals(obj as RegionAvailability);
 		public bool Equals(RegionAvailability? other)
 		{
 			if (other == null || other.Date != Date || other.Height != Height || other.Width != Width)

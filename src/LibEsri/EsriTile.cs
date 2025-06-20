@@ -1,5 +1,4 @@
 ﻿using LibMapCommon;
-using LibMapCommon.Geometry;
 
 namespace LibEsri;
 

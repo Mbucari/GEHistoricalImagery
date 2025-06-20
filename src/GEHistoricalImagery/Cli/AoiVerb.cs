@@ -49,7 +49,7 @@ internal abstract class AoiVerb : OptionsBase
 					Console.WriteLine(new string('=', prompt.Length));
 
 					var placemark
-						= new OptionChooser<PlacemarkOption>()
+						= OptionChooser<PlacemarkOption>
 						.WaitForOptions(placemarks.Select(p => new PlacemarkOption(p)).ToArray())
 						?.Placemark;
 

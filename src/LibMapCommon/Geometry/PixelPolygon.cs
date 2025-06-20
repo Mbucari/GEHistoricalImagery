@@ -3,7 +3,7 @@
 public class PixelPolygon : Polygon<PixelPolygon, PixelPoint>
 {
 	public int ZoomLevel { get; }
-	const int TILE_SZ = 256;
+	private const int TILE_SZ = 256;
 
 	internal PixelPolygon(int zoomLevel, IList<Line2> edges)
 		: base(0, TILE_SZ << zoomLevel, edges)

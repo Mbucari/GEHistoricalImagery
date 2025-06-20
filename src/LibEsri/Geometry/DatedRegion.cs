@@ -8,7 +8,7 @@ public class DatedRegion : GeoRegion<WebMercator>
 	public DateOnly Date { get; }
 
 	private DatedRegion(DateOnly date, double leftmostX, double rightmostX, GeoPolygon<WebMercator>[] rings)
-		:base(leftmostX, rightmostX, rings)
+		: base(leftmostX, rightmostX, rings)
 	{
 		Date = date;
 	}

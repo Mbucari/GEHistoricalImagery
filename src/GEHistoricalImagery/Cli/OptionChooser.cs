@@ -13,7 +13,7 @@
 		private static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
 		public OptionChooser() { }
 
-		public T? WaitForOptions(T[] options)
+		public static T? WaitForOptions(T[] options)
 			=> options.Length <= INDICES.Length
 			? WaitForSingleCharSelection(options)
 			: WaitForMultiCharSelection(options);

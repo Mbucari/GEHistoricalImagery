@@ -74,7 +74,7 @@ public class TileNode
 	}
 
 	private DatedTile? GetDefaultImagery(DateOnly imageDate = default)
-		=> (QuadtreeNode as QuadtreeNode)?.Layer ?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery
+		=> (QuadtreeNode as QuadtreeNode)?.Layer?.FirstOrDefault(l => l.Type is QuadtreeLayer.Types.LayerType.Imagery) is QuadtreeLayer regImagery
 		? new DatedTile(Tile, imageDate, regImagery)
 		: null;
 }

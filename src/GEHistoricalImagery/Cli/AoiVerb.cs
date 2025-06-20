@@ -40,15 +40,27 @@ internal abstract class AoiVerb : OptionsBase
 				yield return "Keyhole file doesn't contain any enclosed regions";
 			else
 			{
-				var placemark = placemarks.Length == 1 ? placemarks[0]
-					: new OptionChooser<PlacemarkOption>().WaitForOptions(placemarks.Select(p => new PlacemarkOption(p)).ToArray())?.Placemark;
-				if (placemark is null)
-					yield return "No placemark was selected";
+				if (placemarks.Length == 1)
+					Region = GeoRegion<Wgs1984>.Create(placemarks[0].Coordinates);
 				else
-					Region = GeoRegion<Wgs1984>.Create(placemark.Coordinates);
+				{
+					var prompt = "Select which KMZ file to use as the region";
+					Console.WriteLine(prompt);
+					Console.WriteLine(new string('=', prompt.Length));
+
+					var placemark
+						= new OptionChooser<PlacemarkOption>()
+						.WaitForOptions(placemarks.Select(p => new PlacemarkOption(p)).ToArray())
+						?.Placemark;
+
+					if (placemark is null)
+						yield return "No placemark was selected";
+					else
+						Region = GeoRegion<Wgs1984>.Create(placemark.Coordinates);
+				}
 			}
 		}
-		else if (RegionCoordinates?.Count > 0)
+		else if (RegionCoordinates?.Count >= 3)
 		{
 			var converter = new Wgs1984TypeConverter();
 			var coords = new Wgs1984[RegionCoordinates.Count];
@@ -106,7 +118,7 @@ internal abstract class AoiVerb : OptionsBase
 		{
 			Placemark = placemark;
 			var area = placemark.GetArea() / 1000000;
-			DisplayValue = $"<{placemark.Type}> '{placemark.Name}' ({area:F2} km^2)  ";
+			DisplayValue = $"<{placemark.Type} '{placemark.Name}' ({area:F2} km^2)>";
 		}
 
 		public bool DrawOption() => true;

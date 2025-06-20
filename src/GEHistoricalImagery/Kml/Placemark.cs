@@ -1,7 +1,9 @@
 ﻿using LibMapCommon;
 using LibMapCommon.Geometry;
 using System.IO.Compression;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace GEHistoricalImagery.Kml;
 
@@ -20,7 +22,7 @@ internal class Placemark
 	public Wgs1984[] Coordinates { get; }
 	private static Wgs1984TypeConverter Converter { get; } = new();
 
-	private Placemark(string name, PlacemarkType  type, Wgs1984[] coordinates)
+	private Placemark(string name, PlacemarkType type, Wgs1984[] coordinates)
 	{
 		Name = name;
 		Type = type;
@@ -34,7 +36,7 @@ internal class Placemark
 
 		var poly = GeoRegion<Wgs1984>.Create(Coordinates);
 		double sphericalExcess = 0;
-		foreach(var triangle in poly.TriangulatePolygon())
+		foreach (var triangle in poly.TriangulatePolygon())
 		{
 			var v1 = triangle.Edges[0].Origin;
 			var v2 = triangle.Edges[1].Origin;
@@ -43,7 +45,7 @@ internal class Placemark
 			var A = new Wgs1984(v1.Y, v1.X).ToRectangular();
 			var B = new Wgs1984(v2.Y, v2.X).ToRectangular();
 			var C = new Wgs1984(v3.Y, v3.X).ToRectangular();
-			
+
 			var a = Vector3.GetAngle(A, B, C);
 			var b = Vector3.GetAngle(B, C, A);
 			var c = Vector3.GetAngle(C, A, B);
@@ -93,61 +95,54 @@ internal class Placemark
 		if (doc?.Name?.LocalName != "Document")
 			return null;
 
-		var placemarks = GetPlacemarksRecursively(doc);
+		var nsMgr = new XmlNamespaceManager(xml.CreateReader().NameTable);
+		nsMgr.AddNamespace(NS, doc.GetDefaultNamespace().ToString());
+
+
+		var placemarks = GetPlacemarksRecursively(nsMgr, doc);
 		return placemarks.Count > 0 ? placemarks : null;
 	}
 
-	private static List<Placemark> GetPlacemarksRecursively(XElement root)
+	private static List<Placemark> GetPlacemarksRecursively(XmlNamespaceManager nsMgr, XElement root)
 	{
-		var children = root.Elements().ToArray();
 		List<Placemark> placemarks = [];
 
-		foreach (var child in children)
+		foreach (var child in root.Elements())
 		{
 			var childName = child.Name.LocalName;
 
 			if (childName == "Folder")
-				placemarks.AddRange(GetPlacemarksRecursively(child));
-			else if (childName == "Placemark" && Parse(child) is Placemark p)
+				placemarks.AddRange(GetPlacemarksRecursively(nsMgr, child));
+			else if (childName == "Placemark" && Parse(nsMgr, child) is Placemark p)
 				placemarks.Add(p);
 		}
 
 		return placemarks;
 	}
 
-	private static Placemark? Parse(XElement element)
+	private const string NS = "KML";
+	private const string PointCoordinatesSelect = "./" + NS + ":Point/" + NS + ":coordinates";
+	private const string LineStringCoordinatesSelect = "./" + NS + ":LineString/" + NS + ":coordinates";
+	private const string PolygonCoordinatesSelect = "./" + NS + ":Polygon/" + NS + ":outerBoundaryIs/" + NS + ":LinearRing/" + NS + ":coordinates";
+
+	private static readonly (string query, Func<string, string, Placemark?> parser)[] Parsers = [
+		(PointCoordinatesSelect, ParsePoint),
+		(LineStringCoordinatesSelect, ParseLineString),
+		(PolygonCoordinatesSelect, ParsePolygon)];
+
+	private static Placemark? Parse(XmlNamespaceManager nsMgr, XElement element)
 	{
 		var ns = element.GetDefaultNamespace();
 
-		var name = element.Element(XName.Get("name", ns.NamespaceName))?.Value;
-		if (name is null)
+		if (element.XPathSelectElement($"./{NS}:name", nsMgr)?.Value is not string name)
 			return null;
 
-		var coordinateList = element
-			.Element(XName.Get("Polygon", ns.NamespaceName))
-			?.Element(XName.Get("outerBoundaryIs", ns.NamespaceName))
-			?.Element(XName.Get("LinearRing", ns.NamespaceName))
-			?.Element(XName.Get("coordinates", ns.NamespaceName))
-			?.Value;
-
-		if (coordinateList is not null)
-			return ParsePolygon(name, coordinateList);
-
-		coordinateList = element
-			.Element(XName.Get("LineString", ns.NamespaceName))
-			?.Element(XName.Get("coordinates", ns.NamespaceName))
-			?.Value;
-
-		if (coordinateList is not null)
-			return ParseLineString(name, coordinateList);
-
-		coordinateList = element
-			.Element(XName.Get("Point", ns.NamespaceName))
-			?.Element(XName.Get("coordinates", ns.NamespaceName))
-			?.Value;
-
-		if (coordinateList is not null)
-			return ParsePoint(name, coordinateList);
+		foreach (var (query, parser) in Parsers)
+		{
+			var coordinateList = element.XPathSelectElement(query, nsMgr)?.Value;
+			if (coordinateList is not null && parser(name, coordinateList) is Placemark placemark)
+				return placemark;
+		}
 
 		return null;
 	}
@@ -161,9 +156,9 @@ internal class Placemark
 	private static Placemark? ParsePolygon(string name, string coordinates)
 	{
 		var coords = ParseCoordinates(coordinates);
-		if (coords.Length < 4) return null;
-		Array.Resize(ref coords, coords.Length - 1);
-		return new Placemark(name, PlacemarkType.Polygon, coords);
+		if (coords[0] == coords[^1])
+			Array.Resize(ref coords, coords.Length - 1);
+		return coords.Length >= 3 ? new Placemark(name, PlacemarkType.Polygon, coords) : null;
 	}
 
 	private static Placemark? ParseLineString(string name, string coordinates)

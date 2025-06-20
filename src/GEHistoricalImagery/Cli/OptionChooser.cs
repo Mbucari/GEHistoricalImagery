@@ -2,7 +2,7 @@
 {
 	public interface IConsoleOption
 	{
-		public string DisplayValue { get; }
+		string DisplayValue { get; }
 
 		/// <returns>True if option choice is final, otherwise false to continue.</returns>
 		bool DrawOption();
@@ -13,20 +13,17 @@
 		private static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
 		public OptionChooser() { }
 
-		protected static string DateString(DateOnly date) => date.ToString("yyyy/MM/dd");
-
-		public T? WaitForOptions(T[] options)		
+		public T? WaitForOptions(T[] options)
 			=> options.Length <= INDICES.Length
 			? WaitForSingleCharSelection(options)
 			: WaitForMultiCharSelection(options);
 
-
-		private T? WaitForSingleCharSelection(T[] options)
+		private static T? WaitForSingleCharSelection(T[] options)
 		{
 			const string finalOption = "[Esc]  Exit";
 			var dateDict = options.Select((d, i) => new KeyValuePair<char, T>(INDICES[i], d)).ToDictionary();
 
-			WriteDateOptions(dateDict, finalOption);
+			WriteOptions(dateDict, finalOption);
 
 			while (Console.ReadKey(true) is ConsoleKeyInfo key && key.Key != ConsoleKey.Escape)
 			{
@@ -35,13 +32,13 @@
 					if (option.DrawOption())
 						return option;
 					Console.WriteLine();
-					WriteDateOptions(dateDict, finalOption);
+					WriteOptions(dateDict, finalOption);
 				}
 			}
 			return null;
 		}
 
-		private T? WaitForMultiCharSelection(T[] options)
+		private static T? WaitForMultiCharSelection(T[] options)
 		{
 			const string finalOption = "[E]  Exit";
 
@@ -49,7 +46,7 @@
 			var decFormat = "D" + numPlaces;
 			var dateDict = options.Select((d, i) => new KeyValuePair<string, T>(i.ToString(decFormat), d)).ToDictionary();
 
-			WriteDateOptions(dateDict, finalOption);
+			WriteOptions(dateDict, finalOption);
 			while (Console.ReadLine() is string key && !string.Equals(key, "E", StringComparison.OrdinalIgnoreCase))
 			{
 				if (dateDict.TryGetValue(key, out var option))
@@ -57,27 +54,30 @@
 					if (option.DrawOption())
 						return option;
 					Console.WriteLine();
-					WriteDateOptions(dateDict, finalOption);
+					WriteOptions(dateDict, finalOption);
 				}
 			}
 			return null;
 		}
 
-		private static void WriteDateOptions<S>(IEnumerable<KeyValuePair<S, T>> dateDict, string finalOption) where S : notnull
+		private static void WriteOptions<S>(IEnumerable<KeyValuePair<S, T>> dateDict, string finalOption) where S : notnull
 		{
 			const string spacer = "  ";
+			var entries = dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value.DisplayValue}").Append(finalOption).ToArray();
 
-			foreach (var entry in dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value.DisplayValue}").Append(finalOption))
+			for (int i = 0; i < entries.Length - 1; i++)
 			{
-				Console.Write(entry);
+				Console.Write(entries[i]);
 
 				var remainingSpace = Console.WindowWidth - Console.CursorLeft;
-
-				if (remainingSpace < entry.Length + spacer.Length)
+				if (remainingSpace < entries[i + 1].Length + spacer.Length)
 					Console.WriteLine();
 				else
 					Console.Write(spacer);
 			}
+
+			Console.Write(entries[^1]);
+
 			if (Console.CursorLeft > 0)
 				Console.WriteLine();
 		}

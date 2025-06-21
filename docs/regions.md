@@ -52,7 +52,7 @@ An irregular polygonal area of interest that crosses the 180°E/180°W meridian 
 - minimum (west-most) longitude is 179.964134°E
 - maximum (east-most) longitude is 180.03262°E (aka 179.96738°W)
 
-Note that when crossing the antimeridian from the eastern hemisphere to the western hemisphere (going from point `-16.79878,179.991` to `-16.79878,180.03262`, the points _after crossing increase over 180 degrees. This is necessary for the program to understand that you are crossing the antimeridian instead of taking the longer way around the earth. If the first point after crossing was written as `-16.79878,-179.96738` instead of `-16.79878,180.03262` (which are the same points on the globe modulus 360 degrees), GEHistoricalImagery would interpret that to mean that the polygon's next vertex is located 359.95838 west of point `-16.79878,179.991`.
+Note that when crossing the antimeridian from the eastern hemisphere to the western hemisphere (going from point `-16.79878,179.991` to `-16.79878,180.03262`, the points _after_ crossing increase over 180 degrees. This is necessary for the program to understand that you are crossing the antimeridian instead of taking the longer way around the earth. If the first point after crossing was written as `-16.79878,-179.96738` instead of `-16.79878,180.03262` (which are the same points on the globe modulus 360 degrees), GEHistoricalImagery would interpret that to mean that the polygon's next vertex is located 359.95838 west of point `-16.79878,179.991`.
 
 ```console
 --region -16.849704,179.964134+-16.829128,179.97+-16.79878,179.991+-16.79878,180.03262+-16.849704,180.004219
@@ -70,7 +70,7 @@ An irregular polygonal area of interest that crosses the 180°W/180°E meridian 
 ```
 ## Using Geometry from a KMZ or KML File
 
-The newest and perhaps easiest to specify a region of interest is to provide a path to a [kmz/kml](https://pro.arcgis.com/en/pro-app/latest/help/data/kml/what-is-kml-.htm) file containing polygons or line strings which define the region of interest. If the supplied kmz/kml file contains more than one geometry suitable tor defining the region of interest, GEHistoricalImagery will list all suitable placemarks and prompt you to choose one.
+The newest and perhaps easiest method to specify a region of interest is to provide a path to a [kmz/kml](https://pro.arcgis.com/en/pro-app/latest/help/data/kml/what-is-kml-.htm) file containing polygons or line strings which define the region of interest. If the supplied kmz/kml file contains more than one geometry suitable for defining a region of interest, GEHistoricalImagery will list all suitable placemarks and prompt you to choose one.
 
 ### Example - Using [RegionFile.kmz](./assets/RegionFile.kmz)
 
@@ -78,7 +78,7 @@ Specify the region of interest by supplying the path to a kmz/kml file containin
 ```console
 --region-file /path/to/RegionFile.kmz
 ```
-Because [RegionFile.kmz](./assets/RegionFile.kmz) contains five placemarks suitable for defining a region of interest, GEHistoricalImagery presents a list of the five placemarks feature-type, name, and approximate area (in square kilometers). Press the number (or letter, depending on how many options there are), and the command will use the selected placemark's geometry as the region of interest.
+Because [RegionFile.kmz](./assets/RegionFile.kmz) contains five placemarks suitable for defining a region of interest, GEHistoricalImagery presents a list of the five placemarks' feature-types, names, and approximate areas (in square kilometers). Press the number (or letter, depending on how many options are available), and the command will use the selected placemark's geometry as the region of interest.
 
 ```console
 Select which placemark to use as the region of interest

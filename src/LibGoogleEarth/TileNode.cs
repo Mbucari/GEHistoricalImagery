@@ -44,6 +44,12 @@ public class TileNode
 	/// </summary>
 	public IEnumerable<DatedTile> GetAllDatedTiles()
 	{
+		if (QuadtreeNode is KhQuadtreeNode khNode && khNode.Children.HasImage && khNode.Layers.FirstOrDefault(l => l.Type == QuadtreeLayer.Types.LayerType.Imagery) is IQuadtreeLayer l)
+		{
+			yield return new DatedTile(Tile, default, l);
+			yield break;
+		}
+
 		if (QuadtreeNode is not QuadtreeNode node)
 			yield break;
 

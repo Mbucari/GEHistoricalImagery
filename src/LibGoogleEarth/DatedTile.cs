@@ -33,7 +33,7 @@ public record DatedTile : IEarthAsset<byte[]>
 		AssetUrl = string.Format(ROOT_URL, tile.Path, Epoch, datedTile.Date.ToString("x"));
 	}
 
-	internal DatedTile(KeyholeTile tile, DateOnly tileDate, QuadtreeLayer imageryLayer)
+	internal DatedTile(KeyholeTile tile, DateOnly tileDate, IQuadtreeLayer imageryLayer)
 	{
 		Tile = tile;
 		Provider = 0;

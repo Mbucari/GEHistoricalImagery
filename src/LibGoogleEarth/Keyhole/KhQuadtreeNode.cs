@@ -7,7 +7,7 @@ internal class KhQuadtreeNode : IQuadtreeNode
 	IReadOnlyList<IQuadtreeLayer> IQuadtreeNode.Layer => Layers;
 	IReadOnlyList<IQuadtreeChannel> IQuadtreeNode.Channel => Channels;
 
-	private readonly List<KhQuadtreeLayer> Layers;
+	public readonly List<KhQuadtreeLayer> Layers;
 	public readonly KhQuadtreeChannel[] Channels;
 
 	public KhQuadtreeNode(KhQuadTreeQuantum16 khQuadTreeQuantum16, short[] channelTypes, short[] channelVersions)

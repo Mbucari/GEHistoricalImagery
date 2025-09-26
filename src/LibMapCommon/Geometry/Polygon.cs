@@ -127,8 +127,9 @@ public abstract class Polygon<TPoly, TCoordinate>
 		//Ear clipping
 		var triangles = new List<TPoly>(Edges.Count - 2);
 
-		var poly = CreateFromEdges(Edges);
-		var edges = Edges.ToList();
+		const double epsilon = 1e-12;
+		var poly = CreateFromEdges(Edges.Where(e => e.Direction.Length > epsilon).ToArray());
+		var edges = poly.Edges.ToList();
 
 		for (int i = 0; edges.Count > 3; i = (i + 1) % edges.Count)
 		{

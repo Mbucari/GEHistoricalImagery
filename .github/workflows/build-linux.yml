@@ -21,16 +21,16 @@ on:
 
 env:
   DOTNET_CONFIGURATION: "Release"
-  DOTNET_VERSION: "9.0.x"
+  DOTNET_VERSION: "10.x"
 
 jobs:
   build:
     name: "linux-${{ inputs.architecture }}"
     runs-on: ${{ inputs.runs_on }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -93,7 +93,7 @@ jobs:
           echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
           
       - name: Publish bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ steps.bundle.outputs.artifact }}
           path: ./src/bin/Publish/${{ steps.bundle.outputs.artifact }}

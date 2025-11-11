@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dotnet_channel="9.0"
+dotnet_channel="10.0"
 dotnet=~/.dotnet/dotnet
 
 install_dotnet() {
@@ -15,7 +15,7 @@ if [ ! -f $dotnet ]; then
 fi
 
 dotnet_versions=$($dotnet --list-sdks)
-regex="9\.0\.[0-9]{3}"
+regex="10\.0\.[0-9]{3}"
 
 if [[ ! $dotnet_versions =~ $regex ]]; then
     install_dotnet

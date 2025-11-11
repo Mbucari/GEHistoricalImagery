@@ -261,7 +261,7 @@ internal class Availability : AoiVerb
 		public override bool Equals(object? obj) => Equals(obj as RegionAvailability);
 		public bool Equals(RegionAvailability? other)
 		{
-			if (other == null || other.Date != Date || other.Height != Height || other.Width != Width)
+			if (other is null || other.Date != Date || other.Height != Height || other.Width != Width)
 				return false;
 
 			for (int i = 0; i < Height; i++)

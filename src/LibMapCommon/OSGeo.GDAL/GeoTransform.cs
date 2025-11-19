@@ -28,4 +28,25 @@ public readonly record struct GeoTransform
 		UpperLeft_X += x;
 		UpperLeft_Y += y;
 	}
+	public void WriteWorldFile(string imageFile)
+	{
+		var worldFileExtension = Path.GetExtension(imageFile) switch
+		{
+			".gif" or ".giff" => ".gfw",
+			".jpg" or ".jpeg" => ".jgw",
+			".tif" or ".tiff" => ".tfw",
+			".png" => ".pgw",
+			".jp2" => ".j2w",
+			_ => ".worldfile"
+		};
+
+		var worldFile = Path.ChangeExtension(imageFile, worldFileExtension);
+		using var sw = new StreamWriter(worldFile);
+		sw.WriteLine(PixelWidth);
+		sw.WriteLine(ColumnRotation);
+		sw.WriteLine(RowRotation);
+		sw.WriteLine(PixelHeight);
+		sw.WriteLine(UpperLeft_X);
+		sw.WriteLine(UpperLeft_Y);
+	}
 }

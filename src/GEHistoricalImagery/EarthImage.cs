@@ -21,12 +21,7 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 
 	static EarthImage()
 	{
-#if LINUX
-		Gdal.AllRegister();
-#else
-		GdalConfiguration.ConfigureGdal();
-#endif
-		Gdal.SetCacheMax(1024 * 1024 * 300);
+		GdalLib.Register();
 	}
 
 	public EarthImage(GeoRegion<T> region, int level, string? cacheFile = null)
@@ -108,6 +103,25 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
 	}
 
+	public static GDALWarpAppOptions GetWarpOptions(string target_srs, int cpuCount = 1)
+	{
+		string[] parameters =
+		[
+			"-multi",
+			"-wo", $"NUM_THREADS={cpuCount}",
+			"-of", "GTiff",
+			"-ot", "Byte",
+			"-wo", "OPTIMIZE_SIZE=TRUE",
+			"-co", "COMPRESS=JPEG",
+			"-co", "PHOTOMETRIC=YCBCR",
+			"-co", "TILED=TRUE",
+			"-r", "bilinear",
+			"-s_srs", $"EPSG:{T.EpsgNumber}",
+			"-t_srs", target_srs
+		];
+		return new GDALWarpAppOptions(parameters);
+	}
+
 	public void Save(string path, string? outSR, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
 	{
 		if (TempDataset == null) return;
@@ -117,21 +131,7 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 
 		if (outSR != null)
 		{
-			string[] parameters =
-			[
-				"-multi",
-				"-wo", $"NUM_THREADS={cpuCount}",
-				"-of", "GTiff",
-				"-ot", "Byte",
-				"-wo", "OPTIMIZE_SIZE=TRUE",
-				"-co", "COMPRESS=JPEG",
-				"-co", "PHOTOMETRIC=YCBCR",
-				"-co", "TILED=TRUE",
-				"-r", "bilinear",
-				"-s_srs", $"EPSG:{T.EpsgNumber}",
-				"-t_srs", outSR
-			];
-			using var options = new GDALWarpAppOptions(parameters);
+			using var options = GetWarpOptions(outSR, cpuCount);
 			saved = Gdal.Warp(path, [TempDataset], options, reportProgress, null);
 		}
 		else
@@ -162,24 +162,7 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 			saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();
 
-			var worldFileExtension = Path.GetExtension(path) switch
-			{
-				".gif" or ".giff" => ".gfw",
-				".jpg" or ".jpeg" => ".jgw",
-				".tif" or ".tiff" => ".tfw",
-				".png" => ".pgw",
-				".jp2" => ".j2w",
-				_ => ".worldfile"
-			};
-
-			var worldFile = Path.ChangeExtension(path, worldFileExtension);
-			using var sw = new StreamWriter(worldFile);
-			sw.WriteLine(geoTransform.PixelWidth);
-			sw.WriteLine(geoTransform.ColumnRotation);
-			sw.WriteLine(geoTransform.RowRotation);
-			sw.WriteLine(geoTransform.PixelHeight);
-			sw.WriteLine(geoTransform.UpperLeft_X);
-			sw.WriteLine(geoTransform.UpperLeft_Y);
+			geoTransform.WriteWorldFile(path);
 		}
 
 		int reportProgress(double Complete, IntPtr Message, IntPtr Data)

@@ -39,7 +39,8 @@ To learn about defining a region of interest, please refer to the [Regions of In
 
   -p N, --parallel=N                           (Default: ALL_CPUS) Number of concurrent downloads
 
-  --target-sr=https://epsg.io/1234.wkt         Warp image to Spatial Reference
+  --target-sr=[SPATIAL REFERENCE]              Warp image to Spatial Reference. Either EPSG:#### or path to projection
+                                               file (file system or web)
 
   --scale=S                                    (Default: 1) Geo transform scale factor
 

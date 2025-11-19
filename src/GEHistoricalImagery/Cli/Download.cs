@@ -22,7 +22,7 @@ internal class Download : AoiVerb
 	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
 	public int ConcurrentDownload { get; set; }
 
-	[Option("target-sr", HelpText = "Warp image to Spatial Reference", MetaValue = "https://epsg.io/1234.wkt", Default = null)]
+	[Option("target-sr", HelpText = "Warp image to Spatial Reference. Either EPSG:#### or path to projection file (file system or web)", MetaValue = "[SPATIAL REFERENCE]", Default = null)]
 	public string? TargetSpatialReference { get; set; }
 
 	[Option("scale", HelpText = "Geo transform scale factor", MetaValue = "S", Default = 1d)]

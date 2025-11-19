@@ -8,19 +8,7 @@ To learn about defining a region of interest, please refer to the [Regions of In
 
 ## Usage
 ```Console
- GEHistoricalImagery dump [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+...]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache]
-
-  --region-file=/path/to/kmzfile.kmz                Path to a kmz or kml file containing the region geometry (polygon or
-                                                    polyline with at least three vertices)
-
-  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2         A list of geographic coordinates which are the vertices of the
-                                                    polygonal area of interest. Vertex coordinates delimiter with a '+'.
-
-  --lower-left=LAT,LONG                             Geographic coordinate of the lower-left (southwest) corner of the
-                                                    rectangular area of interest.
-
-  --upper-right=LAT,LONG                            Geographic coordinate of the upper-right (northeast) corner of the
-                                                    rectangular area of interest.
+ GEHistoricalImagery dump [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+...]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache] [--target-sr "SPATIAL REFERENCE"]] [--world]
 
   -d yyyy/MM/dd, --date=yyyy/MM/dd                  Required. Imagery Date
 
@@ -40,6 +28,23 @@ To learn about defining a region of interest, please refer to the [Regions of In
                                                       "{LD}" = tile's layer date (wayback only)
 
   -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
+
+  --target-sr=[SPATIAL REFERENCE]                   Warp image to Spatial Reference. Either EPSG:#### or path to
+                                                    projection file (file system or web)
+
+  -w, --world                                       Write a world file for each tile
+
+  --region-file=/path/to/kmzfile.kmz                Path to a kmz or kml file containing the region geometry (polygon or
+                                                    polyline with at least three vertices)
+
+  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2         A list of geographic coordinates which are the vertices of the
+                                                    polygonal area of interest. Vertex coordinates delimiter with a '+'.
+
+  --lower-left=LAT,LONG                             Geographic coordinate of the lower-left (southwest) corner of the
+                                                    rectangular area of interest.
+
+  --upper-right=LAT,LONG                            Geographic coordinate of the upper-right (northeast) corner of the
+                                                    rectangular area of interest.
 
   -z N, --zoom=N                                    Required. Zoom level [1-23]
 
@@ -95,6 +100,23 @@ There are `2^zoom` number of global rows, beginning with row 0 at -180 degrees l
    ...
    Zoom=20, Global Column=218963, Global Row=639743.jpg
    ```
+   
+### Example 3
+
+Same as [Example 1](#example-1), but warp each Google Earth tile to Web Mercator reference and save world files for each tile.
+
+   **Command:**
+   ```Console
+   GEHistoricalImagery dump --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2024/06/05 -f "Zoom={Z}, Column={c}, Row={r}.jpg" --world --target-sr EPSG:3857 -o "./Tiles"
+   ```   
+   **Output:**
+   ```
+   Zoom=20, Column=00, Row=00.jpg
+   Zoom=20, Column=00, Row=00.jgw
+   ...
+   Zoom=20, Column=91, Row=54.jpg
+   Zoom=20, Column=91, Row=54.jgw
+   ```
 ## Convert Between Lat/Long and Row/Column numbers
 
 **Global** row/column numbers can be related to latitude/longitude using the following formulae:
@@ -121,4 +143,4 @@ Where:
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/06/20</i></p>
+<p align="center"><i>Updated 2025/11/19</i></p>

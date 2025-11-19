@@ -3,6 +3,7 @@ using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
 using LibMapCommon.Geometry;
+using OSGeo.GDAL;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -35,6 +36,12 @@ internal partial class Dump : AoiVerb
 
 	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
 	public int ConcurrentDownload { get; set; }
+
+	[Option("target-sr", HelpText = "Warp image to Spatial Reference. Either EPSG:#### or path to projection file (file system or web)", MetaValue = "[SPATIAL REFERENCE]", Default = null)]
+	public string? TargetSpatialReference { get; set; }
+
+	[Option('w', "world", HelpText = "Write a world file for each tile")]
+	public bool WriteWorldFile { get; set; }
 
 	public override async Task RunAsync()
 	{
@@ -150,9 +157,8 @@ internal partial class Dump : AoiVerb
 
 			var imageBts = await wayBack.DownloadTileAsync(dt.Layer, dt.Tile);
 
-			return new()
+			return new TileDataset<WebMercator>(tile)
 			{
-				Tile = tile,
 				Dataset = imageBts,
 				Message = dt.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(dt.CaptureDate)} for tile at {tile.Wgs84Center}",
 				TileDate = dt.CaptureDate,
@@ -171,9 +177,8 @@ internal partial class Dump : AoiVerb
 		{
 			var imageBts = await wayBack.DownloadTileAsync(layer, tile);
 
-			return new()
+			return new TileDataset<WebMercator>(tile)
 			{
-				Tile = tile,
 				Dataset = imageBts,
 				Message = null,
 				TileDate = getTileDate ? await wayBack.GetDateAsync(layer, tile) : default,
@@ -217,9 +222,8 @@ internal partial class Dump : AoiVerb
 			{
 				if (await root.GetEarthAssetAsync(dt) is byte[] imageBts)
 				{
-					return new()
+					return new TileDataset<Wgs1984>(tile)
 					{
-						Tile = tile,
 						Dataset = imageBts,
 						Message = dt.Date == desiredDate ? null
 						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}",
@@ -255,7 +259,7 @@ internal partial class Dump : AoiVerb
 			{
 				var saveFile = formatter.GetString(tds);
 				var savePath = Path.Combine(saveFolder.FullName, saveFile);
-				File.WriteAllBytes(savePath, tds.Dataset);
+				SaveDataset(savePath, tds);
 				numTilesDownload++;
 			}
 
@@ -266,19 +270,84 @@ internal partial class Dump : AoiVerb
 		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 	}
 
-	private static TileDataset EmptyDataset(ITile tile) => new()
+	private void SaveDataset(string filePath, TileDataset tds)
 	{
-		Tile = tile,
-		Message = $"No imagery available for tile at {tile.Wgs84Center}"
+		if (TargetSpatialReference is null)
+		{
+			if (tds.Dataset is null)
+			{
+				Console.Error.WriteLine($"\r\nDataset for tile {tds.Tile} is empty");
+				return;
+			}
+			File.WriteAllBytes(filePath, tds.Dataset);
+			if (WriteWorldFile)
+			{
+				tds.GetGeoTransform().WriteWorldFile(filePath);
+			}
+			return;
+		}
+
+		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
+		string srcFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
+
+		try
+		{
+			Gdal.FileFromMemBuffer(srcFile, tds.Dataset);
+			using var sourceDs = Gdal.OpenEx(srcFile, (uint)openOptions, ["JPEG"], null, []);
+
+			var geoTransform = tds.GetGeoTransform();
+			sourceDs.SetGeoTransform(geoTransform);
+
+			using var options = tds.GetWarpOptions(TargetSpatialReference);
+			using var destDs = Gdal.Warp(filePath, [sourceDs], options, null, null);
+			if (WriteWorldFile)
+			{
+				destDs.GetGeoTransform().WriteWorldFile(filePath);
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"Failed to open GDAL dataset for tile at {tds.Tile.Wgs84Center}: {ex.Message}");
+		}
+		finally
+		{
+			Gdal.Unlink(srcFile);
+		}
+	}
+
+	private static TileDataset EmptyDataset<TCoordinate>(ITile<TCoordinate> tile, string? messageOverride = null)
+		where TCoordinate : IGeoCoordinate<TCoordinate> => new TileDataset<TCoordinate>(tile)
+	{
+		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
 	};
 
-	private class TileDataset
+	private abstract class TileDataset
 	{
 		public DateOnly? LayerDate { get; init; }
 		public DateOnly TileDate { get; init; }
-		public required ITile Tile { get; init; }
+		public abstract ITile Tile { get; }
 		public byte[]? Dataset { get; init; }
 		public required string? Message { get; init; }
+		public abstract GeoTransform GetGeoTransform();
+		public abstract GDALWarpAppOptions GetWarpOptions(string targetSr);
+
+		static TileDataset()
+		{
+			GdalLib.Register();
+		}
+	}
+
+	private class TileDataset<TCoordinate> : TileDataset
+		where TCoordinate : IGeoCoordinate<TCoordinate>
+	{
+		public override ITile<TCoordinate> Tile { get; }
+		public TileDataset(ITile<TCoordinate> tile)
+		{
+			Tile = tile;
+		}
+		public override GeoTransform GetGeoTransform() => Tile.GetGeoTransform();
+		public override GDALWarpAppOptions GetWarpOptions(string targetSr)
+			=> EarthImage<TCoordinate>.GetWarpOptions(targetSr);
 	}
 
 	private class FilenameFormatter

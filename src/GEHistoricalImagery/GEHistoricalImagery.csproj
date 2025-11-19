@@ -4,7 +4,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>0.3.2</Version>
+		<Version>0.3.3</Version>
 		<SelfContained>true</SelfContained>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -20,8 +20,8 @@
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 	</ItemGroup>
 	<ItemGroup Condition="$(RuntimeIdentifier.StartsWith('linux'))">
-		<PackageReference Include="MaxRev.Gdal.Core" Version="3.11.0.335" />
-		<PackageReference Include="MaxRev.Gdal.LinuxRuntime.Minimal" Version="3.11.0.335" />
+		<PackageReference Include="MaxRev.Gdal.Core" Version="3.12.0.418" />
+		<PackageReference Include="MaxRev.Gdal.LinuxRuntime.Minimal" Version="3.12.0.418" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">

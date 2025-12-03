@@ -79,9 +79,9 @@ internal abstract class AoiVerb : OptionsBase
 		else if (LowerLeft is null && UpperRight is null)
 			yield return "An area of interest must be specified either with the 'region' option or the 'lower-left' and 'upper-right' options";
 		else if (LowerLeft is null)
-			yield return "Invalid lower-left coordinate.\r\n Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305";
+			yield return $"Invalid lower-left coordinate.{Environment.NewLine} Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305";
 		else if (UpperRight is null)
-			yield return "Invalid upper-right coordinate.\r\n Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305";
+			yield return $"Invalid upper-right coordinate.{Environment.NewLine} Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305";
 		else
 		{
 			string? errorMessage = null;
@@ -102,7 +102,7 @@ internal abstract class AoiVerb : OptionsBase
 			}
 			catch (Exception e)
 			{
-				errorMessage = $"Invalid rectangle.\r\n {e.Message}";
+				errorMessage = $"Invalid rectangle.{Environment.NewLine} {e.Message}";
 			}
 			if (errorMessage != null)
 				yield return errorMessage;

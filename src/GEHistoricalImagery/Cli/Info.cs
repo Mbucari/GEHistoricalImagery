@@ -18,7 +18,7 @@ internal class Info : OptionsBase
 	{
 		if (Coordinate is null)
 		{
-			Console.Error.WriteLine("Invalid location coordinate.\r\n Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305");
+			Console.Error.WriteLine($"Invalid location coordinate.{Environment.NewLine} Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305");
 			return;
 		}
 		if (ZoomLevel < 1 || ZoomLevel > 23)

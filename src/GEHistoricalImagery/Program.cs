@@ -39,7 +39,7 @@ internal class Program
 		}
 		catch (Exception ex)
 		{
-			Console.Error.WriteLine("An error occurred:\r\n\r\n" + ex.ToString());
+			Console.Error.WriteLine("An error occurred:" + Environment.NewLine + Environment.NewLine + ex.ToString());
 		}
 	}
 }

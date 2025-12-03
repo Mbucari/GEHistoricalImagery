@@ -10,8 +10,11 @@ namespace GEHistoricalImagery.Cli;
 [Verb("download", HelpText = "Download historical imagery")]
 internal class Download : AoiVerb
 {
-	[Option('d', "date", HelpText = "Imagery Date", MetaValue = "yyyy/MM/dd", Required = true)]
-	public DateOnly? Date { get; set; }
+	[Option('d', "date", HelpText = "Imagery Date(s). Multiple dates separated by a comman (,)", MetaValue = "yyyy/MM/dd", Required = true, Separator = ',')]
+	public IEnumerable<DateOnly>? Dates { get; set; }
+
+	[Option("exact-date", HelpText = "Require an exact date match for tiles to be download")]
+	public bool ExactMatch { get; set; }
 
 	[Option("layer-date", HelpText = "(Wayback only) The date specifies a layer instead of an image capture date")]
 	public bool LayerDate { get; set; }
@@ -47,7 +50,7 @@ internal class Download : AoiVerb
 			hasError = true;
 		}
 
-		if (Date is null)
+		if (Dates is null)
 		{
 			Console.Error.WriteLine("Invalid imagery date");
 			hasError = true;
@@ -78,73 +81,85 @@ internal class Download : AoiVerb
 			return;
 		}
 
-		var desiredDate = Date!.Value;
-		var task = Provider is Provider.Wayback ? Run_Esri(saveFile, desiredDate)
-			: Run_Keyhole(saveFile, desiredDate);
+		var desiredDates = Dates!;
+		var task = Provider is Provider.Wayback ? Run_Esri(saveFile, desiredDates)
+			: Run_Keyhole(saveFile, desiredDates);
 
 		await task;
 	}
 
 	#region Esri
 
-	private async Task Run_Esri(FileInfo saveFile, DateOnly desiredDate)
+	private async Task Run_Esri(FileInfo saveFile, IEnumerable<DateOnly> desiredDates)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 		var webMerc = Region.ToWebMercator();
 		var stats = webMerc.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
 
-		await Run_Common(saveFile, desiredDate, webMerc, stats.TileCount, generateWork());
+		await Run_Common(saveFile, webMerc, stats.TileCount, generateWork());
 
 		IEnumerable<Task<TileDataset<WebMercator>>> generateWork()
 		{
 			var aoi = webMerc.ToPixelRegion(ZoomLevel);
 			if (LayerDate)
 			{
-				var layer = wayBack.Layers.OrderBy(l => int.Abs(l.Date.DayNumber - desiredDate.DayNumber)).First();
-
-				Console.Write($"Grabbing Image Tiles From {layer.Title}: ");
+				var datedLayer = wayBack.Layers.SortByNearestDates(d => d.Date, desiredDates).FirstOrDefault();
+				if (datedLayer is null)
+				{
+					Console.Error.WriteLine($"ERROR: No layers found");
+					return [];
+				}
+				else if (ExactMatch && !datedLayer.IsExactMatch)
+				{
+					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
+					return [];
+				}
+				Console.Write($"Grabbing Image Tiles From {datedLayer.DatedElement.Title}: ");
 				ReportProgress(0);
-				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, layer)));
+				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, datedLayer.DatedElement)));
 			}
 			else
 			{
-				Console.Write($"Grabbing Image Tiles Nearest To {DateString(desiredDate)}: ");
+				var message = ExactMatch ? "On" : "Nearest To";
+				Console.Write($"Grabbing Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				ReportProgress(0);
-				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDate)));
+				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDates)));
 			}
 		}
 	}
 
-	private async Task<TileDataset<WebMercator>> DownloadTile(PixelRegion aoi, WayBack wayBack, EsriTile tile, DateOnly desiredDate)
+	private async Task<TileDataset<WebMercator>> DownloadTile(PixelRegion aoi, WayBack wayBack, EsriTile tile, IEnumerable<DateOnly> desiredDates)
 	{
 		try
 		{
 			EsriTile gotTile = tile;
-			DatedEsriTile? node;
-			while ((node = await wayBack.GetNearestDatedTileAsync(gotTile, desiredDate)) is null &&
+			DateMatchResult<DatedEsriTile>? dmr;
+			while ((dmr = await wayBack.GetDatesAsync(tile).GetCloseteDatedElement(d => d.CaptureDate, desiredDates)) is null &&
 				tile.Level - gotTile.Level < 2 && gotTile.Level >= 2)
 			{
 				gotTile = EsriTile.Create(gotTile.Row / 2, gotTile.Column / 2, gotTile.Level - 1);
 			}
 
-			if (node is null)
+			if (dmr is null)
 				return EmptyDataset(tile);
 
-			var imageBts = await wayBack.DownloadTileAsync(node.Layer, node.Tile);
+			if (ExactMatch && !dmr.IsExactMatch)
+				return EmptyDataset(tile, $"Could not find an exact date match for tile at {tile.Wgs84Center} Closest tile date found: {DateString(dmr.DatedElement.CaptureDate)}");
+
+			var imageBts = await wayBack.DownloadTileAsync(dmr.DatedElement.Layer, dmr.DatedElement.Tile);
 			var dataset = OpenDataset(imageBts);
-			var message = node.CaptureDate == desiredDate ? null : $"Substituting imagery from {DateString(node.CaptureDate)} for tile at {tile.Wgs84Center}";
+			var message = dmr.IsExactMatch ? null : $"Substituting imagery from {DateString(dmr.DatedElement.CaptureDate)} for tile at {tile.Wgs84Center}";
 
 			if (gotTile.Level != tile.Level)
 			{
 				dataset = ResizeTile(gotTile, dataset, tile);
-				message = $"Substituting level {gotTile.Level} imagery from {DateString(node.CaptureDate)} for tile at {tile.Wgs84Center}";
+				message = $"Substituting level {gotTile.Level} imagery from {DateString(dmr.DatedElement.CaptureDate)} for tile at {tile.Wgs84Center}";
 			}
 
 			dataset = TrimDataset(dataset, aoi, tile);
 
-			return new()
+			return new(tile)
 			{
-				Tile = tile,
 				Message = message,
 				Dataset = dataset
 			};
@@ -175,9 +190,8 @@ internal class Download : AoiVerb
 
 				dataset = TrimDataset(dataset, aoi, tile);
 
-				return new()
+				return new(tile)
 				{
-					Tile = tile,
 					Message = message,
 					Dataset = dataset
 				};
@@ -195,12 +209,12 @@ internal class Download : AoiVerb
 
 	#region Keyhole
 
-	private async Task Run_Keyhole(FileInfo saveFile, DateOnly desiredDate)
+	private async Task Run_Keyhole(FileInfo saveFile, IEnumerable<DateOnly> desiredDates)
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var stats = Region.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
 
-		await Run_Common(saveFile, desiredDate, Region, stats.TileCount, generateWork());
+		await Run_Common(saveFile, Region, stats.TileCount, generateWork());
 
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
@@ -208,11 +222,11 @@ internal class Download : AoiVerb
 			Console.Write("Grabbing Image Tiles: ");
 			ReportProgress(0);
 
-			return Region.GetTiles<KeyholeTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDate)));
+			return Region.GetTiles<KeyholeTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDates)));
 		}
 	}
 
-	private async Task<TileDataset<Wgs1984>> DownloadTile(PixelRegion aoi, DbRoot root, KeyholeTile tile, DateOnly desiredDate)
+	private async Task<TileDataset<Wgs1984>> DownloadTile(PixelRegion aoi, DbRoot root, KeyholeTile tile, IEnumerable<DateOnly> desiredDates)
 	{
 		KeyholeTile gotTile = tile;
 		TileNode? node;
@@ -226,12 +240,14 @@ internal class Download : AoiVerb
 		if (node is null)
 			return EmptyDataset(tile);
 
-		foreach (var dt in node.GetAllDatedTiles().OrderBy(d => int.Abs(desiredDate.DayNumber - d.Date.DayNumber)))
+		foreach (var dt in node.GetAllDatedTiles().SortByNearestDates(t => t.Date, desiredDates))
 		{
 			try
 			{
-				byte[]? imageBts = await root.GetEarthAssetAsync(dt);
-				if (imageBts == null)
+				if (ExactMatch && !dt.IsExactMatch)
+					return EmptyDataset(tile, $"Exact date match not found for tile at {tile.Wgs84Center}. Closest layer date found: {DateString(dt.DatedElement.Date)}");
+
+				if (await root.GetEarthAssetAsync(dt.DatedElement) is not byte[] imageBts)
 					continue;
 
 				var dataset = OpenDataset(imageBts);
@@ -240,20 +256,19 @@ internal class Download : AoiVerb
 				if (gotTile.Level != tile.Level)
 				{
 					dataset = ResizeTile(gotTile, dataset, tile);
-					message = dt.Date == default
+					message = dt.DatedElement.Date == default
 						? $"Substituting level {gotTile.Level} default imagery of unknown date for tile at {tile.Wgs84Center}"
-						: $"Substituting level {gotTile.Level} imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
+						: $"Substituting level {gotTile.Level} imagery from {DateString(dt.DatedElement.Date)} for tile at {tile.Wgs84Center}";
 				}
-				else if (dt.Date != desiredDate)
-					message = dt.Date == default
+				else if (!dt.IsExactMatch)
+					message = dt.DatedElement.Date == default
 						? $"Substituting default imagery of unknown date for tile at {tile.Wgs84Center}"
-						: $"Substituting imagery from {DateString(dt.Date)} for tile at {tile.Wgs84Center}";
+						: $"Substituting imagery from {DateString(dt.DatedElement.Date)} for tile at {tile.Wgs84Center}";
 
 				dataset = TrimDataset(dataset, aoi, tile);
 
-				return new()
+				return new(tile)
 				{
-					Tile = tile,
 					Dataset = dataset,
 					Message = message
 				};
@@ -306,7 +321,7 @@ internal class Download : AoiVerb
 		return enlarged.ToDataset();
 	}
 
-	private async Task Run_Common<T>(FileInfo saveFile, DateOnly desiredDate, GeoRegion<T> region, double tileCount, IEnumerable<Task<TileDataset<T>>> generator)
+	private async Task Run_Common<T>(FileInfo saveFile, GeoRegion<T> region, double tileCount, IEnumerable<Task<TileDataset<T>>> generator)
 		where T : IGeoCoordinate<T>
 	{
 		var tempFile = Path.GetTempFileName();
@@ -323,16 +338,24 @@ internal class Download : AoiVerb
 			await foreach (var tds in processor.EnumerateResults(generator))
 				using (tds)
 				{
-					image.AddTile(tds.Tile, tds.Dataset ?? missingTile);
-					numTilesDownload++;
+					if (tds.Dataset is null)
+					{
+
+						image.AddTile(tds.Tile, missingTile);
+					}
+					else
+					{
+						image.AddTile(tds.Tile, tds.Dataset);
+						numTilesDownload++;
+					}
 
 					if (tds.Message is not null)
-						Console.Error.WriteLine($"\r\n{tds.Message}");
+						Console.Error.WriteLine($"{Environment.NewLine}{tds.Message}");
 
 					ReportProgress(++numTilesProcessed / tileCount);
 				}
 
-			ReplaceProgress("Done!\r\n");
+			ReplaceProgress($"Done!{Environment.NewLine}");
 			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 			//Release the lock for either saving or deleting
@@ -350,7 +373,7 @@ internal class Download : AoiVerb
 
 			image.Saving += Image_Saving;
 			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
-			ReplaceProgress("Done!\r\n");
+			ReplaceProgress("Done!" + Environment.NewLine);
 		}
 		finally
 		{
@@ -422,23 +445,11 @@ internal class Download : AoiVerb
 		return image.ToDataset();
 	}
 
-	private static TileDataset<T> EmptyDataset<T>(ITile<T> tile) where T : IGeoCoordinate<T> => new()
+	private static TileDataset<T> EmptyDataset<T>(ITile<T> tile, string? messageOverride = null) where T : IGeoCoordinate<T> => new(tile)
 	{
-		Tile = tile,
-		Message = $"No imagery available for tile at {tile.Wgs84Center}"
+		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
 	};
 
-	private class TileDataset<T> : IDisposable where T : IGeoCoordinate<T>
-	{
-		public required ITile<T> Tile { get; init; }
-		public Dataset? Dataset { get; init; }
-		public required string? Message { get; init; }
-
-		public void Dispose()
-		{
-			Dataset?.Dispose();
-		}
-	}
 
 	internal class TileImage
 	{

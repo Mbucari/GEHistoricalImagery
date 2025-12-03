@@ -81,7 +81,7 @@ internal class Placemark
 		}
 		catch (Exception ex)
 		{
-			Console.Error.WriteLine("Error reading keyhole file.\r\n" + ex.Message);
+			Console.Error.WriteLine($"Error reading keyhole file.{Environment.NewLine}" + ex.Message);
 			return null;
 		}
 	}

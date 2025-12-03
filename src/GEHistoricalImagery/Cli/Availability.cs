@@ -43,7 +43,7 @@ internal class Availability : AoiVerb
 		Console.Write("Loading World Atlas WayBack Layer Info: ");
 
 		var all = await GetAllEsriRegions(wayBack, Region);
-		ReplaceProgress("Done!\r\n");
+		ReplaceProgress("Done!" + Environment.NewLine);
 
 		if (all.Sum(r => r.Availabilities.Length) == 0)
 		{
@@ -128,16 +128,16 @@ internal class Availability : AoiVerb
 			if (Availabilities.Length == 1)
 			{
 				var availabilityStr = $"Tile availability on {DateString(Layer.Date)} (captured on {DateString(Availabilities[0].Date)})";
-				Console.WriteLine("\r\n" + availabilityStr);
-				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
+				Console.WriteLine(Environment.NewLine + availabilityStr);
+				Console.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 
 				Availabilities[0].DrawMap();
 			}
 			else if (Availabilities.Length > 1)
 			{
 				var availabilityStr = $"Layer {Layer.Title} has imagery from {Availabilities.Length} different dates";
-				Console.WriteLine("\r\n" + availabilityStr);
-				Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
+				Console.WriteLine(Environment.NewLine + availabilityStr);
+				Console.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 
 				OptionChooser<RegionAvailability>.WaitForOptions(Availabilities);
 			}
@@ -154,7 +154,7 @@ internal class Availability : AoiVerb
 		Console.Write("Loading Quad Tree Packets: ");
 
 		var all = await GetAllDatesAsync(root, Region);
-		ReplaceProgress("Done!\r\n");
+		ReplaceProgress("Done!" + Environment.NewLine);
 
 		if (all.Length == 0)
 		{
@@ -278,8 +278,8 @@ internal class Availability : AoiVerb
 		public bool DrawOption()
 		{
 			var availabilityStr = $"Tile availability on {DateString(Date)}";
-			Console.WriteLine("\r\n" + availabilityStr);
-			Console.WriteLine(new string('=', availabilityStr.Length) + "\r\n");
+			Console.WriteLine(Environment.NewLine + availabilityStr);
+			Console.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 			DrawMap();
 			return false;
 		}

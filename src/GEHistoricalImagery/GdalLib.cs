@@ -34,8 +34,10 @@ internal class GdalLib
 	/// </summary>
 	private static void SetConfigOption(string name, string value)
 	{
-		var bts = Encoding.UTF8.GetBytes(value);
-		SetConfigOption(name, bts);
+		int size = Encoding.UTF8.GetByteCount(value);
+		var ut8Bytes = new byte[size + 1];
+		Encoding.UTF8.GetBytes(value, ut8Bytes);
+		SetConfigOption(name, ut8Bytes);
 	}
 
 	[DllImport("gdal_wrap", EntryPoint = "CSharp_OSGeofGDAL_SetConfigOption___")]

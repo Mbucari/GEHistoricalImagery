@@ -1,0 +1,102 @@
+# build-mac.yml
+# Reusable workflow that builds the MacOS (x64 and arm64) versions.
+---
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      software-version:
+        type: string
+        description: "Version number"
+        required: true
+      architecture:
+        type: string
+        description: "CPU architecture targeted by the build."
+        required: true
+      dotnet-version:
+        type: string
+        required: true
+      sign-app:
+        type: boolean
+        description: "Wheather to sign an notorize the app bundle and dmg."
+
+jobs:
+  build:
+    name: "macOS-${{ inputs.architecture }}"
+    runs-on: macos-latest
+    steps:
+      - uses: apple-actions/import-codesign-certs@v5
+        if: ${{ inputs.sign-app }}
+        with: 
+          p12-file-base64: ${{ secrets.DISTRIBUTION_SIGNING_CERT }}
+          p12-password: ${{ secrets.DISTRIBUTION_SIGNING_CERT_PW }}
+          
+    
+      - uses: actions/checkout@v6
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Publish
+        id: publish
+        working-directory: ./src
+        run: |
+          preprocessor="LINUX"          
+          
+          dotnet publish \
+              GEHistoricalImagery/GEHistoricalImagery.csproj \
+              --os osx \
+              --arch ${{ inputs.architecture }} \
+              --configuration Release \
+              --output "../GEHistoricalImagery" \
+              -p:DefineConstants=$preprocessor \
+              -p:PublishProtocol=FileSystem \
+              -p:SelfContained=true \
+              -p:PublishTrimmed=true \
+              -p:PublishSingleFile=true
+
+      - name: Sign and Notarize bundle
+        id: notarize
+        if: ${{ inputs.sign-app }}
+        run: |          
+          ENTITLEMENTS=../my.entitlements
+          echo -e '<?xml version="1.0" encoding="UTF-8"?>' > $ENTITLEMENTS
+          echo -e '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> $ENTITLEMENTS
+          echo -e '<plist version="1.0">' >> $ENTITLEMENTS
+          echo -e '<dict>' >> $ENTITLEMENTS
+          echo -e '  <key>com.apple.security.app-sandbox</key>' >> $ENTITLEMENTS
+          echo -e '  <false/>' >> $ENTITLEMENTS
+          echo -e '  <key>com.apple.security.cs.disable-executable-page-protection</key>' >> $ENTITLEMENTS
+          echo -e '  <true/>' >> $ENTITLEMENTS
+          echo -e '</dict>' >> $ENTITLEMENTS
+          echo -e '</plist>' >> $ENTITLEMENTS
+          
+          all_identities=$(security find-identity -v -p codesigning)
+          identity=$(echo ${all_identities} | sed -n 's/.*"\(.*\)".*/\1/p')
+          
+          find "./GEHistoricalImagery/" -type f |while read fname; do
+            if [[ -f $fname ]]; then
+              chflags hidden "$fname"
+              codesign --force --timestamp --options=runtime --entitlements "$ENTITLEMENTS" --sign "${identity}" "$fname"
+            fi
+          done    
+          
+          chflags nohidden ./GEHistoricalImagery/GEHistoricalImagery
+          artifact="GEHistoricalImagery.${{ inputs.software-version }}-macOS-${{ inputs.architecture }}.dmg"
+          hdiutil create -srcFolder ./GEHistoricalImagery -o "$artifact"
+          
+          xcrun notarytool submit $artifact --wait --apple-id ${{ vars.APPLE_DEV_EMAIL }} --password ${{ secrets.APPLE_DEV_PASSWORD }} --team-id ${{ secrets.APPLE_TEAM_ID }}
+          xcrun stapler staple "$artifact"
+          echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
+          
+      - name: Publish bundle
+        if: ${{ inputs.sign-app }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ steps.notarize.outputs.artifact }}
+          path: ./${{ steps.notarize.outputs.artifact }}
+          if-no-files-found: error
+          retention-days: 7

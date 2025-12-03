@@ -5,20 +5,31 @@ name: build
 on:
   workflow_call:
     inputs:
-      version_override:
+      software-version:
         type: string
-        description: "Version number override"
-        required: false
+        description: "Version number"
+        required: true
+      dotnet-version:
+        type: string
+        default: "10.x"
+        description: ".NET version to target"
+      release:
+        type: boolean
+        description: "Whether this workflow is being called as a release"
 
 jobs:
-  windows:
+
+  macOS:
     strategy:
       matrix:
-        architecture: [x64, x86]  
-    uses: ./.github/workflows/build-windows.yml
+        architecture: [x64, arm64]
+    uses: ./.github/workflows/build-mac.yml
     with:
-      version_override: ${{ inputs.version_override }}
+      software-version: ${{ inputs.software-version }}
       architecture: ${{ matrix.architecture }}
+      dotnet-version: ${{ inputs.dotnet-version }}
+      sign-app: ${{ inputs.release || vars.SIGN_MAC_APP_ON_VALIDATE == 'true' }}
+    secrets: inherit
 
   linux:
     strategy:
@@ -26,6 +37,12 @@ jobs:
         architecture: [x64, arm64]
     uses: ./.github/workflows/build-linux.yml
     with:
-      version_override: ${{ inputs.version_override }}
-      runs_on: ubuntu-latest
+      software-version: ${{ inputs.software-version }}
       architecture: ${{ matrix.architecture }}
+      dotnet-version: ${{ inputs.dotnet-version }}
+
+  windows:
+    uses: ./.github/workflows/build-windows.yml
+    with:
+      software-version: ${{ inputs.software-version }}
+      dotnet-version: ${{ inputs.dotnet-version }}

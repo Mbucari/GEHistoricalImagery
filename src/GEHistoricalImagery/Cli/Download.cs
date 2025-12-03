@@ -68,7 +68,7 @@ internal class Download : AoiVerb
 		try
 		{
 			//Try to create the output file so any problems will cause early failure
-			saveFile = new FileInfo(SavePath!);
+			saveFile = new FileInfo(PathHelper.ReplaceUnixHomeDir(SavePath!));
 			saveFile.Create().Dispose();
 		}
 		catch (Exception ex)

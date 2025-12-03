@@ -8,7 +8,7 @@ on:
       - "v*"
 jobs:
   prerelease:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       version: ${{ steps.get_version.outputs.version }}
     steps:
@@ -21,22 +21,24 @@ jobs:
   build:
     needs: [prerelease]
     uses: ./.github/workflows/build.yml
+    secrets: inherit
     with:
-      version_override: ${{ needs.prerelease.outputs.version }}
+      software-version: ${{ needs.prerelease.outputs.version }}
+      release: true
 
   release:
     needs: [prerelease, build]
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           pattern: "*GEHistoricalImagery.*"
           path: artifacts
 
       - name: Release
         id: release
-        uses: softprops/action-gh-release@v2.2.2
+        uses: softprops/action-gh-release@v2
         with:
           name: GEHistoricalImagery v${{ needs.prerelease.outputs.version }}
           body: <Put a body here>
@@ -45,6 +47,3 @@ jobs:
           prerelease: false
           files: |
             artifacts/*/*
-            
-            
-            

@@ -17,10 +17,38 @@ internal abstract class OptionsBase
 	public bool DisableCache { get; set; }
 	public abstract Task RunAsync();
 
+	string? _cacheDir = null;
 	protected string? CacheDir
-		=> DisableCache ? null
-		: Environment.GetEnvironmentVariable("GEHistoricalImagery_Cache") is string cacheDir ? cacheDir
-		: "./cache";
+	{
+		get
+		{
+			if (DisableCache)
+			{
+				return null;
+			}
+			else if (_cacheDir is not null)
+			{
+				return _cacheDir;
+			}
+			else if (Environment.GetEnvironmentVariable("GEHistoricalImagery_Cache") is string cd)
+			{
+				_cacheDir = PathHelper.ReplaceUnixHomeDir(cd);
+			}
+			else
+			{
+				try
+				{
+					_cacheDir = Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "GEHI_cache")).FullName;
+				}
+				catch
+				{
+					_cacheDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "GEHI_cache")).FullName;
+				}
+			}
+			return _cacheDir;
+		}
+	}
+
 
 	public double Progress { get; set; }
 

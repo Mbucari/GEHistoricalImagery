@@ -96,7 +96,7 @@ internal partial class Dump : AoiVerb
 		try
 		{
 			//Try to create the output file so any problems will cause early failure
-			saveFolder = new DirectoryInfo(SavePath!);
+			saveFolder = new DirectoryInfo(PathHelper.ReplaceUnixHomeDir(SavePath!));
 			saveFolder.Create();
 		}
 		catch (Exception ex)

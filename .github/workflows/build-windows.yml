@@ -5,83 +5,62 @@ name: build
 on:
   workflow_call:
     inputs:
-      version_override:
+      software-version:
         type: string
-        description: "Version number override"
-        required: false
-      run_unit_tests:
-        type: boolean
-        description: "Skip running unit tests"
-        required: false
-        default: true
-      architecture:
-        type: string
-        description: "CPU architecture targeted by the build."
+        description: "Version number"
         required: true
-
-env:
-  DOTNET_CONFIGURATION: "Release"
-  DOTNET_VERSION: "10.x"
+      dotnet-version:
+        type: string
+        required: true
 
 jobs:
   build:
-    name: "win-${{ inputs.architecture }}"
+    name: "win-x64"
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Get version
-        id: get_version
-        run: |
-          if ("${{ inputs.version_override }}".length -gt 0) {
-            $version = "${{ inputs.version_override }}"
-          } else {
-            $version = (Select-Xml -Path "./src/GEHistoricalImagery/GEHistoricalImagery.csproj" -XPath "/Project/PropertyGroup/Version").Node.InnerXML.Trim()
-          }
-          "version=$version" >> $env:GITHUB_OUTPUT
+          dotnet-version: ${{ inputs.dotnet-version }}
 
       - name: Publish
         working-directory: ./src
         run: |
-          $RUNTIME_ID="win-${{ inputs.architecture }}"
-
-          $OUTPUT="bin/Publish/win-${{ inputs.architecture }}"
-
-          echo "Runtime Identifier: $RUNTIME_ID"
-          echo "Output Directory: $OUTPUT"
-
           dotnet publish `
               GEHistoricalImagery/GEHistoricalImagery.csproj `
-              --runtime $RUNTIME_ID `
-              --configuration ${{ env.DOTNET_CONFIGURATION }} `
-              --output $OUTPUT `
+              --arch x64 `
+              --os win `
+              --configuration Release `
+              --output "../bin/gdal" `
               -p:PublishProtocol=FileSystem `
               -p:SelfContained=true `
               -p:PublishAot=true
-          
-          
-          Copy-Item "GEHistoricalImagery\bin\Release\gdal" "$OUTPUT\" -Force -Recurse
-          
-          if ("${{ inputs.architecture }}" -eq "x64") { Remove-Item -Path "$OUTPUT\gdal\x86" -Force -Recurse }
-          if ("${{ inputs.architecture }}" -eq "x86") { Remove-Item -Path "$OUTPUT\gdal\x64" -Force -Recurse }
 
-      - name: Zip artifact
-        id: zip
-        working-directory: ./src/bin/Publish
-        run: |
-          $bin_dir = "win-${{ inputs.architecture }}\"
-          $artifact="GEHistoricalImagery.${{ steps.get_version.outputs.version }}-win-${{ inputs.architecture }}.zip"
+      - name: Build bundle
+        id: bundle
+        working-directory: ./bin/
+        run: |          
+          $SCRIPT=@"
+          @echo off
+          set SCRIPT_DIR=%~dp0
+          set GEHistoricalImagery_Cache=%SCRIPT_DIR%cache
+          set GDAL_DATA=%SCRIPT_DIR%gdal
+          set GEOTIFF_CSV=%GDAL_DATA%
+          set PROJ_LIB=%GDAL_DATA%
+          "%SCRIPT_DIR%gdal\GEHistoricalImagery.exe" %*
+          "@
+          
+          Set-Content -Path ./GEHistoricalImagery.bat -Value $SCRIPT -Encoding UTF8
+          
+          $artifact="GEHistoricalImagery.${{ inputs.software-version }}-win-x64.zip"
           "artifact=$artifact" >> $env:GITHUB_OUTPUT
-          Compress-Archive -Path "${bin_dir}*" -DestinationPath "$artifact"
+          Compress-Archive -Path ./* -DestinationPath "$artifact"
 
       - name: Publish artifact
         uses: actions/upload-artifact@v5
         with:
-          name: GEHistoricalImagery.${{ steps.get_version.outputs.version }}-win-${{ inputs.architecture }}.zip
-          path: ./src/bin/Publish/${{ steps.zip.outputs.artifact }}
+          name: ${{ steps.bundle.outputs.artifact }}
+          path: ./bin/${{ steps.bundle.outputs.artifact }}
           if-no-files-found: error
           retention-days: 7

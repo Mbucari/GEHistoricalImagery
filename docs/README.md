@@ -20,6 +20,8 @@ GEHistoricalImagery is a utility for downloading historical aerial imagery from 
 
 To learn about defining regions of interest for these commands, please refer to the [Regions of Interest article](https://github.com/Mbucari/GEHistoricalImagery/blob/master/docs/regions.md).
 
+[Demonstration Video](https://github.com/user-attachments/assets/e28493ca-3a0b-40f6-b1fa-2d1ea0c651f5)
+
 ************************
 ## Build and Run on Linux (x64 and arm64)
 
@@ -37,4 +39,4 @@ chmod +x gehinix.sh
 ```
 
 ************************
-<p align="center"><i>Updated 2025/06/20</i></p>
+<p align="center"><i>Updated 2025/12/03</i></p>

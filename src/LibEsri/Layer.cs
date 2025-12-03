@@ -81,7 +81,7 @@ public class Layer
 			string[] points = new string[poly.Edges.Count + 1];
 
 			for (int j = 0; j < poly.Edges.Count; j++)
-				points[j] = $"%5B{poly.Edges[j].Origin.X},{poly.Edges[j].Origin.Y}%5D";
+				points[j] = FormattableString.Invariant($"%5B{poly.Edges[j].Origin.X},{poly.Edges[j].Origin.Y}%5D");
 			points[^1] = points[0];
 
 			rings[i] = "%5B" + string.Join("%2C", points) + "%5D";

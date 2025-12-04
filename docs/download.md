@@ -8,7 +8,16 @@ To learn about defining a region of interest, please refer to the [Regions of In
 
 ## Usage
 ```Console
- GEHistoricalImagery download [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]] [--scale [S]] [--offset-x [X]] [--offset-y [Y]] [--scale-first] [--provider [P]] [--no-cache]
+ GEHistoricalImagery download [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd[,yyyy/mm/dd[,...]]] [--exact-date] -o [PATH] [--target-sr "SPATIAL REFERENCE"]] [-p [N]] [--scale [S]] [--offset-x [X]] [--offset-y [Y]] [--scale-first] [--provider [P]] [--no-cache]
+
+  -o out.tif, --output=out.tif                 Required. Output GeoTiff save location
+
+  -d yyyy/MM/dd, --date=yyyy/MM/dd             Required. Imagery Date(s). One or more dates separated by a comma (,)
+
+  --exact-date                                 Require an exact date match for tiles to be download
+
+  --target-sr=[SPATIAL REFERENCE]              Warp image to Spatial Reference. Either EPSG:#### or path to projection
+                                               file (file system or web)
 
   --region-file=/path/to/kmzfile.kmz           Path to a kmz or kml file containing the region geometry (polygon or
                                                polyline with at least three vertices)
@@ -22,26 +31,6 @@ To learn about defining a region of interest, please refer to the [Regions of In
   --upper-right=LAT,LONG                       Geographic coordinate of the upper-right (northeast) corner of the
                                                rectangular area of interest.
 
-  -z N, --zoom=N                               Required. Zoom level [1-23]
-
-  --provider=TM                                (Default: TM) Aerial imagery provider
-                                                [TM]      Google Earth Time Machine
-                                                [Wayback] ESRI World Imagery Wayback
-
-  --no-cache                                   (Default: false) Disable local caching
-
-  -d yyyy/MM/dd, --date=yyyy/MM/dd             Required. Imagery Date
-
-  --layer-date                                 (Wayback only) The date specifies a layer instead of an image capture
-                                               date
-
-  -o out.tif, --output=out.tif                 Required. Output GeoTiff save location
-
-  -p N, --parallel=N                           (Default: ALL_CPUS) Number of concurrent downloads
-
-  --target-sr=[SPATIAL REFERENCE]              Warp image to Spatial Reference. Either EPSG:#### or path to projection
-                                               file (file system or web)
-
   --scale=S                                    (Default: 1) Geo transform scale factor
 
   --offset-x=X                                 (Default: 0) Geo transform X offset
@@ -49,6 +38,19 @@ To learn about defining a region of interest, please refer to the [Regions of In
   --offset-y=Y                                 (Default: 0) Geo transform Y offset
 
   --scale-first                                (Default: false) Perform scaling before offsetting X and Y
+
+  -z N, --zoom=N                               Required. Zoom level [1-23]
+
+  -p N, --parallel=N                           (Default: ALL_CPUS) Number of concurrent downloads
+
+  --provider=TM                                (Default: TM) Aerial imagery provider
+                                                [TM]      Google Earth Time Machine
+                                                [Wayback] ESRI World Imagery Wayback
+
+  --layer-date                                 (Wayback only) The date specifies a layer instead of an image capture
+                                               date
+
+  --no-cache                                   (Default: false) Disable local caching
 ```
 
 ## Examples
@@ -76,7 +78,7 @@ Download historical imagery at zoom level `20` from within the region defined by
    ![Cherry Creek 2-Small.jpg](assets/Cherry%20Creek%202-Small.jpg)
    [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%202.tif)
 
-### Example 3 -  Get imagery from 2021/08/17
+### Example 3 - Get imagery from 2021/08/17
 
    **Command:**
    ```Console
@@ -88,7 +90,7 @@ Download historical imagery at zoom level `20` from within the region defined by
    ![Cherry Creek 3-Small.jpg](assets/Cherry%20Creek%203-Small.jpg)
    [click here to download the original file](../../../raw/d607b9c7f8851316ff893ed02396c95bb55391ef/docs/assets/Cherry%20Creek%203.tif)
 
-### Example 4 -  Get imagery from Esri Wayback version 2023/04/15
+### Example 4 - Get imagery from Esri Wayback version 2023/04/15
 
    **NOTE : The date in this command is the date of the Wayback layer, _not the image capture date_.**
    
@@ -112,5 +114,17 @@ Download historical imagery at zoom level `20` from within the region defined by
    **Output:**
    ![Cherry Creek 5-Small.jpg](assets/Cherry%20Creek%205-Small.jpg)
 
+### Example 6 - Get imagery from Esri wayback on 2023/05/05 and 2023/04/16 only
+
+   This is the same area, as [Example 1](#example-1---get-imagery-from-20240605), but using the Esri Wayback provider at zoom level 18, and specifying two imagery dates, and requiring that imagery match either of those two dates _exactly_ (no falling back to the next closest available tile). Because the command requires an exact date match (the `--exact-date` flag), the image is black everywhere that imagery is unavailable on those dates.
+
+   **Command:**
+   ```Console
+   GEHistoricalImagery download --provider wayback --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --output "./cherry Creek 6.tif" --zoom 18 --date 2023/05/05,2023/04/16 --exact-date --target-sr EPSG:2232
+   ```
+
+   **Output:**
+   ![Cherry Creek 6-Small.jpg](assets/Cherry%20Creek%206-Small.jpg)
+
 ************************
-<p align="center"><i>Updated 2025/06/20</i></p>
+<p align="center"><i>Updated 2025/12/03</i></p>

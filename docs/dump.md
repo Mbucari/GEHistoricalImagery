@@ -8,12 +8,7 @@ To learn about defining a region of interest, please refer to the [Regions of In
 
 ## Usage
 ```Console
- GEHistoricalImagery dump [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+...]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd] -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache] [--target-sr "SPATIAL REFERENCE"]] [--world]
-
-  -d yyyy/MM/dd, --date=yyyy/MM/dd                  Required. Imagery Date
-
-  --layer-date                                      (Wayback only) The date specifies a layer instead of an image
-                                                    capture date
+ GEHistoricalImagery dump [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+...]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] -z [N] -d [yyyy/mm/dd[,yyyy/mm/dd[,...]]] --exact-date -o [Directory] [--format [FORMAT_STRING]] [-p [N]] [--provider [P]] [--no-cache] [--target-sr "SPATIAL REFERENCE"]] [--world]
 
   -o [Directory], --output=[Directory]              Required. Output image tile save directory
 
@@ -27,12 +22,15 @@ To learn about defining a region of interest, please refer to the [Regions of In
                                                       "{D}" = tile's image capture date
                                                       "{LD}" = tile's layer date (wayback only)
 
-  -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
+  -w, --world                                       Write a world file for each tile
+
+  -d yyyy/MM/dd, --date=yyyy/MM/dd                  Required. Imagery Date(s). One or more dates separated by a comma
+                                                    (,)
+
+  --exact-date                                      Require an exact date match for tiles to be download
 
   --target-sr=[SPATIAL REFERENCE]                   Warp image to Spatial Reference. Either EPSG:#### or path to
                                                     projection file (file system or web)
-
-  -w, --world                                       Write a world file for each tile
 
   --region-file=/path/to/kmzfile.kmz                Path to a kmz or kml file containing the region geometry (polygon or
                                                     polyline with at least three vertices)
@@ -48,9 +46,14 @@ To learn about defining a region of interest, please refer to the [Regions of In
 
   -z N, --zoom=N                                    Required. Zoom level [1-23]
 
+  -p N, --parallel=N                                (Default: ALL_CPUS) Number of concurrent downloads
+
   --provider=TM                                     (Default: TM) Aerial imagery provider
                                                      [TM]      Google Earth Time Machine
                                                      [Wayback] ESRI World Imagery Wayback
+
+  --layer-date                                      (Wayback only) The date specifies a layer instead of an image
+                                                    capture date
 
   --no-cache                                        (Default: false) Disable local caching
 ```
@@ -117,6 +120,23 @@ Same as [Example 1](#example-1), but warp each Google Earth tile to Web Mercator
    Zoom=20, Column=91, Row=54.jpg
    Zoom=20, Column=91, Row=54.jgw
    ```
+### Example 4
+
+Same as [Example 1](#example-1), but specify multiple dates and require that imagery match either of those two dates exactly (no falling back to the next closest available tile). Because the command requires an exact date match (the --exact-date flag), only 544 of the 5060 tiles in the region were downloaded.
+
+   **Command:**
+   ```Console
+   GEHistoricalImagery dump --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --date 2022/09/26,2021/08/17 --exact-date -f "Zoom={Z}, Column={c}, Row={r}.jpg" -o "./Tiles"
+   ```   
+   **Output:**
+   ```console
+   544 out of 5060 downloaded
+   ```
+   ```
+   Zoom=20, Column=00, Row=07.jpg
+   ...
+   Zoom=20, Column=91, Row=26.jpg
+   ```
 ## Convert Between Lat/Long and Row/Column numbers
 
 **Global** row/column numbers can be related to latitude/longitude using the following formulae:
@@ -143,4 +163,4 @@ Where:
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/11/19</i></p>
+<p align="center"><i>Updated 2025/12/03</i></p>

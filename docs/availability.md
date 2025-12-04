@@ -8,15 +8,19 @@ Tiles that are available from a specific date are shaded, unavailable tiles are 
 To learn about defining a region of interest, please refer to the [Regions of Interest article](./regions.md).
 ## Usage
 ```Console
-GEHistoricalImagery availability [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] --zoom [N] [--parallel [N]] [--provider [P]] [--no-cache]
+GEHistoricalImagery availability [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] --zoom [N] [--min-date=yyyy/MM/dd] [--max-date=yyyy/MM/dd] [--complete] [--parallel [N]] [--provider [P]] [--no-cache]
 
-  -p N, --parallel=N                           (Default: 20) Number of concurrent downloads
+  -c, --complete                               Only display dates with complete coverage of the region
+
+  --min-date=yyyy/MM/dd                        Oldest image tiles to consider
+
+  --max-date=yyyy/MM/dd                        Youngest (most recent) image tiles to consider
 
   --region-file=/path/to/kmzfile.kmz           Path to a kmz or kml file containing the region geometry (polygon or
                                                polyline with at least three vertices)
 
-  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2    A list of geographic coordinates which are the vertices of the
-                                               polygonal area of interest. Vertex coordinates delimiter with a '+'.
+  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2    A list of geographic coordinates which are the vertices of the polygonal
+                                               area of interest. Vertex coordinates delimiter with a '+'.
 
   --lower-left=LAT,LONG                        Geographic coordinate of the lower-left (southwest) corner of the
                                                rectangular area of interest.
@@ -25,6 +29,8 @@ GEHistoricalImagery availability [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]
                                                rectangular area of interest.
 
   -z N, --zoom=N                               Required. Zoom level [1-23]
+
+  -p N, --parallel=N                           (Default: ALL_CPUS) Number of concurrent downloads
 
   --provider=TM                                (Default: TM) Aerial imagery provider
                                                 [TM]      Google Earth Time Machine
@@ -211,5 +217,37 @@ Loading Quad Tree Packets: Done!
 ```
 This diagram, shown by pressing `5` in the console, shows the tiles with available imagery from 2023/04/29. The shaded areas represent tiles which contain imagery for the selected date, the dots represent tiles which have no imagery for the selected date, and the empty area show space outside of the polygonal region.
 
+## Example 3 - Restrict Date Ranges to Display
+
+This is the same as [Example 1](#example-1), but with the minimum and maximum dates specified. Gets the availability diagram for a rectangular region, between the dates of 2019/1/1 and 2024/1/1 (inclusive).
+
+**Command:**
+```console
+GEHistoricalImagery availability --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --min-date 2019/1/1 --max-date 2024/1/1
+```
+**Output:**
+```Console
+Loading Quad Tree Packets: Done!
+[0]  2023/10/20  [1]  2023/09/05  [2]  2023/05/28  [3]  2023/04/29  [4]  2022/09/26
+[5]  2021/08/17  [6]  2021/06/15  [7]  2021/06/11  [8]  2020/10/03  [9]  2020/09/30
+[a]  2020/06/07  [b]  2019/10/03  [c]  2019/09/13  [Esc]  Exit
+```
+Notice that there are only 13 dates, all between 2019/1/1 and 2024/1/1.
+
+## Example 4 - Restrict Date Ranges to Display
+
+This is the same as [Example 3](#example-3---restrict-date-ranges-to-display), but with the addition of the `--complete` flag which will only display dates which completely cover the region.
+**Command:**
+```console
+GEHistoricalImagery availability --lower-left 39.619819,-104.856121 --upper-right 39.638393,-104.824990 --zoom 20 --min-date 2019/1/1 --max-date 2024/1/1 --complete
+```
+**Output:**
+```Console
+Loading Quad Tree Packets: Done!
+[0]  2023/10/20  [1]  2023/05/28  [2]  2021/06/15  [3]  2021/06/11  [4]  2020/10/03
+[5]  2020/09/30  [6]  2020/06/07  [7]  2019/10/03  [8]  2019/09/13  [Esc]  Exit
+```
+Notice that there are now only 9 dates. The other 5 dates, which were displayed in Example 3 but which are absent here, only partially covered the region.
+
 ************************
-<p align="center"><i>Updated 2025/06/20</i></p>
+<p align="center"><i>Updated 2025/12/03</i></p>

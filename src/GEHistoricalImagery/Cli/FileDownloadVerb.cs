@@ -4,7 +4,7 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class FileDownloadVerb : AoiVerb
 {
-	[Option('d', "date", HelpText = "Imagery Date(s). Multiple dates separated by a comma (,)", MetaValue = "yyyy/MM/dd", Required = true, Separator = ',')]
+	[Option('d', "date", HelpText = "Imagery Date(s). One or more dates separated by a comma (,)", MetaValue = "yyyy/MM/dd", Required = true, Separator = ',')]
 	public IEnumerable<DateOnly>? Dates { get; set; }
 
 	[Option("exact-date", HelpText = "Require an exact date match for tiles to be download")]

@@ -10,10 +10,22 @@ namespace GEHistoricalImagery.Cli;
 [Verb("availability", HelpText = "Get imagery date availability in a specified region")]
 internal class Availability : AoiVerb
 {
+	[Option('c', "complete", HelpText = "Only display dates with complete coverage of the region")]
+	public bool CompleteOnly { get; set; }
+
+	[Option("min-date", HelpText = "Oldest image tiles to consider", MetaValue = "yyyy/MM/dd")]
+	public DateOnly MinDate { get; set; }
+
+	[Option("max-date", HelpText = "Youngest (most recent) image tiles to consider", MetaValue = "yyyy/MM/dd")]
+	public DateOnly MaxDate { get; set; }
+
 	public override async Task RunAsync()
 	{
 		if (AnyAoiErrors())
 			return;
+
+		if (MaxDate.DayNumber == 0)
+			MaxDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
 
 		Console.OutputEncoding = Encoding.Unicode;
 
@@ -47,8 +59,14 @@ internal class Availability : AoiVerb
 
 	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<Wgs1984> aoi)
 	{
+		//A layer date < MinDate will not have imagery captured after MinDate, but
+		//a layer date > MaxDate may still have imagery captured before MaxDate.
+		//Truncate the Layers whose layer date is older than MinDate, then search layers from
+		//oldest to newest, stopping when a layer contains no imagery captured before MaxDate
+		var layers = wayBack.Layers.Where(l => l.Date >= MinDate).OrderBy(l => l.Date).ToArray();
+
 		int count = 0;
-		int numTiles = wayBack.Layers.Count;
+		int numTiles = layers.Length;
 		ReportProgress(0);
 
 		var mercAoi = aoi.ToWebMercator();
@@ -57,10 +75,17 @@ internal class Availability : AoiVerb
 		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
 		List<EsriRegion> allLayers = new();
 
-		await foreach (var region in processor.EnumerateResults(wayBack.Layers.Select(getLayerDates)))
+		await foreach (var region in processor.EnumerateResults(layers.Select(getLayerDates)))
 		{
-			allLayers.Add(region);
-			ReportProgress(++count / (double)numTiles);
+			if (region.Availabilities.Any(a => a.Date <= MaxDate))
+			{
+				allLayers.Add(region);
+				ReportProgress(++count / (double)numTiles);
+			}
+			else
+			{
+				break;
+			}
 		}
 
 		//De-duplicate list
@@ -98,7 +123,7 @@ internal class Availability : AoiVerb
 					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
 				}
 
-				if (availability.HasAnyTiles())
+				if (availability.HasAnyTiles() && (availability.HasAllTiles() || !CompleteOnly))
 					displays.Add(availability);
 			}
 
@@ -149,7 +174,7 @@ internal class Availability : AoiVerb
 
 		if (all.Length == 0)
 		{
-			Console.Error.WriteLine($"No dated imagery available at zoom level {ZoomLevel}");
+			Console.Error.WriteLine($"No dated imagery available within specified constraints");
 			return;
 		}
 
@@ -200,7 +225,7 @@ internal class Availability : AoiVerb
 			}
 		}
 
-		return uniqueDates.Values.OrderByDescending(r => r.Date).ToArray();
+		return uniqueDates.Values.Where(r => r.HasAllTiles() || !CompleteOnly).OrderByDescending(r => r.Date).ToArray();
 
 		async Task<List<DatedTile>> getDatedTiles(KeyholeTile tile)
 		{
@@ -209,10 +234,8 @@ internal class Availability : AoiVerb
 			if (await root.GetNodeAsync(tile) is not TileNode node)
 				return dates;
 
-			foreach (var datedTile in node.GetAllDatedTiles())
+			foreach (var datedTile in node.GetAllDatedTiles().Where(d => d.Date.Year != 1 && d.Date >= MinDate && d.Date <= MaxDate))
 			{
-				if (datedTile.Date.Year == 1) continue;
-
 				if (!dates.Any(d => d.Date == datedTile.Date))
 					dates.Add(datedTile);
 			}
@@ -245,7 +268,8 @@ internal class Availability : AoiVerb
 		}
 
 		public bool HasAnyTiles() => Availability.OfType<bool>().Any(b => b);
-		
+		public bool HasAllTiles() => Availability.OfType<bool>().All(b => b);
+
 		public static bool operator ==(RegionAvailability a, RegionAvailability b)=> a.Equals(b);
 		public static bool operator !=(RegionAvailability a, RegionAvailability b)=> !a.Equals(b);
 		public override int GetHashCode() => HashCode.Combine(Date, Availability);

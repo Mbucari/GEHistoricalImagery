@@ -22,10 +22,24 @@ internal abstract class AoiVerb : OptionsBase
 	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "N", Required = true)]
 	public int ZoomLevel { get; set; }
 
+	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
+	public int ConcurrentDownload { get; set; }
+
 	protected GeoRegion<Wgs1984> Region { get; set; } = null!;
+
+	protected bool AnyAoiErrors()
+	{
+		var errors = GetAoiErrors().ToList();
+		errors.ForEach(Console.Error.WriteLine);
+		return errors.Count > 0;
+	}
 
 	protected IEnumerable<string> GetAoiErrors()
 	{
+		if (ConcurrentDownload <= 0)
+			ConcurrentDownload = Environment.ProcessorCount;
+		ConcurrentDownload = Math.Min(ConcurrentDownload, Environment.ProcessorCount);
+
 		if (ZoomLevel > 23)
 			yield return $"Zoom level: {ZoomLevel} is too large. Max zoom is 23";
 		else if (ZoomLevel < 1)

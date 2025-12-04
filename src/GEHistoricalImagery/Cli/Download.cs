@@ -7,26 +7,11 @@ using OSGeo.GDAL;
 
 namespace GEHistoricalImagery.Cli;
 
-[Verb("download", HelpText = "Download historical imagery")]
-internal class Download : AoiVerb
+[Verb("download", HelpText = "Download historical imagery to a single GeoTiff")]
+internal class Download : FileDownloadVerb
 {
-	[Option('d', "date", HelpText = "Imagery Date(s). Multiple dates separated by a comman (,)", MetaValue = "yyyy/MM/dd", Required = true, Separator = ',')]
-	public IEnumerable<DateOnly>? Dates { get; set; }
-
-	[Option("exact-date", HelpText = "Require an exact date match for tiles to be download")]
-	public bool ExactMatch { get; set; }
-
-	[Option("layer-date", HelpText = "(Wayback only) The date specifies a layer instead of an image capture date")]
-	public bool LayerDate { get; set; }
-
 	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "out.tif", Required = true)]
-	public string? SavePath { get; set; }
-
-	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
-	public int ConcurrentDownload { get; set; }
-
-	[Option("target-sr", HelpText = "Warp image to Spatial Reference. Either EPSG:#### or path to projection file (file system or web)", MetaValue = "[SPATIAL REFERENCE]", Default = null)]
-	public string? TargetSpatialReference { get; set; }
+	public override string? SavePath { get; set; }
 
 	[Option("scale", HelpText = "Geo transform scale factor", MetaValue = "S", Default = 1d)]
 	public double ScaleFactor { get; set; }
@@ -42,30 +27,8 @@ internal class Download : AoiVerb
 
 	public override async Task RunAsync()
 	{
-		bool hasError = false;
-
-		foreach (var errorMessage in GetAoiErrors())
-		{
-			Console.Error.WriteLine(errorMessage);
-			hasError = true;
-		}
-
-		if (Dates is null)
-		{
-			Console.Error.WriteLine("Invalid imagery date");
-			hasError = true;
-		}
-
-		if (string.IsNullOrWhiteSpace(SavePath))
-		{
-			Console.Error.WriteLine("Invalid output file");
-			hasError = true;
-		}
-
-		if (ConcurrentDownload <= 0)
-			ConcurrentDownload = Environment.ProcessorCount;
-
-		if (hasError) return;
+		if (AnyFileDownloadErrors())
+			return;
 
 		FileInfo saveFile;
 		try

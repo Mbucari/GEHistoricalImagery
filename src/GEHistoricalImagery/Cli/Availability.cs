@@ -10,20 +10,11 @@ namespace GEHistoricalImagery.Cli;
 [Verb("availability", HelpText = "Get imagery date availability in a specified region")]
 internal class Availability : AoiVerb
 {
-	[Option('p', "parallel", HelpText = "Number of concurrent downloads", MetaValue = "N", Default = 20)]
-	public int ConcurrentDownload { get; set; }
-
 	public override async Task RunAsync()
 	{
-		bool hasError = false;
+		if (AnyAoiErrors())
+			return;
 
-		foreach (var errorMessage in GetAoiErrors())
-		{
-			Console.Error.WriteLine(errorMessage);
-			hasError = true;
-		}
-
-		if (hasError) return;
 		Console.OutputEncoding = Encoding.Unicode;
 
 		await (Provider is Provider.Wayback ? Run_Esri() : Run_Keyhole());

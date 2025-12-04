@@ -8,7 +8,7 @@ using OSGeo.GDAL;
 namespace GEHistoricalImagery.Cli;
 
 [Verb("dump", HelpText = "Dump historical image tiles into a folder")]
-internal partial class Dump : AoiVerb
+internal partial class Dump : FileDownloadVerb
 {
 	private const string formatHelpText = """
 				
@@ -22,61 +22,29 @@ internal partial class Dump : AoiVerb
 				  "{LD}" = tile's layer date (wayback only)
 				""";
 
-	[Option('d', "date", HelpText = "Imagery Date(s). Multiple dates separated by a comman (,)", MetaValue = "yyyy/MM/dd", Required = true, Separator = ',')]
-	public IEnumerable<DateOnly>? Dates { get; set; }
-
-	[Option("exact-date", HelpText = "Require an exact date match for tiles to be download")]
-	public bool ExactMatch { get; set; }
-
-	[Option("layer-date", HelpText = "(Wayback only) The date specifies a layer instead of an image capture date")]
-	public bool LayerDate { get; set; }
-
 	[Option('o', "output", HelpText = "Output image tile save directory", MetaValue = "[Directory]", Required = true)]
-	public string? SavePath { get; set; }
+	public override string? SavePath { get; set; }
 
 	[Option('f', "format", HelpText = formatHelpText, Default = "z={Z}-Col={c}-Row={r}.jpg", MetaValue = "[FilenameFormat]")]
 	public string? Formatter { get; set; }
-
-	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
-	public int ConcurrentDownload { get; set; }
-
-	[Option("target-sr", HelpText = "Warp image to Spatial Reference. Either EPSG:#### or path to projection file (file system or web)", MetaValue = "[SPATIAL REFERENCE]", Default = null)]
-	public string? TargetSpatialReference { get; set; }
 
 	[Option('w', "world", HelpText = "Write a world file for each tile")]
 	public bool WriteWorldFile { get; set; }
 
 	public override async Task RunAsync()
 	{
-		bool hasError = false;
-
-		foreach (var errorMessage in GetAoiErrors())
-		{
-			Console.Error.WriteLine(errorMessage);
-			hasError = true;
-		}
-
-		if (Dates?.Any() is not true)
-		{
-			Console.Error.WriteLine("Invalid imagery date");
-			hasError = true;
-		}
-
-		if (string.IsNullOrWhiteSpace(SavePath))
-		{
-			Console.Error.WriteLine("Invalid output file");
-			hasError = true;
-		}
+		if (AnyFileDownloadErrors())
+			return;
 
 		if (string.IsNullOrEmpty(Formatter))
 		{
 			Console.Error.WriteLine($"Invalid filename formatter");
-			hasError = true;
+			return;
 		}
 		else if (Formatter.FirstOrDefault(c => Path.GetInvalidFileNameChars().Any(i => i == c)) is char fileChar && fileChar != default)
 		{
 			Console.Error.WriteLine($"Invalid filename character: {fileChar}");
-			hasError = true;
+			return;
 		}
 		else if (!(Formatter.Contains("{C}") || Formatter.Contains("{c}")) ||
 			!(Formatter.Contains("{R}") || Formatter.Contains("{r}")))
@@ -90,10 +58,8 @@ internal partial class Dump : AoiVerb
 				  or a "{r}" tag for the tile's row number within the rectangle
 				 (optional) a "{Z}" tag for the tile's zoom level
 				""");
-			hasError = true;
+			return;
 		}
-
-		if (hasError) return;
 
 		DirectoryInfo saveFolder;
 		try
@@ -109,11 +75,7 @@ internal partial class Dump : AoiVerb
 			return;
 		}
 
-		if (ConcurrentDownload <= 0)
-			ConcurrentDownload = Environment.ProcessorCount;
-
 		var desiredDates = Dates!;
-
 		var task = Provider is Provider.Wayback ? Run_Esri(saveFolder, desiredDates)
 		: Run_Keyhole(saveFolder, desiredDates);
 

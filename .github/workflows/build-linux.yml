@@ -68,7 +68,7 @@ jobs:
           echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
           
       - name: Publish bundle
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.bundle.outputs.artifact }}
           path: ./bin/${{ steps.bundle.outputs.artifact }}

@@ -17,11 +17,13 @@ on:
       dotnet-version:
         type: string
         required: true
+      runner:
+        type: string
 
 jobs:
   build:
     name: "linux-${{ inputs.architecture }}"
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup .NET
@@ -44,8 +46,7 @@ jobs:
               -p:DefineConstants=$preprocessor \
               -p:PublishProtocol=FileSystem \
               -p:SelfContained=true \
-              -p:PublishTrimmed=true \
-              -p:PublishSingleFile=true
+              -p:PublishAot=true
 
       - name: Build bundle
         id: bundle

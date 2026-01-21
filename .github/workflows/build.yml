@@ -35,11 +35,17 @@ jobs:
     strategy:
       matrix:
         architecture: [x64, arm64]
+        include:
+          - runner: ubuntu-22.04-arm
+            architecture: arm64
+          - runner: ubuntu-22.04
+            architecture: x64
     uses: ./.github/workflows/build-linux.yml
     with:
       software-version: ${{ inputs.software-version }}
       architecture: ${{ matrix.architecture }}
       dotnet-version: ${{ inputs.dotnet-version }}
+      runner: ${{ matrix.runner }}
 
   windows:
     uses: ./.github/workflows/build-windows.yml

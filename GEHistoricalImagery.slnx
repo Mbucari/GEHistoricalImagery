@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="test/GEHistoricalImageryTest/GEHistoricalImageryTest.csproj" />
+    <Project Path="test/LibGoogleEarthTest/LibGoogleEarthTest.csproj" />
+  </Folder>
+  <Project Path="src/GEHistoricalImagery/GEHistoricalImagery.csproj" />
+  <Project Path="src/LibEsri/LibEsri.csproj" />
+  <Project Path="src/LibGoogleEarth/LibGoogleEarth.csproj" />
+  <Project Path="src/LibMapCommon/LibMapCommon.csproj" />
+</Solution>

@@ -26,7 +26,7 @@ jobs:
     name: "macOS-${{ inputs.architecture }}"
     runs-on: macos-latest
     steps:
-      - uses: apple-actions/import-codesign-certs@v5
+      - uses: apple-actions/import-codesign-certs@v6
         if: ${{ inputs.sign-app }}
         with: 
           p12-file-base64: ${{ secrets.DISTRIBUTION_SIGNING_CERT }}

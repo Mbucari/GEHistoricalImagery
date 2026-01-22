@@ -30,18 +30,15 @@ jobs:
         if: ${{ inputs.sign-app }}
         with: 
           p12-file-base64: ${{ secrets.DISTRIBUTION_SIGNING_CERT }}
-          p12-password: ${{ secrets.DISTRIBUTION_SIGNING_CERT_PW }}
-          
+          p12-password: ${{ secrets.DISTRIBUTION_SIGNING_CERT_PW }}          
     
       - uses: actions/checkout@v6
       
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
 
       - name: Publish
-        id: publish
         working-directory: ./src
         run: |
           preprocessor="LINUX"          
@@ -57,8 +54,7 @@ jobs:
               -p:SelfContained=true \
               -p:PublishAot=true
 
-      - name: Sign and Notarize bundle
-        id: notarize
+      - name: Sign files
         if: ${{ inputs.sign-app }}
         run: |          
           ENTITLEMENTS=../my.entitlements
@@ -83,19 +79,27 @@ jobs:
             fi
           done    
           
+          rm -rf ./GEHistoricalImagery/GEHistoricalImagery.dSYM
           chflags nohidden ./GEHistoricalImagery/GEHistoricalImagery
+      
+      - name: Build DMG
+        id: bundle
+        run: | 
           artifact="GEHistoricalImagery.${{ inputs.software-version }}-macOS-${{ inputs.architecture }}.dmg"
-          hdiutil create -srcFolder ./GEHistoricalImagery -o "$artifact"
-          
-          xcrun notarytool submit $artifact --wait --apple-id ${{ vars.APPLE_DEV_EMAIL }} --password ${{ secrets.APPLE_DEV_PASSWORD }} --team-id ${{ secrets.APPLE_TEAM_ID }}
-          xcrun stapler staple "$artifact"
+          hdiutil create -srcFolder ./GEHistoricalImagery -o "$artifact"          
           echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
           
-      - name: Publish bundle
+      - name: Notarize DMG
         if: ${{ inputs.sign-app }}
+        run: |
+          dmg=${{ steps.bundle.outputs.artifact }}
+          xcrun notarytool submit "$dmg" --wait --apple-id ${{ vars.APPLE_DEV_EMAIL }} --password ${{ secrets.APPLE_DEV_PASSWORD }} --team-id ${{ secrets.APPLE_TEAM_ID }}
+          xcrun stapler staple "$dmg"                
+        
+      - name: Publish bundle
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ steps.notarize.outputs.artifact }}
-          path: ./${{ steps.notarize.outputs.artifact }}
+          name: ${{ steps.bundle.outputs.artifact }}
+          path: ./${{ steps.bundle.outputs.artifact }}
           if-no-files-found: error
           retention-days: 7

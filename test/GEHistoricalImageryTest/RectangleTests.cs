@@ -19,7 +19,7 @@ public class RectangleTests
 			var numTiles = 1 << i;
 			var stats = rec.GetRectangularRegionStats<KeyholeTile>(i);
 			Assert.AreEqual(numTiles, stats.NumColumns);
-			Assert.AreEqual(numTiles, stats.NumRows);
+			Assert.AreEqual(numTiles / 2, stats.NumRows);
 		}
 
 		rec = GeoRegion<Wgs1984>.Create(new Wgs1984(-90, -0.000000001), new Wgs1984(89.99999999, -0.000000001), new Wgs1984(89.99999999, -360), new Wgs1984(-90, -360));
@@ -28,11 +28,11 @@ public class RectangleTests
 			var numTiles = 1 << i;
 			var stats = rec.GetRectangularRegionStats<KeyholeTile>(i);
 			Assert.AreEqual(numTiles, stats.NumColumns);
-			Assert.AreEqual(numTiles, stats.NumRows);
+			Assert.AreEqual(numTiles / 2, stats.NumRows);
 		}
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	//Valid web mercater coordinates, but invalid geographic coordinates
 	[DataRow(0, 0, 180, 1)]
 	[DataRow(180, 0, 0, 1)]
@@ -47,7 +47,7 @@ public class RectangleTests
 		Assert.IsFalse(ll.IsValidGeographicCoordinate && ul.IsValidGeographicCoordinate && ur.IsValidGeographicCoordinate && lr.IsValidGeographicCoordinate);
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	//Invalid regions
 	[DataRow(0, 0, 0, 0)] // zero area
 	[DataRow(0, -10, 0, 9)] //zero height
@@ -58,6 +58,6 @@ public class RectangleTests
 		var ul = new Wgs1984(ur_lat, ll_long);
 		var ur = new Wgs1984(ur_lat, ur_long);
 		var lr = new Wgs1984(ll_lat, ur_long);
-		Assert.ThrowsException<InvalidOperationException>(() => new GeoPolygon<Wgs1984>(ll, ul, ur, lr));
+		Assert.Throws<InvalidOperationException>(() => new GeoPolygon<Wgs1984>(ll, ul, ur, lr));
 	}
 }

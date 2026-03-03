@@ -1,12 +1,32 @@
 ﻿using LibGoogleEarth;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 
 namespace LibGoogleEarthTest;
 
 [TestClass]
 public class CoordinateTests
 {
-	[DataTestMethod]
+	[TestMethod]
+	public void TriangulateEarClip()
+	{
+		var p = new GeoPolygon<Wgs1984>([
+			new(3, 1),
+			new(5, 2),
+			new(2, 5),
+			new(1, 4),
+			new(3, 2),
+			]);
+
+		//Test the tile enumeration
+		Assert.HasCount(9, p.GetTiles<KeyholeTile>(8));
+		//Test the triangulation
+		var polygon = p.TriangulatePolygon();
+		Assert.IsNotNull(polygon);
+		Assert.HasCount(p.Edges.Count - 2, polygon);
+	}
+
+	[TestMethod]
 	[DataRow(0, 0, 0, 0, 0)]
 	[DataRow(0, 0, 1, 1, 1)]
 	[DataRow(0, 180, 1, 1, 1)]
@@ -25,26 +45,26 @@ public class CoordinateTests
 		Assert.AreEqual(expectedColumn, tile.Column);
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	[DataRow(-1)]
 	[DataRow(KeyholeTile.MaxLevel + 1)]
 	public void GetTileFail(int zoom)
 	{
 		var c = new Wgs1984(0, 0);
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => KeyholeTile.GetTile(c, zoom));
+		Assert.Throws<ArgumentOutOfRangeException>(() => KeyholeTile.GetTile(c, zoom));
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	[DataRow(200, 0)]
 	[DataRow(0, 400)]
 	[DataRow(180.00000001, 0)]
 	[DataRow(0, 360.00000001)]
 	public void InvalidCoordinate(double lat, double lon)
 	{
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Wgs1984(lat, lon));
+		Assert.Throws<ArgumentOutOfRangeException>(() => new Wgs1984(lat, lon));
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	//Valid web mercater coordinates, but invalid geographic coordinates
 	[DataRow(180, 0)]
 	[DataRow(90.00000001, 0)]

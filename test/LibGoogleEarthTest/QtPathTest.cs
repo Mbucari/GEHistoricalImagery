@@ -21,7 +21,7 @@ public class QtPathTest
 		SubIndexDict = JsonSerializer.Deserialize<Dictionary<string, int>>(File.OpenRead(subIndicesPath))!.AsReadOnly();
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	[DataRow("0000")]
 	[DataRow("00000000")]
 	[DataRow("000000000000")]
@@ -98,11 +98,11 @@ public class QtPathTest
 		var p = new KeyholeTile("0");
 		Assert.IsTrue(p.IsRoot);
 		Assert.AreEqual(0, p.SubIndex);
-		Assert.AreEqual(p.Level, 0);
+		Assert.AreEqual(0, p.Level);
 		Assert.AreEqual("0", p.Path);
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	[DataRow("1")]
 	[DataRow("01234")]
 	[DataRow("012334")]
@@ -113,12 +113,12 @@ public class QtPathTest
 	[DataRow("")]
 	public void BadPaths(string quadTreePath)
 	{
-		Assert.ThrowsException<ArgumentException>(() => new KeyholeTile(quadTreePath));
+		Assert.Throws<ArgumentException>(() => new KeyholeTile(quadTreePath));
 	}
 
 	[TestMethod]
 	public void NullPath()
-		=> Assert.ThrowsException<ArgumentNullException>(() => new KeyholeTile(null!));
+		=> Assert.Throws<ArgumentNullException>(() => new KeyholeTile(null!));
 
 	[TestMethod]
 	public void EnumerateIndices()

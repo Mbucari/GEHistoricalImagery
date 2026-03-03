@@ -7,7 +7,7 @@ public class KeyholeTileTests
 {
 	private const int MAX_ROX_COL_SZ = (1 << KeyholeTile.MaxLevel) - 1;
 
-	[DataTestMethod]
+	[TestMethod]
 	[DataRow(0, 0, 0, "0")]
 	[DataRow(0, 0, 1, "00")]
 	[DataRow(0, 1, 1, "01")]
@@ -37,7 +37,7 @@ r0	|  0  |  1  |
 		Assert.AreEqual(zoom, tile.Level);
 	}
 
-	[DataTestMethod]
+	[TestMethod]
 	[DataRow(0, 0, -1)]
 	[DataRow(0, -1, 0)]
 	[DataRow(-1, 0, 0)]
@@ -47,6 +47,6 @@ r0	|  0  |  1  |
 
 	public void TilesOutOfRange(int row, int col, int zoom)
 	{
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new KeyholeTile(row, col, zoom));
+		Assert.Throws<ArgumentOutOfRangeException>(() => new KeyholeTile(row, col, zoom));
 	}
 }

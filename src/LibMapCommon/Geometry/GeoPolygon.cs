@@ -18,22 +18,12 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 	/// </summary>
 	/// <param name="tile">A map tile to test</param>
 	/// <returns>True if any part of the tile is within this polygon, otherwise false</returns>
-	public bool ContainsTile<TTile>(TTile tile) where TTile : ITile<TCoordinate>
-	{
-		if (ContainsPoint(tile.LowerLeft) ||
-			ContainsPoint(tile.LowerRight) ||
-			ContainsPoint(tile.UpperLeft) ||
-			ContainsPoint(tile.UpperRight))
-			return true;
-		else
-		{
-			//Test if the tile contains any of the polygon's vertices.
-			//Since the tile is guaranteed rectangular, we can test the envelope instead of intersecting edges.
-			var ll = tile.LowerLeft;
-			var ur = tile.UpperRight;
-			return Edges.Any(edge => edge.Origin.X > ll.X && edge.Origin.X < ur.X && edge.Origin.Y > ll.Y && edge.Origin.Y < ur.Y);
-		}
-	}
+	public bool ContainsTile<TTile>(TTile tile) where TTile : ITile<TCoordinate> =>
+		ContainsPoint(tile.LowerLeft) ||
+		ContainsPoint(tile.LowerRight) ||
+		ContainsPoint(tile.UpperLeft) ||
+		ContainsPoint(tile.UpperRight) ||
+		PolygonIntersects(tile.GetGeoPolygon());
 
 	/// <summary>
 	/// Convert to the global pixel space for the current polygon's coordinate system.
@@ -112,7 +102,6 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 				var row = (stats.MinRow + r) % numTiles;
 				var col = (stats.MinColumn + c) % numTiles;
 				var tile = TTile.Create(row, col, stats.Zoom);
-
 				if (ContainsTile(tile))
 					yield return tile;
 				progress?.Invoke();

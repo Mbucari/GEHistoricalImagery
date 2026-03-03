@@ -11,11 +11,13 @@ public class CoordinateTests
 	public void TriangulateEarClip()
 	{
 		var p = new GeoPolygon<Wgs1984>([
-			new(3, 1),
-			new(5, 2),
-			new(2, 5),
-			new(1, 4),
-			new(3, 2),
+			new(3,1),
+			new(5,2),
+			new(2,5),
+			new(2,4),
+			new(-1,3.5),
+			new(2,3),
+			new(3,2),
 			]);
 
 		//Test the tile enumeration

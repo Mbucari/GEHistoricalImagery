@@ -56,14 +56,14 @@ internal class Download : FileDownloadVerb
 	private async Task Run_Esri(FileInfo saveFile, IEnumerable<DateOnly> desiredDates)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
-		var webMerc = Region.ToWebMercator();
-		var stats = webMerc.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
+		var mercAoi = Region.ToWebMercator();
+		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
 
-		await Run_Common(saveFile, webMerc, stats.TileCount, generateWork());
+		await Run_Common(saveFile, mercAoi, regionTiles.Length, generateWork());
 
 		IEnumerable<Task<TileDataset<WebMercator>>> generateWork()
 		{
-			var aoi = webMerc.ToPixelRegion(ZoomLevel);
+			var aoi = mercAoi.ToPixelRegion(ZoomLevel);
 			if (LayerDate)
 			{
 				var datedLayer = wayBack.Layers.SortByNearestDates(d => d.Date, desiredDates).FirstOrDefault();
@@ -77,16 +77,16 @@ internal class Download : FileDownloadVerb
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
 				}
-				Console.Write($"Grabbing Image Tiles From {datedLayer.DatedElement.Title}: ");
+				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				ReportProgress(0);
-				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, datedLayer.DatedElement)));
+				return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, datedLayer.DatedElement)));
 			}
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Write($"Grabbing Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				ReportProgress(0);
-				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDates)));
+				return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDates)));
 			}
 		}
 	}
@@ -175,17 +175,17 @@ internal class Download : FileDownloadVerb
 	private async Task Run_Keyhole(FileInfo saveFile, IEnumerable<DateOnly> desiredDates)
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var stats = Region.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
+		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
 
-		await Run_Common(saveFile, Region, stats.TileCount, generateWork());
+		await Run_Common(saveFile, Region, regionTiles.Length, generateWork());
 
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
 			var aoi = Region.ToPixelRegion(ZoomLevel);
-			Console.Write("Grabbing Image Tiles: ");
+			Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
 			ReportProgress(0);
 
-			return Region.GetTiles<KeyholeTile>(ZoomLevel).Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDates)));
+			return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDates)));
 		}
 	}
 

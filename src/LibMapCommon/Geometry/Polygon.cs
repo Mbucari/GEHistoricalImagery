@@ -94,20 +94,26 @@ public abstract class Polygon<TPoly, TCoordinate>
 		return (hitCount & 1) == 1;
 	}
 
-	private const int roundingDigits = 15;
+	private const int roundingDigits = 14;
 
 	/// <summary>
 	/// Indicates whether any edges of the supplied polygon intersect any edges of this polygon
 	/// </summary>
 	public bool PolygonIntersects(TPoly other)
 	{
-		return Edges.Any(e => other.Edges.Any(t => SegmentsIntersect(e, t)));
+		return other.Edges.Any(PolygonIntersects);
 
-		static bool SegmentsIntersect(Line2 l1, Line2 l2)
-		{
-			var v = l1.Intersect(l2, roundingDigits);
-			return v.X >= 0 && v.X < 1 && v.Y >= 0 && v.Y < 1;
-		}
+	}
+
+	public bool PolygonIntersects(Line2 line)
+	{
+		return Edges.Any(e => SegmentsIntersect(e, line));
+	}
+
+	private static bool SegmentsIntersect(Line2 l1, Line2 l2)
+	{
+		var v = l1.Intersect(l2, roundingDigits);
+		return v.X > 0 && v.X < 1 && v.Y > 0 && v.Y < 1;
 	}
 
 	/// <summary>
@@ -120,7 +126,8 @@ public abstract class Polygon<TPoly, TCoordinate>
 	public string AutoCad => "pl " + string.Join("\r\n", Edges.Select(e => $"{e.Origin.X},{e.Origin.Y}")) + " c\r\n";
 
 	/// <summary>
-	/// Convert a polygon to a collection of triangular polygons
+	/// Convert a polygon to a collection of triangular polygons.
+	/// Returns an empty list if the triangulation algorithm fails (which can happen if the polygon is very complex or has colinear edges).
 	/// </summary>
 	public IList<TPoly> TriangulatePolygon()
 	{
@@ -131,7 +138,8 @@ public abstract class Polygon<TPoly, TCoordinate>
 		var poly = CreateFromEdges(Edges.Where(e => e.Direction.Length > epsilon).ToArray());
 		var edges = poly.Edges.ToList();
 
-		for (int i = 0; edges.Count > 3; i = (i + 1) % edges.Count)
+		int skipsSinceLastClip = 0;
+		for (int i = 0; edges.Count > 3 && skipsSinceLastClip <= edges.Count; i = (i + 1) % edges.Count, skipsSinceLastClip++)
 		{
 			var e1 = edges[i];
 			var e2 = edges[(i + 1) % edges.Count];
@@ -152,10 +160,17 @@ public abstract class Polygon<TPoly, TCoordinate>
 
 			if (poly.ContainsPoint(centroidX, centroidY))
 			{
+				var newEdge = LineFrom(e3.Origin, e1.Origin);
+				if (poly.PolygonIntersects(newEdge))
+				{
+					//The triangle is not an ear, so skip it.
+					continue;
+				}
+
 				triangles.Add(CreateFromEdges([
 					LineFrom(e1.Origin, e2.Origin),
 					LineFrom(e2.Origin, e3.Origin),
-					LineFrom(e3.Origin, e1.Origin)]));
+					newEdge]));
 
 				ClipEdges();
 			}
@@ -163,14 +178,19 @@ public abstract class Polygon<TPoly, TCoordinate>
 			#region Algorithm Function
 			void ClipEdges()
 			{
+				edges[(i + 1) % edges.Count] = LineFrom(e1.Origin, e3.Origin);
 				edges.RemoveAt(i);
-				edges[edges.IndexOf(e2)] = LineFrom(e1.Origin, e3.Origin);
 				poly = CreateFromEdges(edges);
 				i--;
+				skipsSinceLastClip = 0;
 			}
 			#endregion
 		}
-
+		if (skipsSinceLastClip > edges.Count)
+		{
+			//The triangulation algorithm is stuck, so it failed.
+			return [];
+		}
 		triangles.Add(poly);
 		return triangles;
 	}

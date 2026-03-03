@@ -13,6 +13,10 @@ internal class GdalLib
 		if (_isRegistered)
 			return;
 
+#if DEBUG
+		Environment.SetEnvironmentVariable("GDAL_DATA", AppContext.BaseDirectory);
+#endif
+
 		string gdalData = Environment.GetEnvironmentVariable("GDAL_DATA") ?? AppContext.BaseDirectory;
 		string geoTiffCsv = Environment.GetEnvironmentVariable("GEOTIFF_CSV") ?? gdalData;
 		string projLib = Environment.GetEnvironmentVariable("PROJ_LIB") ?? gdalData;

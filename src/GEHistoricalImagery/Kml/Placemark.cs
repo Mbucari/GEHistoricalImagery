@@ -113,8 +113,8 @@ internal class Placemark
 
 			if (childName == "Folder")
 				placemarks.AddRange(GetPlacemarksRecursively(nsMgr, child));
-			else if (childName == "Placemark" && Parse(nsMgr, child) is Placemark p)
-				placemarks.Add(p);
+			else if (childName == "Placemark")
+				placemarks.AddRange(Parse(nsMgr, child));
 		}
 
 		return placemarks;
@@ -124,27 +124,32 @@ internal class Placemark
 	private const string PointCoordinatesSelect = "./" + NS + ":Point/" + NS + ":coordinates";
 	private const string LineStringCoordinatesSelect = "./" + NS + ":LineString/" + NS + ":coordinates";
 	private const string PolygonCoordinatesSelect = "./" + NS + ":Polygon/" + NS + ":outerBoundaryIs/" + NS + ":LinearRing/" + NS + ":coordinates";
+	private const string MultiGeometryPolygonCoordinatesSelect = "./" + NS + ":MultiGeometry/" + NS + ":Polygon/" + NS + ":outerBoundaryIs/" + NS + ":LinearRing/" + NS + ":coordinates";
 
 	private static readonly (string query, Func<string, string, Placemark?> parser)[] Parsers = [
 		(PointCoordinatesSelect, ParsePoint),
 		(LineStringCoordinatesSelect, ParseLineString),
-		(PolygonCoordinatesSelect, ParsePolygon)];
+		(PolygonCoordinatesSelect, ParsePolygon),
+		(MultiGeometryPolygonCoordinatesSelect, ParsePolygon)];
 
-	private static Placemark? Parse(XmlNamespaceManager nsMgr, XElement element)
+	private static IEnumerable<Placemark> Parse(XmlNamespaceManager nsMgr, XElement element)
 	{
 		var ns = element.GetDefaultNamespace();
-
-		if (element.XPathSelectElement($"./{NS}:name", nsMgr)?.Value is not string name)
-			return null;
+		string name = element.XPathSelectElement($"./{NS}:name", nsMgr)?.Value ?? "[no name]";
 
 		foreach (var (query, parser) in Parsers)
 		{
-			var coordinateList = element.XPathSelectElement(query, nsMgr)?.Value?.Trim();
-			if (coordinateList is not null && parser(name, coordinateList) is Placemark placemark)
-				return placemark;
+			int count = 0;
+			foreach (var geoElement in element.XPathSelectElements(query, nsMgr))
+			{
+				var geometryName = count == 0 ? name : $"{name} ({count})";
+				if (geoElement.Value.Trim() is string coordinateList && parser(geometryName, coordinateList) is Placemark placemark)
+				{
+					count++;
+					yield return placemark;
+				}
+			}
 		}
-
-		return null;
 	}
 
 	private static Placemark? ParsePoint(string name, string coordinates)
@@ -156,7 +161,7 @@ internal class Placemark
 	private static Placemark? ParsePolygon(string name, string coordinates)
 	{
 		var coords = ParseCoordinates(coordinates);
-		if (coords[0] == coords[^1])
+		while (coords.Length > 1 && coords[0] == coords[^1])
 			Array.Resize(ref coords, coords.Length - 1);
 		return coords.Length >= 3 ? new Placemark(name, PlacemarkType.Polygon, coords) : null;
 	}

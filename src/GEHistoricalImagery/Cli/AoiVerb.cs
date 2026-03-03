@@ -1,5 +1,7 @@
 ﻿using CommandLine;
 using GEHistoricalImagery.Kml;
+using LibEsri;
+using LibGoogleEarth;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 
@@ -50,23 +52,24 @@ internal abstract class AoiVerb : OptionsBase
 			var placemarks = Placemark.LoadFromKeyhole(RegionFile)?.Where(p => p.Type is PlacemarkType.LineString or PlacemarkType.Polygon).ToArray();
 			if (placemarks is null)
 				yield return "Invalid KMZ file";
-			else if (placemarks.Length == 0)
-				yield return "Keyhole file doesn't contain any enclosed regions";
 			else
 			{
-				if (placemarks.Length == 1)
+				var placemarkOptions = placemarks.Select(p => new PlacemarkOption(p)).Where(p => p.AreaSquareMeters > 0).ToArray();
+				if (placemarkOptions.Length == 0)
+				{
+					yield return "Keyhole file doesn't contain any enclosed regions";
+				}
+				else if (placemarkOptions.Length == 1)
+				{
 					Region = GeoRegion<Wgs1984>.Create(placemarks[0].Coordinates);
+				}
 				else
 				{
 					var prompt = "Select which placemark to use as the region of interest";
 					Console.WriteLine(prompt);
 					Console.WriteLine(new string('=', prompt.Length));
 
-					var placemark
-						= OptionChooser<PlacemarkOption>
-						.WaitForOptions(placemarks.Select(p => new PlacemarkOption(p)).ToArray())
-						?.Placemark;
-
+					var placemark = OptionChooser<PlacemarkOption>.WaitForOptions(placemarkOptions)?.Placemark;
 					if (placemark is null)
 						yield return "No placemark was selected";
 					else
@@ -121,20 +124,100 @@ internal abstract class AoiVerb : OptionsBase
 			if (errorMessage != null)
 				yield return errorMessage;
 		}
+
+		if (Region is not null)
+		{
+			TileStats rectStats;
+			if (Provider is Provider.Wayback)
+			{
+				var webMerc = Region.ToWebMercator();
+				rectStats = webMerc.GetRectangularRegionStats<EsriTile>(ZoomLevel);
+			}
+			else
+				rectStats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel);
+
+			if (rectStats.TileCount < 100_000)
+				yield break;
+
+			string? result;
+			do
+			{
+				Console.Write("""
+				Warning: the specified region and zoom level spans {0} tiles. This could take a very long time and may fail. Recommended to either decrease the zoom level or shrink the area of interest."
+				Do you want to continue? (y/N)  
+				""", rectStats.TileCount.ToString("N0"));
+				result = Console.ReadLine()?.Trim().ToLower();
+			}
+			while (result is not ("y" or "n" or "" or null));
+			if (result != "y")
+				yield return "Aborting due to user request";
+		}
 	}
 
 	private class PlacemarkOption : IConsoleOption
 	{
 		public string DisplayValue { get; }
 		public Placemark Placemark { get; }
+		public double AreaSquareMeters { get; }
 
 		public PlacemarkOption(Placemark placemark)
 		{
 			Placemark = placemark;
-			var area = placemark.GetArea() / 1000000;
-			DisplayValue = $"<{placemark.Type} '{placemark.Name}' ({area:F2} km^2)>";
+			AreaSquareMeters = placemark.GetArea();
+			DisplayValue = $"<{placemark.Type} '{placemark.Name}' ({AreaString(AreaSquareMeters)})>";
+		}
+
+		private static string AreaString(double squareMeters)
+		{
+			if (squareMeters < 1000000)
+			{
+				if (squareMeters < 100)
+					return $"{squareMeters:N2} m^2";
+				else if (squareMeters < 1_000)
+					return $"{squareMeters:N1} m^2";
+				return $"{squareMeters:N0} m^2";
+			}
+			else
+			{
+				var squareKm = squareMeters / 1_000_000;
+				if (squareKm < 10)
+					return $"{squareKm:N3} km^2";
+				else if (squareKm < 100)
+					return $"{squareKm:N2} km^2";
+				else if (squareKm < 1_000)
+					return $"{squareKm:N1} km^2";
+				return $"{squareKm:N0} km^2";
+			}
 		}
 
 		public bool DrawOption() => true;
+	}
+
+	/// <summary>
+	/// Enumerate the tiles that intersect with the AOI region.  Progress is reported as the tiles are being enumerated.
+	/// </summary>
+	protected IEnumerable<TTile> EnumerateTiles<TTile, TCoordinate>(GeoRegion<TCoordinate> region)
+		where TTile : ITile<TTile, TCoordinate>
+		where TCoordinate : IGeoCoordinate<TCoordinate>
+	{
+		var allRectStats = region.Polygons.Select(p => p.GetRectangularRegionStats<TTile>(ZoomLevel)).ToArray();
+		double totalTileCount = allRectStats.Sum(s => s.TileCount);
+		Console.Write("Finding Tiles Inside Region: ");
+		ReportProgress(0);
+		long numTilesChecked = 0;
+
+		for (int i = 0; i < allRectStats.Length; i++)
+		{
+			var polygon = region.Polygons[i];
+			var stats = allRectStats[i];
+			var polygonTiles = polygon.EnumerateTiles<TTile>(stats, () =>
+			{
+				var progress = ++numTilesChecked / totalTileCount;
+				ReportProgress(progress);
+			});
+			foreach (var tile in polygonTiles)
+					yield return tile;
+		}
+		ReplaceProgress("Done!" + Environment.NewLine);
 	}
 }

@@ -19,11 +19,21 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 	/// <param name="tile">A map tile to test</param>
 	/// <returns>True if any part of the tile is within this polygon, otherwise false</returns>
 	public bool ContainsTile<TTile>(TTile tile) where TTile : ITile<TCoordinate>
-		=> ContainsPoint(tile.LowerLeft) ||
+	{
+		if (ContainsPoint(tile.LowerLeft) ||
 			ContainsPoint(tile.LowerRight) ||
 			ContainsPoint(tile.UpperLeft) ||
-			ContainsPoint(tile.UpperRight) ||
-			PolygonIntersects(tile.GetGeoPolygon());
+			ContainsPoint(tile.UpperRight))
+			return true;
+		else
+		{
+			//Test if the tile contains any of the polygon's vertices.
+			//Since the tile is guaranteed rectangular, we can test the envelope instead of intersecting edges.
+			var ll = tile.LowerLeft;
+			var ur = tile.UpperRight;
+			return Edges.Any(edge => edge.Origin.X > ll.X && edge.Origin.X < ur.X && edge.Origin.Y > ll.Y && edge.Origin.Y < ur.Y);
+		}
+	}
 
 	/// <summary>
 	/// Convert to the global pixel space for the current polygon's coordinate system.
@@ -49,17 +59,6 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 			edges[i] = edge;
 		}
 		return edges;
-	}
-
-	/// <summary>
-	/// Gets the tile statistics for the region defined by this polygon.
-	/// </summary>
-	/// <param name="level">The zoom level of interest</param>
-	public TileStats GetPolygonalRegionStats<TTile>(int level) where TTile : ITile<TTile, TCoordinate>
-	{
-		var stats = GetRectangularRegionStats<TTile>(level);
-		var tileCount = EnumerateTiles<TTile>(stats).Count();
-		return stats with { TileCount = tileCount };
 	}
 
 	/// <summary>
@@ -95,11 +94,12 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 		return EnumerateTiles<TTile>(stats);
 	}
 
-	internal IEnumerable<TTile> EnumerateTiles<TTile>(TileStats stats) where TTile : ITile<TTile, TCoordinate>
+	public IEnumerable<TTile> EnumerateTiles<TTile>(TileStats stats, Action? progress = null) where TTile : ITile<TTile, TCoordinate>
 	{
 		if (stats.TileCount == 1)
 		{
 			yield return TTile.Create(stats.MinRow, stats.MinColumn, stats.Zoom);
+			progress?.Invoke();
 			yield break;
 		}
 
@@ -115,6 +115,7 @@ public class GeoPolygon<TCoordinate> : Polygon<GeoPolygon<TCoordinate>, TCoordin
 
 				if (ContainsTile(tile))
 					yield return tile;
+				progress?.Invoke();
 			}
 		}
 	}

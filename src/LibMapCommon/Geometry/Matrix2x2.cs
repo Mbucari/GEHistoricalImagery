@@ -1,10 +1,7 @@
 ﻿namespace LibMapCommon.Geometry;
 
-public readonly struct Matrix2x2(double m11, double m12, double m21, double m22)
+public readonly record struct Matrix2x2(double M11, double M12, double M21, double M22)
 {
-	public readonly double M11 = m11; public readonly double M12 = m12;
-	public readonly double M21 = m21; public readonly double M22 = m22;
-
 	public static Vector2 Multiply(Matrix2x2 m, Vector2 v)
 		=> new Vector2(m.M11 * v.X + m.M12 * v.Y, m.M21 * v.X + m.M22 * v.Y);
 

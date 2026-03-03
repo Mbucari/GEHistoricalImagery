@@ -43,8 +43,6 @@ internal class Availability : AoiVerb
 
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		Console.Write("Loading World Atlas WayBack Layer Info: ");
-
 		var all = await GetAllEsriRegions(wayBack, Region);
 		ReplaceProgress("Done!" + Environment.NewLine);
 
@@ -67,10 +65,12 @@ internal class Availability : AoiVerb
 
 		int count = 0;
 		int numTiles = layers.Length;
-		ReportProgress(0);
 
 		var mercAoi = aoi.ToWebMercator();
-		var stats = mercAoi.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
+		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
+		Console.Write("Loading World Atlas WayBack Layer Info: ");
+		ReportProgress(0);
+		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 
 		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
 		List<EsriRegion> allLayers = new();
@@ -115,7 +115,7 @@ internal class Availability : AoiVerb
 			{
 				var availability = new RegionAvailability(regions[i].Date, stats.NumRows, stats.NumColumns);
 
-				foreach (var tile in mercAoi.GetTiles<EsriTile>(ZoomLevel))
+				foreach (var tile in regionTiles)
 				{
 					var cIndex = LibMapCommon.Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
 					var rIndex = tile.Row - stats.MinRow;
@@ -167,8 +167,6 @@ internal class Availability : AoiVerb
 	private async Task Run_Keyhole()
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		Console.Write("Loading Quad Tree Packets: ");
-
 		var all = await GetAllDatesAsync(root, Region);
 		ReplaceProgress("Done!" + Environment.NewLine);
 
@@ -184,15 +182,17 @@ internal class Availability : AoiVerb
 	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoRegion<Wgs1984> reg)
 	{
 		int count = 0;
-		var stats = reg.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
-		ReportProgress(0);
 
+		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
+		var stats = reg.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
+		Console.Write("Loading Quad Tree Packets: ");
+		ReportProgress(0);
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
 
 		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();
 		HashSet<Tuple<int, int>> uniquePoints = new();
 
-		await foreach (var dSet in processor.EnumerateResults(reg.GetTiles<KeyholeTile>(ZoomLevel).Select(getDatedTiles)))
+		await foreach (var dSet in processor.EnumerateResults(regionTiles.Select(getDatedTiles)))
 		{
 			foreach (var d in dSet)
 			{

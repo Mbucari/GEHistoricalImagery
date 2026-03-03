@@ -23,18 +23,6 @@ public class GeoRegion<TCoordinate> : Region<GeoPolygon<TCoordinate>, TCoordinat
 		return new PixelRegion(level, ll.X, ur.X, Polygons.Select(p => p.ToPixelPolygon(level)).ToArray());
 	}
 
-
-	/// <summary>
-	/// Gets the tile statistics for the region defined by this polygon.
-	/// </summary>
-	/// <param name="level">The zoom level of interest</param>
-	public TileStats GetPolygonalRegionStats<TTile>(int level) where TTile : ITile<TTile, TCoordinate>
-	{
-		var stats = GetRectangularRegionStats<TTile>(level);
-		var tileCount = Polygons.Sum(p => p.EnumerateTiles<TTile>(stats).Count());
-		return stats with { TileCount = tileCount };
-	}
-
 	/// <summary>
 	/// Gets the tile statistics for the region defined by this polygon's rectangular envelope
 	/// </summary>
@@ -52,7 +40,7 @@ public class GeoRegion<TCoordinate> : Region<GeoPolygon<TCoordinate>, TCoordinat
 		var nColumns = Util.Mod(ur.Column - ll.Column, 1 << level) + 1;
 		var nRows = maxRow - minRow + 1;
 
-		return new TileStats(level, nColumns, nRows, minRow, maxRow, minColumn, maxColumn, nColumns * nRows);
+		return new TileStats(level, nColumns, nRows, minRow, maxRow, minColumn, maxColumn, (long)nColumns * nRows);
 	}
 
 	/// <summary>
@@ -75,8 +63,8 @@ public class GeoRegion<TCoordinate> : Region<GeoPolygon<TCoordinate>, TCoordinat
 
 	public static GeoRegion<TCoordinate> Create(params TCoordinate[] coords)
 	{
-		var minX = coords.Select(x => x.X).Min();
-		var maxX = coords.Select(x => x.X).Max();
+		var minX = coords.Min(x => x.X);
+		var maxX = coords.Max(x => x.X);
 
 		if (maxX > TCoordinate.Equator)
 			throw new ArgumentException($"The largest X coordinate ({maxX}) exceeds the equatorial distance ({TCoordinate.Equator})");

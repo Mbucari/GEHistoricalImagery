@@ -88,8 +88,9 @@ internal partial class Dump : FileDownloadVerb
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		var webMerc = Region.ToWebMercator();
-		var stats = webMerc.GetPolygonalRegionStats<EsriTile>(ZoomLevel);
+		var mercAoi = Region.ToWebMercator();
+		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
+		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var formatter = new FilenameFormatter(Formatter!, stats);
 		await Run_Common(saveFolder, stats.TileCount, formatter, generateWork());
 
@@ -110,16 +111,16 @@ internal partial class Dump : FileDownloadVerb
 					return [];
 				}
 
-				Console.Write($"Grabbing Image Tiles From {datedLayer.DatedElement.Title}: ");
+				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				ReportProgress(0);
-				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, datedLayer.DatedElement, formatter.HasTileDate)));
+				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, datedLayer.DatedElement, formatter.HasTileDate)));
 			}
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Write($"Grabbing Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s":"")}: ");
+				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s":"")}: ");
 				ReportProgress(0);
-				return webMerc.GetTiles<EsriTile>(ZoomLevel).Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
+				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
 			}
 		}
 	}
@@ -179,18 +180,18 @@ internal partial class Dump : FileDownloadVerb
 
 	private async Task Run_Keyhole(DirectoryInfo saveFolder, IEnumerable<DateOnly> desiredDates)
 	{
-		Console.Write("Grabbing Image Tiles: ");
+		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
+		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
+
+		Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
 		ReportProgress(0);
 
-		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var stats = Region.GetPolygonalRegionStats<KeyholeTile>(ZoomLevel);
+		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 		var formatter = new FilenameFormatter(Formatter!, stats);
 		await Run_Common(saveFolder, stats.TileCount, formatter, generateWork());
 
 		IEnumerable<Task<TileDataset>> generateWork()
-			=> Region
-			.GetTiles<KeyholeTile>(ZoomLevel)
-			.Select(t => Task.Run(() => DownloadTile(root, t, desiredDates)));
+			=> regionTiles.Select(t => Task.Run(() => DownloadTile(root, t, desiredDates)));
 	}
 
 	private async Task<TileDataset> DownloadTile(DbRoot root, KeyholeTile tile, IEnumerable<DateOnly> desiredDates)

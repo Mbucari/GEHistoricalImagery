@@ -150,17 +150,17 @@ $N$ is the row/column<br>
 $Z$ is the zoom level.<br>
 ### Esri Tiles
 
-$$Longitude = 360\frac{Column}{2^{Z}}-180$$
+$$\text{Longitude} = 360\frac{\text{Column}}{2^{Z}}-180$$
 
-$$Latitude = \arctan(\sinh(\pi (1-2\frac{Row}{2^{Z}}))) \frac{180}{\pi}$$
+$$\text{Latitude} = \frac{360\cdot\arctan(\exp(2\pi(0.5-\frac{\text{Row}}{2^{Z}})))}{\pi}-90$$
 or
-$$Column = 2^{Z}\frac{Longitude + 180}{360}$$
+$$\text{Column} = 2^{Z}\frac{\text{Longitude} + 180}{360}$$
 
-$$Row = \frac{2^{Z}}{2}(1 - \frac{1}{\pi}\ln(\tan(\frac{\pi\cdot Latitude}{180}) + \sec(\frac{\pi\cdot Latitude}{180})) $$
+$$\text{Row} = 2^{Z}(0.5-\frac{\ln(\tan(\frac{\pi}{360}\cdot(\text{Latitude}+90)))}{2\pi}) $$
 
 Where:
 
 $Z$ is the zoom level.<br>
 
 ************************
-<p align="center"><i>Updated 2025/12/03</i></p>
+<p align="center"><i>Updated 2026/03/04</i></p>

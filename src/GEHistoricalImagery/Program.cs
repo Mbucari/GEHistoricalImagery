@@ -28,8 +28,9 @@ internal class Program
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Download))]
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Dump))]
 	private static async Task Main(string[] args)
-	{
-		var parser = new Parser(ConfigureParser);
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        var parser = new Parser(ConfigureParser);
 
 		var result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
 

@@ -18,7 +18,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="MaxRev.Gdal.Universal" Version="3.12.1.440" />
+		<PackageReference Include="MaxRev.Gdal.Universal" Version="3.12.2.472" />
 	</ItemGroup>
 
 	<ItemGroup>

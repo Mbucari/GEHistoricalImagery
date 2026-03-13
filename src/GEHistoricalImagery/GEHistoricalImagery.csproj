@@ -22,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\LibDumpedTileDatabase\LibDumpedTileDatabase.csproj" />
 		<ProjectReference Include="..\LibEsri\LibEsri.csproj" />
 		<ProjectReference Include="..\LibGoogleEarth\LibGoogleEarth.csproj" />
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

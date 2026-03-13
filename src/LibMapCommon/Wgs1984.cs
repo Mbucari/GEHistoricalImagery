@@ -14,6 +14,7 @@ public readonly struct Wgs1984 : IEquatable<Wgs1984>, IGeoCoordinate<Wgs1984>
 
 	public double X { get; }
 	public double Y { get; }
+	public Wgs1984 ToWgs1984() => this;
 
 	/// <summary> The <see cref="Wgs1984"/>'s longitude </summary>
 	public double Longitude => X;

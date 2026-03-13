@@ -9,6 +9,7 @@ public interface IGeoCoordinate : ICoordinate
 {
 	static abstract int EpsgNumber { get; }
 	static abstract double Equator { get; }
+	public Wgs1984 ToWgs1984();
 }
 
 public interface ICoordinate

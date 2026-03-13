@@ -10,6 +10,8 @@ internal abstract class TileDataset
 	public abstract ITile Tile { get; }
 	public byte[]? TileBytes { get; init; }
 	public required string? Message { get; init; }
+	public abstract Wgs1984 LowerLeft { get; }
+	public abstract Wgs1984 UpperRight { get; }
 	public abstract GeoTransform GetGeoTransform();
 	public abstract GDALWarpAppOptions GetWarpOptions(string targetSr);
 
@@ -24,6 +26,8 @@ internal class TileDataset<TCoordinate> : TileDataset, IDisposable
 {
 	public Dataset? Dataset { get; init; }
 	public override ITile<TCoordinate> Tile { get; }
+	public override Wgs1984 LowerLeft => Tile.LowerLeft.ToWgs1984();
+	public override Wgs1984 UpperRight => Tile.UpperRight.ToWgs1984();
 	public TileDataset(ITile<TCoordinate> tile)
 	{
 		Tile = tile;

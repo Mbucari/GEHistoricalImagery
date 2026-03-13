@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using LibDumpedTileDatabase;
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
@@ -118,7 +119,7 @@ internal partial class Dump : FileDownloadVerb
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s":"")}: ");
+				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				ReportProgress(0);
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
 			}
@@ -233,6 +234,15 @@ internal partial class Dump : FileDownloadVerb
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
 		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+		await using var db = DumpContext.Create(saveFolder);
+		List<DumpedTile> dumpedTiles = [];
+		var dbOperation = db.AddOperation(
+			new Operation
+			{
+				DumpedTiles = dumpedTiles,
+				Provider = Provider.ToString(),
+				OutputDirectory = saveFolder.FullName
+			});
 
 		await foreach (var tds in processor.EnumerateResults(generator))
 		{
@@ -244,14 +254,37 @@ internal partial class Dump : FileDownloadVerb
 				var saveFile = formatter.GetString(tds);
 				var savePath = Path.Combine(saveFolder.FullName, saveFile);
 				SaveDataset(savePath, tds);
+				AddTileToDatabase(db, dbOperation, saveFile, tds);
 				numTilesDownload++;
 			}
 
 			ReportProgress(++numTilesProcessed / tileCount);
 		}
+		await db.SaveChangesAsync();
 
 		ReplaceProgress($"Done!{Environment.NewLine}");
 		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+	}
+
+	private void AddTileToDatabase(DumpContext db, Operation operation, string saveFile, TileDataset tds)
+	{
+		var ll = tds.LowerLeft;
+		var ur = tds.UpperRight;
+		var dt = new DumpedTile
+		{
+			Operation = operation,
+			TileDate = tds.TileDate == default ? null : tds.TileDate,
+			LayerDate = tds.LayerDate,
+			Column = tds.Tile.Column,
+			Row = tds.Tile.Row,
+			Zoom = tds.Tile.Level,
+			Latitude_Top = ur.Latitude,
+			Latitude_Bottom = ll.Latitude,
+			Longitude_Left = ll.Longitude,
+			Longitude_Right = ur.Longitude,
+			SavedFile = saveFile
+		};
+		db.AddDumpedTile(dt);
 	}
 
 	private void SaveDataset(string filePath, TileDataset tds)
@@ -301,9 +334,9 @@ internal partial class Dump : FileDownloadVerb
 
 	private static TileDataset EmptyDataset<TCoordinate>(ITile<TCoordinate> tile, string? messageOverride = null)
 		where TCoordinate : IGeoCoordinate<TCoordinate> => new TileDataset<TCoordinate>(tile)
-	{
-		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
-	};
+		{
+			Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
+		};
 
 
 	private class FilenameFormatter

@@ -92,7 +92,7 @@ Download historical imagery at zoom level `20` from within the region defined by
 
 ### Example 4 - Get imagery from Esri Wayback version 2023/04/15
 
-   **NOTE : The date in this command is the date of the Wayback layer, _not the image capture date_.**
+   **NOTE** : The date in this command is the image capture date. Determining the image capture date for each tile is slow because it requires an additional query for every tile. For faster downloads, use the `--layer-date` option to download imagery from a single Wayback layer.
    
    **Command:**
    ```Console
@@ -127,4 +127,4 @@ Download historical imagery at zoom level `20` from within the region defined by
    ![Cherry Creek 6-Small.jpg](assets/Cherry%20Creek%206-Small.jpg)
 
 ************************
-<p align="center"><i>Updated 2025/12/03</i></p>
+<p align="center"><i>Updated 2026/05/01</i></p>

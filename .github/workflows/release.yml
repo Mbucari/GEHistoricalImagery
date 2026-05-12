@@ -42,7 +42,6 @@ jobs:
         with:
           name: GEHistoricalImagery v${{ needs.prerelease.outputs.version }}
           body: <Put a body here>
-          token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
           prerelease: false
           files: |

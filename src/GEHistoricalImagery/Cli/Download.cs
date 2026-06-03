@@ -77,14 +77,14 @@ internal class Download : FileDownloadVerb
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
 				}
-				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
+				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				ReportProgress(0);
 				return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, datedLayer.DatedElement)));
 			}
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				ReportProgress(0);
 				return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDates)));
 			}
@@ -182,7 +182,7 @@ internal class Download : FileDownloadVerb
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
 			var aoi = Region.ToPixelRegion(ZoomLevel);
-			Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
+			Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
 			ReportProgress(0);
 
 			return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDates)));
@@ -319,7 +319,7 @@ internal class Download : FileDownloadVerb
 				}
 
 			ReplaceProgress($"Done!{Environment.NewLine}");
-			Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+			Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 			//Release the lock for either saving or deleting
 			fileLock.Dispose();
@@ -331,7 +331,7 @@ internal class Download : FileDownloadVerb
 				return;
 			}
 
-			Console.Write("Saving Image: ");
+			Console.Error.Write("Saving Image: ");
 			Progress = 0;
 
 			image.Saving += Image_Saving;

@@ -68,7 +68,7 @@ internal class Availability : AoiVerb
 
 		var mercAoi = aoi.ToWebMercator();
 		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
-		Console.Write("Loading World Atlas WayBack Layer Info: ");
+		Console.Error.Write("Loading World Atlas WayBack Layer Info: ");
 		ReportProgress(0);
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 
@@ -144,16 +144,16 @@ internal class Availability : AoiVerb
 			if (Availabilities.Length == 1)
 			{
 				var availabilityStr = $"Tile availability on {DateString(Layer.Date)} (captured on {DateString(Availabilities[0].Date)})";
-				Console.WriteLine(Environment.NewLine + availabilityStr);
-				Console.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
+				Console.Error.WriteLine(Environment.NewLine + availabilityStr);
+				Console.Error.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 
 				Availabilities[0].DrawMap();
 			}
 			else if (Availabilities.Length > 1)
 			{
 				var availabilityStr = $"Layer {Layer.Title} has imagery from {Availabilities.Length} different dates";
-				Console.WriteLine(Environment.NewLine + availabilityStr);
-				Console.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
+				Console.Error.WriteLine(Environment.NewLine + availabilityStr);
+				Console.Error.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 
 				OptionChooser<RegionAvailability>.WaitForOptions(Availabilities);
 			}
@@ -185,7 +185,7 @@ internal class Availability : AoiVerb
 
 		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
 		var stats = reg.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
-		Console.Write("Loading Quad Tree Packets: ");
+		Console.Error.Write("Loading Quad Tree Packets: ");
 		ReportProgress(0);
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
 
@@ -293,8 +293,8 @@ internal class Availability : AoiVerb
 		public bool DrawOption()
 		{
 			var availabilityStr = $"Tile availability on {DateString(Date)}";
-			Console.WriteLine(Environment.NewLine + availabilityStr);
-			Console.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
+			Console.Error.WriteLine(Environment.NewLine + availabilityStr);
+			Console.Error.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 			DrawMap();
 			return false;
 		}
@@ -335,7 +335,7 @@ internal class Availability : AoiVerb
 					}
 				}
 
-				Console.WriteLine(new string(row));
+				Console.Error.WriteLine(new string(row));
 			}
 		}
 	}

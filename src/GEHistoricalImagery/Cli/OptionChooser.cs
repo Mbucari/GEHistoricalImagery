@@ -31,7 +31,7 @@
 				{
 					if (option.DrawOption())
 						return option;
-					Console.WriteLine();
+					Console.Error.WriteLine();
 					WriteOptions(dateDict, finalOption);
 				}
 			}
@@ -53,7 +53,7 @@
 				{
 					if (option.DrawOption())
 						return option;
-					Console.WriteLine();
+					Console.Error.WriteLine();
 					WriteOptions(dateDict, finalOption);
 				}
 			}
@@ -67,19 +67,19 @@
 
 			for (int i = 0; i < entries.Length - 1; i++)
 			{
-				Console.Write(entries[i]);
+				Console.Error.Write(entries[i]);
 
 				var remainingSpace = Console.WindowWidth - Console.CursorLeft;
 				if (remainingSpace < entries[i + 1].Length + spacer.Length)
-					Console.WriteLine();
+					Console.Error.WriteLine();
 				else
-					Console.Write(spacer);
+					Console.Error.Write(spacer);
 			}
 
-			Console.Write(entries[^1]);
+			Console.Error.Write(entries[^1]);
 
 			if (Console.CursorLeft > 0)
-				Console.WriteLine();
+				Console.Error.WriteLine();
 		}
 	}
 }

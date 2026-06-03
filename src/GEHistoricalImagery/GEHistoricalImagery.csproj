@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<Version>0.5.2</Version>
+		<PublishAot>true</PublishAot>
 		<SelfContained>true</SelfContained>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

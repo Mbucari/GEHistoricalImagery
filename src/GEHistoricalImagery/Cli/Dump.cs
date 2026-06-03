@@ -111,14 +111,14 @@ internal partial class Dump : FileDownloadVerb
 					return [];
 				}
 
-				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
+				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				ReportProgress(0);
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, datedLayer.DatedElement, formatter.HasTileDate)));
 			}
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s":"")}: ");
+				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s":"")}: ");
 				ReportProgress(0);
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
 			}
@@ -183,7 +183,7 @@ internal partial class Dump : FileDownloadVerb
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
 
-		Console.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
+		Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
 		ReportProgress(0);
 
 		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
@@ -251,7 +251,7 @@ internal partial class Dump : FileDownloadVerb
 		}
 
 		ReplaceProgress($"Done!{Environment.NewLine}");
-		Console.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
+		Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 	}
 
 	private void SaveDataset(string filePath, TileDataset tds)

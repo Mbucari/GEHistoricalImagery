@@ -30,14 +30,15 @@ public readonly record struct GeoTransform
 	}
 	public void WriteWorldFile(string imageFile)
 	{
-		var worldFileExtension = Path.GetExtension(imageFile) switch
+		var extension = Path.GetExtension(imageFile)?.Trim();
+		var worldFileExtension = string.IsNullOrEmpty(extension) ? ".worldfile" : extension switch
 		{
 			".gif" or ".giff" => ".gfw",
 			".jpg" or ".jpeg" => ".jgw",
 			".tif" or ".tiff" => ".tfw",
 			".png" => ".pgw",
 			".jp2" => ".j2w",
-			_ => ".worldfile"
+			_ => extension + "w"
 		};
 
 		var worldFile = Path.ChangeExtension(imageFile, worldFileExtension);

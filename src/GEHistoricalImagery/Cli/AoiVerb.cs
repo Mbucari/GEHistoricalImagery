@@ -59,15 +59,15 @@ internal abstract class AoiVerb : OptionsBase
 				{
 					yield return "Keyhole file doesn't contain any enclosed regions";
 				}
-				else if (placemarkOptions.Length == 1)
+				else if (placemarkOptions.Length == 1 || this is IQuietCommand { Quiet: true })
 				{
 					Region = GeoRegion<Wgs1984>.Create(placemarks[0].Coordinates);
 				}
 				else
 				{
 					var prompt = "Select which placemark to use as the region of interest";
-					Console.WriteLine(prompt);
-					Console.WriteLine(new string('=', prompt.Length));
+					Console.Error.WriteLine(prompt);
+					Console.Error.WriteLine(new string('=', prompt.Length));
 
 					var placemark = OptionChooser<PlacemarkOption>.WaitForOptions(placemarkOptions)?.Placemark;
 					if (placemark is null)
@@ -136,13 +136,13 @@ internal abstract class AoiVerb : OptionsBase
 			else
 				rectStats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel);
 
-			if (rectStats.TileCount < 100_000)
+			if (rectStats.TileCount < 100_000 || this is IQuietCommand { Quiet: true })
 				yield break;
 
 			string? result;
 			do
 			{
-				Console.Write("""
+				Console.Error.Write("""
 				Warning: the specified region and zoom level spans {0} tiles. This could take a very long time and may fail. Recommended to either decrease the zoom level or shrink the area of interest."
 				Do you want to continue? (y/N)  
 				""", rectStats.TileCount.ToString("N0"));
@@ -202,7 +202,7 @@ internal abstract class AoiVerb : OptionsBase
 	{
 		var allRectStats = region.Polygons.Select(p => p.GetRectangularRegionStats<TTile>(ZoomLevel)).ToArray();
 		double totalTileCount = allRectStats.Sum(s => s.TileCount);
-		Console.Write("Finding Tiles Inside Region: ");
+		Console.Error.Write("Finding Tiles Inside Region: ");
 		ReportProgress(0);
 		long numTilesChecked = 0;
 

@@ -28,11 +28,16 @@ internal class Program
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Download))]
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Dump))]
 	private static async Task Main(string[] args)
-    {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        var parser = new Parser(ConfigureParser);
+	{
+		Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-		var result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
+		Parser parser = new(ConfigureParser);
+		ParserResult<object> result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
+		if (result.Value is IQuietCommand quietOpt && quietOpt.Quiet)
+		{
+			Console.SetError(new StreamWriter(Stream.Null));
+			OSGeo.GDAL.Gdal.SetErrorHandler((_, _, _) => { }, 0);
+		}
 
 		try
 		{

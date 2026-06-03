@@ -60,7 +60,7 @@ internal abstract class OptionsBase
 			if (progress >= Progress)
 			{
 				var p = progress.ToString("P");
-				Console.Write(new string('\b', lastProgLen) + p);
+				Console.Error.Write(new string('\b', lastProgLen) + p);
 				lastProgLen = p.Length;
 				Progress = progress;
 			}
@@ -73,10 +73,10 @@ internal abstract class OptionsBase
 
 		newText = newText + new string(' ', lastProgLen) + newText + text;
 
-		Console.Write(newText);
+		Console.Error.Write(newText);
 		Progress = 0;
 		lastProgLen = 0;
 	}
 
-	protected static string DateString(DateOnly date) => date.ToString("yyyy/MM/dd");
+	protected static string DateString(DateOnly? date) => date?.ToString("yyyy/MM/dd") ?? "N/A";
 }

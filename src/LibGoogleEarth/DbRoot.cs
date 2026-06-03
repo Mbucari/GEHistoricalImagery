@@ -80,6 +80,13 @@ public abstract class DbRoot
 			: null;
 	}
 
+	public string? GetProviderCopyright(DatedTile tile)
+	{
+		var provider = DbRootBuffer.ProviderInfo
+			.FirstOrDefault(n => n.HasProviderId && n.ProviderId == tile.Provider)
+			?.CopyrightString.Value;
+		return string.IsNullOrEmpty(provider) ? null : provider;
+	}
 
 	[return: NotNullIfNotNull(nameof(terrainTile))]
 	public async Task<T?> GetEarthAssetAsync<T>(IEarthAsset<T>? terrainTile)

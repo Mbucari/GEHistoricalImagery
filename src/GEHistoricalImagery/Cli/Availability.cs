@@ -43,8 +43,8 @@ internal class Availability : AoiVerb
 
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		var all = await GetAllEsriRegions(wayBack, Region);
-		ReplaceProgress("Done!" + Environment.NewLine);
+		var all = await GetAllEsriRegions(wayBack, Region.Transform<WebMercator>());
+		ReplaceProgress();
 
 		if (all.Sum(r => r.Availabilities.Length) == 0)
 		{
@@ -55,7 +55,7 @@ internal class Availability : AoiVerb
 		OptionChooser<EsriRegion>.WaitForOptions(all);
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<Wgs1984> aoi)
+	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<WebMercator> aoi)
 	{
 		//A layer date < MinDate will not have imagery captured after MinDate, but
 		//a layer date > MaxDate may still have imagery captured before MaxDate.
@@ -66,10 +66,9 @@ internal class Availability : AoiVerb
 		int count = 0;
 		int numTiles = layers.Length;
 
-		var mercAoi = aoi.ToWebMercator();
-		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
-		Console.Error.Write("Loading World Atlas WayBack Layer Info: ");
-		ReportProgress(0);
+		var mercAoi = aoi.Transform<WebMercator>();
+		var regionTiles = GetTiles(mercAoi);
+		BeginProgress("Loading World Atlas WayBack Layer Info: ");
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 
 		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
@@ -81,10 +80,6 @@ internal class Availability : AoiVerb
 			{
 				allLayers.Add(region);
 				ReportProgress(++count / (double)numTiles);
-			}
-			else
-			{
-				break;
 			}
 		}
 
@@ -120,7 +115,7 @@ internal class Availability : AoiVerb
 					var cIndex = LibMapCommon.Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
 					var rIndex = tile.Row - stats.MinRow;
 
-					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
+					availability[rIndex, cIndex] = regions[i].ContainsTile<EsriTile>(tile);
 				}
 
 				if (availability.HasAnyTiles() && (availability.HasAllTiles() || !CompleteOnly))
@@ -168,7 +163,7 @@ internal class Availability : AoiVerb
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var all = await GetAllDatesAsync(root, Region);
-		ReplaceProgress("Done!" + Environment.NewLine);
+		ReplaceProgress();
 
 		if (all.Length == 0)
 		{
@@ -183,10 +178,9 @@ internal class Availability : AoiVerb
 	{
 		int count = 0;
 
-		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
+		var regionTiles = GetTiles(reg);
 		var stats = reg.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
-		Console.Error.Write("Loading Quad Tree Packets: ");
-		ReportProgress(0);
+		BeginProgress("Loading Quad Tree Packets: ");
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
 
 		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();

@@ -3,36 +3,32 @@ using OSGeo.GDAL;
 
 namespace GEHistoricalImagery;
 
-internal abstract class TileDataset
+internal interface ITileDataset
 {
-	public DateOnly? LayerDate { get; init; }
-	public DateOnly TileDate { get; init; }
-	public abstract ITile Tile { get; }
-	public byte[]? TileBytes { get; init; }
-	public required string? Message { get; init; }
-	public abstract GeoTransform GetGeoTransform();
-	public abstract GDALWarpAppOptions GetWarpOptions(string targetSr);
-
-	static TileDataset()
-	{
-		GdalLib.Register();
-	}
+	DateOnly? LayerDate { get; init; }
+	DateOnly TileDate { get; init; }
+	ITile Tile { get; }
+	byte[]? TileBytes { get; init; }
+	string? Message { get; init; }
+	GeoTransform GetGeoTransform();
+	GDALWarpAppOptions GetWarpOptions(RasterOptions rasterOptions, string targetSr);
 }
 
-internal class TileDataset<TCoordinate> : TileDataset, IDisposable
+internal class TileDataset<TCoordinate>(ITile<TCoordinate> tile) : ITileDataset, IDisposable
 	where TCoordinate : IGeoCoordinate<TCoordinate>
 {
 	public Dataset? Dataset { get; init; }
-	public override ITile<TCoordinate> Tile { get; }
-	public TileDataset(ITile<TCoordinate> tile)
-	{
-		Tile = tile;
-	}
+	public ITile<TCoordinate> Tile { get; } = tile;
+	ITile ITileDataset.Tile => Tile;
+	public DateOnly? LayerDate { get; init; }
+	public DateOnly TileDate { get; init; }
+	public byte[]? TileBytes { get; init; }
+	public required string? Message { get; init; }
 
-	public override GeoTransform GetGeoTransform() => Tile.GetGeoTransform();
+	public GeoTransform GetGeoTransform() => Tile.GetGeoTransform();
 
-	public override GDALWarpAppOptions GetWarpOptions(string targetSr)
-		=> EarthImage<TCoordinate>.GetWarpOptions(targetSr);
+	public GDALWarpAppOptions GetWarpOptions(RasterOptions rasterOptions, string targetSr)
+		=> rasterOptions.GetWarpOptions<TCoordinate>(targetSr);
 
 	public void Dispose()
 		=> Dataset?.Dispose();

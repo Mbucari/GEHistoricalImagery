@@ -1,10 +1,26 @@
 <Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
   <Folder Name="/Tests/">
-    <Project Path="test/GEHistoricalImageryTest/GEHistoricalImageryTest.csproj" />
-    <Project Path="test/LibGoogleEarthTest/LibGoogleEarthTest.csproj" />
+    <Project Path="test/GEHistoricalImageryTest/GEHistoricalImageryTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="test/LibGoogleEarthTest/LibGoogleEarthTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
   </Folder>
-  <Project Path="src/GEHistoricalImagery/GEHistoricalImagery.csproj" />
-  <Project Path="src/LibEsri/LibEsri.csproj" />
-  <Project Path="src/LibGoogleEarth/LibGoogleEarth.csproj" />
-  <Project Path="src/LibMapCommon/LibMapCommon.csproj" />
+  <Project Path="src/GEHistoricalImagery/GEHistoricalImagery.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/LibEsri/LibEsri.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/LibGoogleEarth/LibGoogleEarth.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/LibMapCommon/LibMapCommon.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>

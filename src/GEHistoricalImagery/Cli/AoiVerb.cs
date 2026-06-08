@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using GEHistoricalImagery.Kml;
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
@@ -28,6 +27,10 @@ internal abstract class AoiVerb : OptionsBase
 	public int ConcurrentDownload { get; set; }
 
 	protected GeoRegion<Wgs1984> Region { get; set; } = null!;
+	static AoiVerb()
+	{
+		GdalLib.Register();
+	}
 
 	protected bool AnyAoiErrors()
 	{
@@ -49,19 +52,18 @@ internal abstract class AoiVerb : OptionsBase
 
 		if (RegionFile != null)
 		{
-			var placemarks = Placemark.LoadFromKeyhole(RegionFile)?.Where(p => p.Type is PlacemarkType.LineString or PlacemarkType.Polygon).ToArray();
-			if (placemarks is null)
+			if (KmlFile.Parse(PathHelper.ReplaceUnixHomeDir(RegionFile)) is not { } kml)
 				yield return "Invalid KMZ file";
 			else
 			{
-				var placemarkOptions = placemarks.Select(p => new PlacemarkOption(p)).Where(p => p.AreaSquareMeters > 0).ToArray();
+				var placemarkOptions = kml.Placemarks.Where(p => p.GeodesicArea > 0).Select(p => new PlacemarkOption(p)).ToArray();
 				if (placemarkOptions.Length == 0)
 				{
 					yield return "Keyhole file doesn't contain any enclosed regions";
 				}
 				else if (placemarkOptions.Length == 1 || this is IQuietCommand { Quiet: true })
 				{
-					Region = GeoRegion<Wgs1984>.Create(placemarks[0].Coordinates);
+					Region = GeoRegion<Wgs1984>.Create(placemarkOptions[0].Placemark);
 				}
 				else
 				{
@@ -73,7 +75,7 @@ internal abstract class AoiVerb : OptionsBase
 					if (placemark is null)
 						yield return "No placemark was selected";
 					else
-						Region = GeoRegion<Wgs1984>.Create(placemark.Coordinates);
+						Region = GeoRegion<Wgs1984>.Create(placemark);
 				}
 			}
 		}
@@ -91,10 +93,10 @@ internal abstract class AoiVerb : OptionsBase
 				coords[i] = coord;
 			}
 
-			Region = GeoRegion<Wgs1984>.Create(coords);
+			Region = GeoRegion<Wgs1984>.Create(coords); 
 		}
 		else if (LowerLeft is null && UpperRight is null)
-			yield return "An area of interest must be specified either with the 'region' option or the 'lower-left' and 'upper-right' options";
+			yield return "An area of interest must be specified either with 'region', 'region-file', or the 'lower-left' and 'upper-right' options";
 		else if (LowerLeft is null)
 			yield return $"Invalid lower-left coordinate.{Environment.NewLine} Location must be in decimal Lat,Long. e.g. 37.58289,-106.52305";
 		else if (UpperRight is null)
@@ -130,7 +132,7 @@ internal abstract class AoiVerb : OptionsBase
 			TileStats rectStats;
 			if (Provider is Provider.Wayback)
 			{
-				var webMerc = Region.ToWebMercator();
+				var webMerc = Region.Transform<WebMercator>();
 				rectStats = webMerc.GetRectangularRegionStats<EsriTile>(ZoomLevel);
 			}
 			else
@@ -154,17 +156,32 @@ internal abstract class AoiVerb : OptionsBase
 		}
 	}
 
+	protected EsriTile[] GetTiles(GeoRegion<WebMercator> region)
+	{
+		BeginProgress("Finding Tiles Inside Region: ");
+		var regionTiles = region.EnumerateTiles<EsriTile>(ZoomLevel, ReportProgress).ToArray();
+		ReplaceProgress();
+		return regionTiles;
+	}
+
+	protected KeyholeTile[] GetTiles(GeoRegion<Wgs1984> region)
+	{
+		BeginProgress("Finding Tiles Inside Region: ");
+		var regionTiles = region.EnumerateTiles<KeyholeTile>(ZoomLevel, ReportProgress).ToArray();
+		ReplaceProgress();
+		return regionTiles;
+	}
+
 	private class PlacemarkOption : IConsoleOption
 	{
 		public string DisplayValue { get; }
 		public Placemark Placemark { get; }
-		public double AreaSquareMeters { get; }
+		public double AreaSquareMeters => Placemark.GeodesicArea;
 
 		public PlacemarkOption(Placemark placemark)
 		{
 			Placemark = placemark;
-			AreaSquareMeters = placemark.GetArea();
-			DisplayValue = $"<{placemark.Type} '{placemark.Name}' ({AreaString(AreaSquareMeters)})>";
+			DisplayValue = $"<{placemark.ParsedGeometryType.ToString().Remove(0,3)} '{placemark.Name}' ({AreaString(AreaSquareMeters)})>";
 		}
 
 		private static string AreaString(double squareMeters)
@@ -191,33 +208,5 @@ internal abstract class AoiVerb : OptionsBase
 		}
 
 		public bool DrawOption() => true;
-	}
-
-	/// <summary>
-	/// Enumerate the tiles that intersect with the AOI region.  Progress is reported as the tiles are being enumerated.
-	/// </summary>
-	protected IEnumerable<TTile> EnumerateTiles<TTile, TCoordinate>(GeoRegion<TCoordinate> region)
-		where TTile : ITile<TTile, TCoordinate>
-		where TCoordinate : IGeoCoordinate<TCoordinate>
-	{
-		var allRectStats = region.Polygons.Select(p => p.GetRectangularRegionStats<TTile>(ZoomLevel)).ToArray();
-		double totalTileCount = allRectStats.Sum(s => s.TileCount);
-		Console.Error.Write("Finding Tiles Inside Region: ");
-		ReportProgress(0);
-		long numTilesChecked = 0;
-
-		for (int i = 0; i < allRectStats.Length; i++)
-		{
-			var polygon = region.Polygons[i];
-			var stats = allRectStats[i];
-			var polygonTiles = polygon.EnumerateTiles<TTile>(stats, () =>
-			{
-				var progress = ++numTilesChecked / totalTileCount;
-				ReportProgress(progress);
-			});
-			foreach (var tile in polygonTiles)
-					yield return tile;
-		}
-		ReplaceProgress("Done!" + Environment.NewLine);
 	}
 }

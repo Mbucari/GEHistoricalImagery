@@ -58,6 +58,6 @@ public class RectangleTests
 		var ul = new Wgs1984(ur_lat, ll_long);
 		var ur = new Wgs1984(ur_lat, ur_long);
 		var lr = new Wgs1984(ll_lat, ur_long);
-		Assert.Throws<InvalidOperationException>(() => new GeoPolygon<Wgs1984>(ll, ul, ur, lr));
+		Assert.Throws<InvalidOperationException>(() => GeoRegion<Wgs1984>.Create(ll, ul, ur, lr));
 	}
 }

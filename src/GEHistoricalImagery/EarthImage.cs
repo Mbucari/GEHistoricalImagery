@@ -1,11 +1,12 @@
 ﻿using LibMapCommon;
 using LibMapCommon.Geometry;
 using OSGeo.GDAL;
+using OSGeo.OGR;
 using OSGeo.OSR;
 
 namespace GEHistoricalImagery;
 
-internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
+internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<TSource>
 {
 	public const int TILE_SZ = 256;
 	protected int Width { get; init; }
@@ -19,57 +20,53 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 	/// <summary> The y-coordinate of the output dataset's top-left corner relative to global pixel space  </summary>
 	protected int RasterY { get; init; }
 
-	static EarthImage()
-	{
-		GdalLib.Register();
-	}
-
-	public EarthImage(GeoRegion<T> region, int level, string? cacheFile = null)
+	public EarthImage(GeoRegion<TSource> region, int level, string? cacheFile = null)
 	{
 		long globalPixels = TILE_SZ * (1L << level);
 
-		var pixels = region.ToPixelRegion(level);
+		var ll = TSource.Create(region.LeftMostX, region.MinY).GetGlobalPixelCoordinate(level);
+		var ur = TSource.Create(region.RightMostX, region.MaxY).GetGlobalPixelCoordinate(level);
 
-		RasterX = pixels.LeftMostX.ToRoundedInt();
-		RasterY = pixels.MinY.ToRoundedInt();
+		RasterX = ll.X.ToRoundedInt();
+		RasterY = ur.Y.ToRoundedInt();
 
-		Width = (pixels.RightMostX - pixels.LeftMostX).ToRoundedInt();
-		Height = (pixels.MaxY - pixels.MinY).ToRoundedInt();
+		Width = (ur.X - ll.X).ToRoundedInt();
+		Height = (ll.Y - ur.Y).ToRoundedInt();
 		//Allow wrapping around 180/-180
 		if (Width < 0)
 			Width = (int)(Width + globalPixels);
 
-		using var sourceSr = new SpatialReference("");
-		sourceSr.ImportFromEPSG(T.EpsgNumber);
+		using var sourceSr = new SpatialReference(null);
+		sourceSr.Import<TSource>();
 
 		var geoTransform = new GeoTransform
 		{
 			UpperLeft_X = region.LeftMostX,
 			UpperLeft_Y = region.MaxY,
-			PixelWidth = T.Equator / globalPixels,
-			PixelHeight = -T.Equator / globalPixels
+			PixelWidth = TSource.Equator / globalPixels,
+			PixelHeight = -TSource.Equator / globalPixels
 		};
 
 		TempDataset = CreateEmptyDataset(Width, Height, cacheFile);
 		TempDataset.SetSpatialRef(sourceSr);
 		TempDataset.SetGeoTransform(geoTransform);
 	}
-
+	
 	public static Dataset CreateEmptyDataset(int width, int height, string? fileName)
 	{
 		if (string.IsNullOrWhiteSpace(fileName))
 		{
-			using var tifDriver = Gdal.GetDriverByName("MEM");
-			return tifDriver.Create("", width, height, 3, DataType.GDT_Byte, null);
+			using var memDriver = Gdal.GetDriverByName("MEM");
+			return memDriver.Create("", width, height, 3, DataType.GDT_Byte, null);
 		}
 		else
 		{
 			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			return tifDriver.Create(fileName, width, height, 3, DataType.GDT_Byte, null);
+			return tifDriver.Create(fileName, width, height, 3, DataType.GDT_Byte, ["BIGTIFF=YES"]);
 		}
 	}
 
-	public void AddTile(ITile<T> tile, Dataset image)
+	public void AddTile(ITile<TSource> tile, Dataset image)
 	{
 		//Tile's global pixel coordinates of the tile's top-left corner.
 		var gpx = tile.GetTopLeftPixel();
@@ -97,54 +94,26 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 			return;
 
 		int bandCount = image.RasterCount;
-		var bandMap = Enumerable.Range(1, bandCount).ToArray();
 		var rasterBuff = GC.AllocateUninitializedArray<byte>(size_x * size_y * bandCount);
-		image.ReadRaster(read_x, read_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
-		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, bandMap, bandCount, size_x * bandCount, 1);
+		image.ReadRaster(read_x, read_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, null, bandCount, size_x * bandCount, 1);
+		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, null, bandCount, size_x * bandCount, 1);
 	}
 
-	public static GDALWarpAppOptions GetWarpOptions(string target_srs, int cpuCount = 1)
-	{
-		string[] parameters =
-		[
-			"-multi",
-			"-wo", $"NUM_THREADS={cpuCount}",
-			"-of", "GTiff",
-			"-ot", "Byte",
-			"-wo", "OPTIMIZE_SIZE=TRUE",
-			"-co", "COMPRESS=JPEG",
-			"-co", "PHOTOMETRIC=YCBCR",
-			"-co", "TILED=TRUE",
-			"-r", "bilinear",
-			"-s_srs", $"EPSG:{T.EpsgNumber}",
-			"-t_srs", target_srs
-		];
-		return new GDALWarpAppOptions(parameters);
-	}
-
-	public void Save(string path, string? outSR, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
+	public void Save(string path, RasterOptions rasterOptions, string? outSR, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
 	{
 		if (TempDataset == null) return;
 		TempDataset.FlushCache();
 
 		Dataset saved;
-
-		if (outSR != null)
+		if (outSR is null)
 		{
-			using var options = GetWarpOptions(outSR, cpuCount);
-			saved = Gdal.Warp(path, [TempDataset], options, reportProgress, null);
+			using OSGeo.GDAL.Driver driver = Gdal.GetDriverByName(rasterOptions.DriverName);
+			saved = driver.CreateCopy(path, TempDataset, 1, rasterOptions.GetCreationOptions(cpuCount), ReportProgress, null);
 		}
 		else
 		{
-			string[] parameters =
-			[
-				"COMPRESS=JPEG",
-				"PHOTOMETRIC=YCBCR",
-				"TILED=TRUE",
-				$"NUM_THREADS={cpuCount}"
-			];
-			using var tifDriver = Gdal.GetDriverByName("GTiff");
-			saved = tifDriver.CreateCopy(path, TempDataset, 1, parameters, reportProgress, null);
+			using GDALWarpAppOptions options = rasterOptions.GetWarpOptions<TSource>(outSR, cpuCount);
+			saved = Gdal.Warp(path, [TempDataset], options, ReportProgress, null);
 		}
 
 		using (saved)
@@ -161,19 +130,18 @@ internal class EarthImage<T> : IDisposable where T : IGeoCoordinate<T>
 
 			saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();
-
 			geoTransform.WriteWorldFile(path);
-		}
-
-		int reportProgress(double Complete, IntPtr Message, IntPtr Data)
-		{
-			var args = new ImageSaveEventArgs(Complete);
-			Saving?.Invoke(this, args);
-			return args.Continue ? 1 : 0;
 		}
 	}
 
 	public event EventHandler<ImageSaveEventArgs>? Saving;
+
+	private int ReportProgress(double Complete, IntPtr Message, IntPtr Data)
+	{
+		var args = new ImageSaveEventArgs(Complete);
+		Saving?.Invoke(this, args);
+		return args.Continue ? 1 : 0;
+	}
 
 	public void Dispose()
 	{

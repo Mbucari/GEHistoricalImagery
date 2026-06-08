@@ -88,13 +88,13 @@ internal partial class Dump : FileDownloadVerb
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		var mercAoi = Region.ToWebMercator();
-		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
+		var mercAoi = Region.Transform<WebMercator>();
+		var regionTiles = GetTiles(mercAoi);
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var formatter = new FilenameFormatter(Formatter!, stats);
 		await Run_Common(saveFolder, stats.TileCount, formatter, generateWork());
 
-		IEnumerable<Task<TileDataset>> generateWork()
+		IEnumerable<Task<ITileDataset>> generateWork()
 		{
 			if (LayerDate)
 			{
@@ -111,21 +111,19 @@ internal partial class Dump : FileDownloadVerb
 					return [];
 				}
 
-				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
-				ReportProgress(0);
+				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, datedLayer.DatedElement, formatter.HasTileDate)));
 			}
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Spefidied Date{(desiredDates.Count() > 1 ? "s":"")}: ");
-				ReportProgress(0);
+				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
 			}
 		}
 	}
 
-	private async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, IEnumerable<DateOnly> desiredDates)
+	private async Task<ITileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, IEnumerable<DateOnly> desiredDates)
 	{
 		try
 		{
@@ -154,7 +152,7 @@ internal partial class Dump : FileDownloadVerb
 		return EmptyDataset(tile);
 	}
 
-	private static async Task<TileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer, bool getTileDate)
+	private static async Task<ITileDataset> DownloadEsriTile(WayBack wayBack, EsriTile tile, Layer layer, bool getTileDate)
 	{
 		try
 		{
@@ -181,20 +179,20 @@ internal partial class Dump : FileDownloadVerb
 	private async Task Run_Keyhole(DirectoryInfo saveFolder, IEnumerable<DateOnly> desiredDates)
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
-
-		Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
-		ReportProgress(0);
+		var regionTiles = GetTiles(Region);
 
 		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 		var formatter = new FilenameFormatter(Formatter!, stats);
+
+		var message = ExactMatch ? "On" : "Nearest To";
+		BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 		await Run_Common(saveFolder, stats.TileCount, formatter, generateWork());
 
-		IEnumerable<Task<TileDataset>> generateWork()
+		IEnumerable<Task<ITileDataset>> generateWork()
 			=> regionTiles.Select(t => Task.Run(() => DownloadTile(root, t, desiredDates)));
 	}
 
-	private async Task<TileDataset> DownloadTile(DbRoot root, KeyholeTile tile, IEnumerable<DateOnly> desiredDates)
+	private async Task<ITileDataset> DownloadTile(DbRoot root, KeyholeTile tile, IEnumerable<DateOnly> desiredDates)
 	{
 		if (await root.GetNodeAsync(tile) is not TileNode node)
 			return EmptyDataset(tile);
@@ -228,11 +226,11 @@ internal partial class Dump : FileDownloadVerb
 
 	#region Common
 
-	private async Task Run_Common(DirectoryInfo saveFolder, double tileCount, FilenameFormatter formatter, IEnumerable<Task<TileDataset>> generator)
+	private async Task Run_Common(DirectoryInfo saveFolder, double tileCount, FilenameFormatter formatter, IEnumerable<Task<ITileDataset>> generator)
 	{
 		int numTilesProcessed = 0;
 		int numTilesDownload = 0;
-		var processor = new ParallelProcessor<TileDataset>(ConcurrentDownload);
+		var processor = new ParallelProcessor<ITileDataset>(ConcurrentDownload);
 
 		await foreach (var tds in processor.EnumerateResults(generator))
 		{
@@ -250,11 +248,11 @@ internal partial class Dump : FileDownloadVerb
 			ReportProgress(++numTilesProcessed / tileCount);
 		}
 
-		ReplaceProgress($"Done!{Environment.NewLine}");
+		ReplaceProgress();
 		Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 	}
 
-	private void SaveDataset(string filePath, TileDataset tds)
+	private void SaveDataset(string filePath, ITileDataset tds)
 	{
 		if (TargetSpatialReference is null)
 		{
@@ -282,7 +280,7 @@ internal partial class Dump : FileDownloadVerb
 			var geoTransform = tds.GetGeoTransform();
 			sourceDs.SetGeoTransform(geoTransform);
 
-			using var options = tds.GetWarpOptions(TargetSpatialReference);
+			using var options = tds.GetWarpOptions(RasterOptions.Jpeg, TargetSpatialReference);
 			using var destDs = Gdal.Warp(filePath, [sourceDs], options, null, null);
 			if (WriteWorldFile)
 			{
@@ -299,7 +297,7 @@ internal partial class Dump : FileDownloadVerb
 		}
 	}
 
-	private static TileDataset EmptyDataset<TCoordinate>(ITile<TCoordinate> tile, string? messageOverride = null)
+	private static ITileDataset EmptyDataset<TCoordinate>(ITile<TCoordinate> tile, string? messageOverride = null)
 		where TCoordinate : IGeoCoordinate<TCoordinate> => new TileDataset<TCoordinate>(tile)
 	{
 		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
@@ -338,7 +336,7 @@ internal partial class Dump : FileDownloadVerb
 				.Replace("{LD}", "{6}");
 		}
 
-		public string GetString(TileDataset dataset)
+		public string GetString(ITileDataset dataset)
 		{
 			int localCol = dataset.Tile.Column - LowerLeftColumn;
 			if (localCol < 0)

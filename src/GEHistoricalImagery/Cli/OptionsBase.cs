@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using System.Diagnostics;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -66,14 +67,21 @@ internal abstract class OptionsBase
 			}
 		}
 	}
-
-	protected void ReplaceProgress(string text)
+	private Stopwatch progressTimer = new Stopwatch();
+	protected void BeginProgress(string text)
 	{
+		Console.Error.Write(text);
+		progressTimer.Restart();
+		ReportProgress(0);
+	}
+	protected void ReplaceProgress()
+	{
+		progressTimer.Stop();
 		var newText = new string('\b', lastProgLen);
 
-		newText = newText + new string(' ', lastProgLen) + newText + text;
+		newText = newText + new string(' ', lastProgLen) + newText + $"Done! ({progressTimer.Elapsed:g})";
 
-		Console.Error.Write(newText);
+		Console.Error.WriteLine(newText);
 		Progress = 0;
 		lastProgLen = 0;
 	}

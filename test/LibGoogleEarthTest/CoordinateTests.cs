@@ -7,26 +7,6 @@ namespace LibGoogleEarthTest;
 [TestClass]
 public class CoordinateTests
 {
-	[TestMethod]
-	public void TriangulateEarClip()
-	{
-		var p = new GeoPolygon<Wgs1984>([
-			new(3,1),
-			new(5,2),
-			new(2,5),
-			new(2,4),
-			new(-1,3.5),
-			new(2,3),
-			new(3,2),
-			]);
-
-		//Test the tile enumeration
-		Assert.HasCount(9, p.GetTiles<KeyholeTile>(8));
-		//Test the triangulation
-		var polygon = p.TriangulatePolygon();
-		Assert.IsNotNull(polygon);
-		Assert.HasCount(p.Edges.Count - 2, polygon);
-	}
 
 	[TestMethod]
 	[DataRow(0, 0, 0, 0, 0)]

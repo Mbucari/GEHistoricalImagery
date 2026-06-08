@@ -33,7 +33,7 @@ internal class Program
 
 		Parser parser = new(ConfigureParser);
 		ParserResult<object> result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
-		if (result.Value is IQuietCommand quietOpt && quietOpt.Quiet)
+		if (result.Value is IQuietCommand { Quiet: true })
 		{
 			Console.SetError(new StreamWriter(Stream.Null));
 			OSGeo.GDAL.Gdal.SetErrorHandler((_, _, _) => { }, 0);

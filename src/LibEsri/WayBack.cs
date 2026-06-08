@@ -1,6 +1,8 @@
 ﻿using LibEsri.Geometry;
 using LibMapCommon;
 using LibMapCommon.Geometry;
+using OSGeo.GDAL;
+using OSGeo.OGR;
 using System.Text;
 using System.Text.Json.Nodes;
 
@@ -54,31 +56,21 @@ public class WayBack
 	{
 		var metadataUrl = layer.GetEnvelopeQueryUrl(region, zoom);
 
+		string memFile = $"/vsimem/{Guid.NewGuid()}.json";
+
 		try
 		{
-			var ss = await DownloadJsonAsync(metadataUrl);
-
-			if (ss?["features"]?.AsArray().ToDatedRegions(layer, region).ToArray() is not DatedRegion[] regions)
-				return Array.Empty<DatedRegion>();
-
-			//consolidate duplicate dates
-			Dictionary<DateOnly, DatedRegion> set = new();
-			foreach (var r in regions)
-			{
-				if (set.TryGetValue(r.Date, out var dr))
-				{
-					var arr1 = dr.Polygons;
-					Array.Resize(ref arr1, arr1.Length + r.Polygons.Length);
-					Array.Copy(r.Polygons, 0, arr1, dr.Polygons.Length, r.Polygons.Length);
-					set[r.Date] = DatedRegion.Create(r.Date, arr1);
-				}
-				else
-					set.Add(r.Date, r);
-			}
-
-			return set.Values.ToArray();
+			var ss = await HttpClient.GetByteArrayAsync(metadataUrl);
+			Gdal.FileFromMemBuffer(memFile, ss);
+			using var driver = Ogr.GetDriverByName("ESRIJSON");
+			using var ds = driver.Open(memFile, 0);
+			return ds.ToDatedRegions(region)?.ToArray() is DatedRegion[] regions ? regions : Array.Empty<DatedRegion>();
 		}
 		catch { }
+		finally
+		{
+			Gdal.Unlink(memFile);
+		}
 		return Array.Empty<DatedRegion>();
 	}
 

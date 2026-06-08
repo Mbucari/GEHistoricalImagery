@@ -4,6 +4,7 @@ using LibGoogleEarth;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 using OSGeo.GDAL;
+using OSGeo.OGR;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -43,7 +44,6 @@ internal class Download : FileDownloadVerb
 			Console.Error.WriteLine($"\t{ex.Message}");
 			return;
 		}
-
 		var desiredDates = Dates!;
 		var task = Provider is Provider.Wayback ? Run_Esri(saveFile, desiredDates)
 			: Run_Keyhole(saveFile, desiredDates);
@@ -56,14 +56,13 @@ internal class Download : FileDownloadVerb
 	private async Task Run_Esri(FileInfo saveFile, IEnumerable<DateOnly> desiredDates)
 	{
 		var wayBack = await WayBack.CreateAsync(CacheDir);
-		var mercAoi = Region.ToWebMercator();
-		var regionTiles = EnumerateTiles<EsriTile, WebMercator>(mercAoi).ToArray();
+		var mercAoi = Region.Transform<WebMercator>();
+		var regionTiles = GetTiles(mercAoi);
 
 		await Run_Common(saveFile, mercAoi, regionTiles.Length, generateWork());
 
 		IEnumerable<Task<TileDataset<WebMercator>>> generateWork()
 		{
-			var aoi = mercAoi.ToPixelRegion(ZoomLevel);
 			if (LayerDate)
 			{
 				var datedLayer = wayBack.Layers.SortByNearestDates(d => d.Date, desiredDates).FirstOrDefault();
@@ -77,21 +76,19 @@ internal class Download : FileDownloadVerb
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
 				}
-				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
-				ReportProgress(0);
-				return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, datedLayer.DatedElement)));
+				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
+				return regionTiles.Select(t => Task.Run(() => DownloadTile(mercAoi, wayBack, t, datedLayer.DatedElement)));
 			}
 			else
 			{
 				var message = ExactMatch ? "On" : "Nearest To";
-				Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
-				ReportProgress(0);
-				return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, wayBack, t, desiredDates)));
+				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				return regionTiles.Select(t => Task.Run(() => DownloadTile(mercAoi, wayBack, t, desiredDates)));
 			}
 		}
 	}
 
-	private async Task<TileDataset<WebMercator>> DownloadTile(PixelRegion aoi, WayBack wayBack, EsriTile tile, IEnumerable<DateOnly> desiredDates)
+	private async Task<TileDataset<WebMercator>> DownloadTile(GeoRegion<WebMercator> aoi, WayBack wayBack, EsriTile tile, IEnumerable<DateOnly> desiredDates)
 	{
 		try
 		{
@@ -133,7 +130,7 @@ internal class Download : FileDownloadVerb
 		return EmptyDataset(tile);
 	}
 
-	private async Task<TileDataset<WebMercator>> DownloadTile(PixelRegion aoi, WayBack wayBack, EsriTile tile, Layer layer)
+	private static async Task<TileDataset<WebMercator>> DownloadTile(GeoRegion<WebMercator> aoi, WayBack wayBack, EsriTile tile, LibEsri.Layer layer)
 	{
 		EsriTile gotTile = tile;
 
@@ -175,21 +172,20 @@ internal class Download : FileDownloadVerb
 	private async Task Run_Keyhole(FileInfo saveFile, IEnumerable<DateOnly> desiredDates)
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var regionTiles = EnumerateTiles<KeyholeTile, Wgs1984>(Region).ToArray();
+		var regionTiles = GetTiles(Region);
 
 		await Run_Common(saveFile, Region, regionTiles.Length, generateWork());
 
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
-			var aoi = Region.ToPixelRegion(ZoomLevel);
-			Console.Error.Write($"Grabbing {regionTiles.Length:N0} Image Tiles: ");
-			ReportProgress(0);
+			var message = ExactMatch ? "On" : "Nearest To";
+			BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 
-			return regionTiles.Select(t => Task.Run(() => DownloadTile(aoi, root, t, desiredDates)));
+			return regionTiles.Select(t => Task.Run(() => DownloadTile(Region, root, t, desiredDates)));
 		}
 	}
 
-	private async Task<TileDataset<Wgs1984>> DownloadTile(PixelRegion aoi, DbRoot root, KeyholeTile tile, IEnumerable<DateOnly> desiredDates)
+	private async Task<TileDataset<Wgs1984>> DownloadTile(GeoRegion<Wgs1984> aoi, DbRoot root, KeyholeTile tile, IEnumerable<DateOnly> desiredDates)
 	{
 		KeyholeTile gotTile = tile;
 		TileNode? node;
@@ -296,17 +292,11 @@ internal class Download : FileDownloadVerb
 		try
 		{
 			using var image = new EarthImage<T>(region, ZoomLevel, tempFile);
-			using Dataset? missingTile = CreateMissingTile();
 
 			await foreach (var tds in processor.EnumerateResults(generator))
 				using (tds)
 				{
-					if (tds.Dataset is null)
-					{
-
-						image.AddTile(tds.Tile, missingTile);
-					}
-					else
+					if (tds.Dataset is not null)
 					{
 						image.AddTile(tds.Tile, tds.Dataset);
 						numTilesDownload++;
@@ -318,7 +308,7 @@ internal class Download : FileDownloadVerb
 					ReportProgress(++numTilesProcessed / tileCount);
 				}
 
-			ReplaceProgress($"Done!{Environment.NewLine}");
+			ReplaceProgress();
 			Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 			//Release the lock for either saving or deleting
@@ -331,12 +321,10 @@ internal class Download : FileDownloadVerb
 				return;
 			}
 
-			Console.Error.Write("Saving Image: ");
-			Progress = 0;
-
-			image.Saving += Image_Saving;
-			image.Save(saveFile.FullName, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
-			ReplaceProgress("Done!" + Environment.NewLine);
+			BeginProgress("Saving Image: ");
+			image.Saving += (_, e) => ReportProgress(e.Progress);
+			image.Save(saveFile.FullName, RasterOptions.GTiff_Jpeg, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
+			ReplaceProgress();
 		}
 		finally
 		{
@@ -345,7 +333,7 @@ internal class Download : FileDownloadVerb
 		}
 	}
 
-	private Dataset OpenDataset(byte[] jpgBytes)
+	private static Dataset OpenDataset(byte[] jpgBytes)
 	{
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
 		string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
@@ -361,58 +349,40 @@ internal class Download : FileDownloadVerb
 		}
 	}
 
-	private Dataset TrimDataset<T>(Dataset image, PixelRegion aoi, ITile<T> tile)
-		where T : IGeoCoordinate<T>
+	private static Dataset TrimDataset<T>(Dataset image, GeoRegion<T> aoi, ITile<T> tile) where T : IGeoCoordinate<T>
 	{
-		if (aoi.PolygonIntersects(tile.GetGeoPolygon().ToPixelPolygon(tile.Level)))
+		using Geometry tileg = tile.GetPolygon();
+
+		if (!aoi.Overlaps(tileg))
+			return image;
+
+		using (image)
 		{
-			//Blank all pixels outside of the region
-			var gpx = tile.GetTopLeftPixel();
+			using Geometry intersection = aoi.Intersect(tileg);
+			var geoXform = tile.GetGeoTransform();
+			var minX = geoXform.UpperLeft_X + geoXform.PixelWidth / 2;
+			var minY = geoXform.UpperLeft_Y + geoXform.PixelHeight / 2;
 
+			using Geometry pt = new Geometry(wkbGeometryType.wkbPoint);
+			var zeroPixel = new byte[image.RasterCount];
 			var tileImage = new TileImage(image);
-			var zeroPixel = Enumerable.Repeat((byte)0, image.RasterCount).ToArray();
-
 			for (int y = 0; y < image.RasterYSize; y++)
 			{
 				for (int x = 0; x < image.RasterXSize; x++)
 				{
-					if (!aoi.ContainsPoint(new PixelPoint(aoi.ZoomLevel, gpx.X + x + 0.5, gpx.Y + y + 0.5)))
+					pt.SetPoint_2D(0, minX + x * geoXform.PixelWidth, minY + y * geoXform.PixelHeight);
+					if (!intersection.Contains(pt))
 						tileImage.SetPixel(x, y, zeroPixel);
 				}
 			}
-			image.Dispose();
 			return tileImage.ToDataset();
 		}
-		else return image;
-	}
-
-	private void Image_Saving(object? sender, ImageSaveEventArgs e)
-	{
-		ReportProgress(e.Progress);
-	}
-
-	private static Dataset CreateMissingTile()
-	{
-		//The jpeg driver fails when a large number of empty tiles are written.
-		//Empirically determined that three, non-zero pixels on the top and left
-		//side of each tile is enough to successfully compress the jpeg.
-		int pixelSpacing = (int)Math.Ceiling(TILE_SIZE / 3d);
-
-		var image = new TileImage(TILE_SIZE, TILE_SIZE, NUM_BANDS);
-		byte[] color = [0, 0, 1];
-		for (int i = 0; i < TILE_SIZE; i += pixelSpacing)
-		{
-			image.SetPixel(0, i, color);
-			image.SetPixel(i, 0, color);
-		}
-		return image.ToDataset();
 	}
 
 	private static TileDataset<T> EmptyDataset<T>(ITile<T> tile, string? messageOverride = null) where T : IGeoCoordinate<T> => new(tile)
 	{
 		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
 	};
-
 
 	internal class TileImage
 	{
@@ -453,7 +423,6 @@ internal class Download : FileDownloadVerb
 
 		public byte[] GetPixel(int x, int y)
 		{
-
 			ArgumentOutOfRangeException.ThrowIfNegative(x, nameof(x));
 			ArgumentOutOfRangeException.ThrowIfNegative(y, nameof(y));
 			ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(x, RasterX, nameof(x));

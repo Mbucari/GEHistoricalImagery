@@ -1,27 +1,9 @@
-﻿using LibMapCommon.Geometry;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace LibMapCommon;
 
 public static class Util
 {
-	public static GeoRegion<WebMercator> ToWebMercator(this GeoRegion<Wgs1984> geoPolygon)
-		=> geoPolygon.ConvertTo(c => c.ToWebMercator());
-	public static GeoRegion<Wgs1984> ToWgs1984(this GeoRegion<WebMercator> geoPolygon)
-		=> geoPolygon.ConvertTo(c => c.ToWgs1984());
-	public static GeoPolygon<WebMercator> ToWebMercator(this GeoPolygon<Wgs1984> geoPolygon)
-		=> geoPolygon.ConvertTo(c => c.ToWebMercator());
-	public static GeoPolygon<Wgs1984> ToWgs1984(this GeoPolygon<WebMercator> geoPolygon)
-		=> geoPolygon.ConvertTo(c => c.ToWgs1984());
-
-	public static Vector3 ToRectangular(this Wgs1984 wgs84)
-	{
-		var lat = wgs84.Latitude * Math.PI / 180;
-		var lon = wgs84.Longitude * Math.PI / 180;
-		var cosLat = Math.Cos(lat);
-		return new Vector3(cosLat * Math.Cos(lon), cosLat * Math.Sin(lon), Math.Sin(lat));
-	}
-
 	public static int Mod(int value, int modulus)
 	{
 		var result = value % modulus;
@@ -43,7 +25,7 @@ public static class Util
 	public static int ToRoundedInt(this double value) => (int)Math.Round(value, 0);
 
 	public static PixelPoint GetGlobalPixelCoordinate<T>(this T coordinate, int level)
-		where T : IGeoCoordinate<T>
+		where T : IGeoCoordinate
 		=> CoordinateToPixel(coordinate.X, coordinate.Y, level, T.Equator);
 
 	/// <summary>

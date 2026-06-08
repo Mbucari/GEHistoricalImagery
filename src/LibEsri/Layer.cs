@@ -74,17 +74,30 @@ public class Layer
 
 	private static string GetRings(GeoRegion<WebMercator> region)
 	{
-		string[] rings = new string[region.Polygons.Length];
-		for (int i = 0; i < region.Polygons.Length; i++)
+		var polygons = region.GetPolygons().ToArray();
+		List<string> rings = new List<string>(polygons.Length);
+		foreach (var polygon in polygons)
 		{
-			var poly = region.Polygons[i];
-			string[] points = new string[poly.Edges.Count + 1];
+			var gType = polygon.GetGeometryType();
+			int gCount = polygon.GetGeometryCount();
+			for (int i = 0; i < gCount; i++)
+			{
+				var g = polygon.GetGeometryRef(i);
+				var gType2 = g.GetGeometryType();
+				if (gType2 is not OSGeo.OGR.wkbGeometryType.wkbLineString)
+					throw new ArgumentException($"Expected geometry type of wkbLinearRing, got {gType}");
+				var pCount = g.GetPointCount();
 
-			for (int j = 0; j < poly.Edges.Count; j++)
-				points[j] = FormattableString.Invariant($"%5B{poly.Edges[j].Origin.X},{poly.Edges[j].Origin.Y}%5D");
-			points[^1] = points[0];
+				string[] points = new string[pCount];
+				double[] point = new double[2];
+				for (int k = 0; k < pCount; k++)
+				{
+					g.GetPoint_2D(k, point);
+					points[k] = FormattableString.Invariant($"%5B{point[0]},{point[1]}%5D");
+				}
 
-			rings[i] = "%5B" + string.Join("%2C", points) + "%5D";
+				rings.Add("%5B" + string.Join("%2C", points) + "%5D");
+			}
 		}
 		return "%5B" + string.Join("%2C", rings) + "%5D";
 	}

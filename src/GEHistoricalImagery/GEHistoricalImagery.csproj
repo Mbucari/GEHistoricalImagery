@@ -11,6 +11,8 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<RunPostBuildEvent>Always</RunPostBuildEvent>
+		<RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -19,7 +21,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="MaxRev.Gdal.Universal" Version="3.13.0.527" />
 	</ItemGroup>
 
 	<ItemGroup>

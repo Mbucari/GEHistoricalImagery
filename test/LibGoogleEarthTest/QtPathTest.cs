@@ -14,7 +14,7 @@ public class QtPathTest
 
 	static QtPathTest()
 	{
-		var projectDir = Path.Combine(".", "..", "..", "..");
+		var projectDir = Path.Combine(".", "..", "..", "..", "..");
 		var rootIndicesPath = Path.Combine(projectDir, "RootIndexDictionary.json");
 		var subIndicesPath = Path.Combine(projectDir, "SubIndexDictionary.json");
 		RootIndexDict = JsonSerializer.Deserialize<Dictionary<string, int>>(File.OpenRead(rootIndicesPath))!.AsReadOnly();

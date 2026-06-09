@@ -8,29 +8,29 @@ using OSGeo.OGR;
 
 namespace GEHistoricalImagery.Cli;
 
-[Verb("download", HelpText = "Download historical imagery to a single GeoTiff")]
+[Verb("download", HelpText = "Download historical imagery to a single raster image")]
 internal class Download : FileDownloadVerb
 {
-	[Option('o', "output", HelpText = "Output GeoTiff save location", MetaValue = "out.tif", Required = true)]
+	[Option('o', "output", HelpText = "Output raster image save location", MetaValue = "<file.ext>", Required = true)]
 	public override string? SavePath { get; set; }
 
-	[Option("scale", HelpText = "Geo transform scale factor", MetaValue = "S", Default = 1d)]
-	public double ScaleFactor { get; set; }
-
-	[Option("offset-x", HelpText = "Geo transform X offset", MetaValue = "X", Default = 0d)]
-	public double OffsetX { get; set; }
-
-	[Option("offset-y", HelpText = "Geo transform Y offset", MetaValue = "Y", Default = 0d)]
-	public double OffsetY { get; set; }
-
-	[Option("scale-first", HelpText = "Perform scaling before offsetting X and Y", Default = false)]
-	public bool ScaleFirst { get; set; }
-
-	[Option("of", HelpText = "GDAL raster file output format", Default = "GTiff")]
+	[Option("of", HelpText = "GDAL raster file output format", Default = "GTiff", MetaValue = "<FORMAT>")]
 	public string? OutputFormat { get; set; }
 
 	[Option("co", HelpText = "GDAL raster file creation options", MetaValue = "<NAME>=<VALUE>")]
 	public IEnumerable<string>? CreationOptions { get; set; }
+
+	[Option("scale", HelpText = "Geo transform scale factor", MetaValue = "<S>", Default = 1d)]
+	public double ScaleFactor { get; set; } = 1.0;
+
+	[Option("offset-x", HelpText = "Geo transform X offset", MetaValue = "<X>", Default = 0d)]
+	public double OffsetX { get; set; }
+
+	[Option("offset-y", HelpText = "Geo transform Y offset", MetaValue = "<Y>", Default = 0d)]
+	public double OffsetY { get; set; }
+
+	[Option("scale-first", HelpText = "Perform scaling before offsetting X and Y", Default = false)]
+	public bool ScaleFirst { get; set; }
 	private RasterOptions RasterOptions { get; set; } = null!;
 
 	protected override IEnumerable<string> GetFileDownloadErrors()
@@ -106,13 +106,13 @@ internal class Download : FileDownloadVerb
 		{
 			if (LayerDate)
 			{
-				var datedLayer = wayBack.Layers.SortByNearestDates(d => d.Date, desiredDates).FirstOrDefault();
+				var datedLayer = wayBack.Layers.SortByNearestDates(desiredDates, DateMatch).FirstOrDefault();
 				if (datedLayer is null)
 				{
 					Console.Error.WriteLine($"ERROR: No layers found");
 					return [];
 				}
-				else if (ExactMatch && !datedLayer.IsExactMatch)
+				else if (DateMatch is DateMatchType.Exact && !datedLayer.IsExactMatch)
 				{
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
@@ -122,8 +122,7 @@ internal class Download : FileDownloadVerb
 			}
 			else
 			{
-				var message = ExactMatch ? "On" : "Nearest To";
-				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadTile(mercAoi, wayBack, t, desiredDates)));
 			}
 		}
@@ -135,7 +134,7 @@ internal class Download : FileDownloadVerb
 		{
 			EsriTile gotTile = tile;
 			DateMatchResult<DatedEsriTile>? dmr;
-			while ((dmr = await wayBack.GetDatesAsync(tile).GetCloseteDatedElement(d => d.CaptureDate, desiredDates)) is null &&
+			while ((dmr = await wayBack.GetDatesAsync(tile).GetClosestDatedElement(desiredDates, DateMatch)) is null &&
 				tile.Level - gotTile.Level < 2 && gotTile.Level >= 2)
 			{
 				gotTile = EsriTile.Create(gotTile.Row / 2, gotTile.Column / 2, gotTile.Level - 1);
@@ -144,7 +143,7 @@ internal class Download : FileDownloadVerb
 			if (dmr is null)
 				return EmptyDataset(tile);
 
-			if (ExactMatch && !dmr.IsExactMatch)
+			if (DateMatch is DateMatchType.Exact && !dmr.IsExactMatch)
 				return EmptyDataset(tile, $"Could not find an exact date match for tile at {tile.Wgs84Center} Closest tile date found: {DateString(dmr.DatedElement.CaptureDate)}");
 
 			var imageBts = await wayBack.DownloadTileAsync(dmr.DatedElement.Layer, dmr.DatedElement.Tile);
@@ -219,8 +218,7 @@ internal class Download : FileDownloadVerb
 
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
-			var message = ExactMatch ? "On" : "Nearest To";
-			BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+			BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 
 			return regionTiles.Select(t => Task.Run(() => DownloadTile(Region, root, t, desiredDates)));
 		}
@@ -240,11 +238,11 @@ internal class Download : FileDownloadVerb
 		if (node is null)
 			return EmptyDataset(tile);
 
-		foreach (var dt in node.GetAllDatedTiles().SortByNearestDates(t => t.Date, desiredDates))
+		foreach (var dt in node.GetAllDatedTiles().SortByNearestDates(desiredDates, DateMatch))
 		{
 			try
 			{
-				if (ExactMatch && !dt.IsExactMatch)
+				if (DateMatch is DateMatchType.Exact && !dt.IsExactMatch)
 					return EmptyDataset(tile, $"Exact date match not found for tile at {tile.Wgs84Center}. Closest layer date found: {DateString(dt.DatedElement.Date)}");
 
 				if (await root.GetEarthAssetAsync(dt.DatedElement) is not byte[] imageBts)

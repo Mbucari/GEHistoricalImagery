@@ -8,22 +8,22 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class AoiVerb : OptionsBase
 {
-	[Option("region-file", SetName = "Region-File", HelpText = "Path to a kmz or kml file containing the region geometry (polygon or polyline with at least three vertices)", MetaValue = "/path/to/kmzfile.kmz")]
+	[Option("region-file", SetName = "Region-File", HelpText = "Path to a kmz or kml file containing the region geometry (polygon or polyline with at least three vertices)", MetaValue = "<file.kmz>")]
 	public string? RegionFile { get; set; }
 
-	[Option("region", SetName = "Region", Separator = '+', HelpText = "A list of geographic coordinates which are the vertices of the polygonal area of interest. Vertex coordinates delimiter with a '+'. ", MetaValue = "Lat0,Long0+Lat1,Long1+Lat2,Long2")]
+	[Option("region", SetName = "Region", Separator = '+', HelpText = "A list of geographic coordinates which are the vertices of the polygonal area of interest. Vertex coordinates delimited with a '+'. ", MetaValue = "<Lt0>,<Ln0>+<Lt1>,<Ln1>+...")]
 	public IList<string>? RegionCoordinates { get; set; }
 
-	[Option("lower-left", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the lower-left (southwest) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
+	[Option("lower-left", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the lower-left (southwest) corner of the rectangular area of interest.", MetaValue = "<LAT>,<LONG>")]
 	public Wgs1984? LowerLeft { get; set; }
 
-	[Option("upper-right", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "LAT,LONG")]
+	[Option("upper-right", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "<LAT>,<LONG>")]
 	public Wgs1984? UpperRight { get; set; }
 
-	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "N", Required = true)]
+	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "<N>", Required = true)]
 	public int ZoomLevel { get; set; }
 
-	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "N")]
+	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "<N>")]
 	public int ConcurrentDownload { get; set; }
 
 	protected GeoRegion<Wgs1984> Region { get; set; } = null!;

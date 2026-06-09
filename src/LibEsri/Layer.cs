@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace LibEsri;
 
-public class Layer
+public class Layer : IDatedElement
 {
 	private static readonly XNamespace Ows = "https://www.opengis.net/ows/1.1";
 	public string Title { get; init; }

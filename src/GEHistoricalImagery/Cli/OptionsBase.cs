@@ -11,7 +11,7 @@ public enum Provider
 
 internal abstract class OptionsBase
 {
-	[Option("provider", MetaValue = "TM", Default = Provider.TM, HelpText = "Aerial imagery provider\n [TM]      Google Earth Time Machine\n [Wayback] ESRI World Imagery Wayback")]
+	[Option("provider", MetaValue = "<Provider>", Default = Provider.TM, HelpText = "Aerial imagery provider\n [TM]      Google Earth Time Machine\n [Wayback] ESRI World Imagery Wayback")]
 	public Provider Provider { get; set; }
 
 	[Option("no-cache", HelpText = "Disable local caching", Default = false)]

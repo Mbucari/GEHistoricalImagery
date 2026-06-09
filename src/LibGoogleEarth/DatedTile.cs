@@ -1,11 +1,12 @@
 ﻿using Keyhole;
+using LibMapCommon;
 
 namespace LibGoogleEarth;
 
 /// <summary>
 /// Represents a Google Earth aerial image tile from a specific date
 /// </summary>
-public record DatedTile : IEarthAsset<byte[]>
+public record DatedTile : IEarthAsset<byte[]>, IDatedElement
 {
 	private const string ROOT_URL = "https://khmdb.google.com/flatfile?db=tm&f1-{0}-i.{1}-{2}";
 	private const string ROOT_URL_NO_PROVIDER = "https://kh.google.com/flatfile?f1-{0}-i.{1}";

@@ -98,26 +98,23 @@ internal partial class Dump : FileDownloadVerb
 		{
 			if (LayerDate)
 			{
-				var datedLayer = wayBack.Layers.SortByNearestDates(d => d.Date, desiredDates).FirstOrDefault();
-
+				var datedLayer = wayBack.Layers.SortByNearestDates(desiredDates, DateMatch).FirstOrDefault();
 				if (datedLayer is null)
 				{
 					Console.Error.WriteLine($"ERROR: No layers found");
 					return [];
 				}
-				else if (ExactMatch && !datedLayer.IsExactMatch)
+				else if (DateMatch is DateMatchType.Exact && !datedLayer.IsExactMatch)
 				{
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
 				}
-
 				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, datedLayer.DatedElement, formatter.HasTileDate)));
 			}
 			else
 			{
-				var message = ExactMatch ? "On" : "Nearest To";
-				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
 			}
 		}
@@ -129,11 +126,11 @@ internal partial class Dump : FileDownloadVerb
 		{
 			//Only try for the first, closest match when using Wayback capture dates
 			//because enumerating all capture dates for each tiles is too slow.
-			var dt = await wayBack.GetDatesAsync(tile).GetCloseteDatedElement(d => d.CaptureDate, desiredDates);
+			var dt = await wayBack.GetDatesAsync(tile).GetClosestDatedElement(desiredDates, DateMatch);
 			if (dt is null)
 				return EmptyDataset(tile);
 
-			if (ExactMatch && !dt.IsExactMatch)
+			if (DateMatch is DateMatchType.Exact && !dt.IsExactMatch)
 				return EmptyDataset(tile, $"Could not find an exact date match for tile at {tile.Wgs84Center} Closest tile date found: {DateString(dt.DatedElement.CaptureDate)}");
 
 			var imageBts = await wayBack.DownloadTileAsync(dt.DatedElement.Layer, dt.DatedElement.Tile);
@@ -184,8 +181,7 @@ internal partial class Dump : FileDownloadVerb
 		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 		var formatter = new FilenameFormatter(Formatter!, stats);
 
-		var message = ExactMatch ? "On" : "Nearest To";
-		BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {message} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+		BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 		await Run_Common(saveFolder, stats.TileCount, formatter, generateWork());
 
 		IEnumerable<Task<ITileDataset>> generateWork()
@@ -197,11 +193,11 @@ internal partial class Dump : FileDownloadVerb
 		if (await root.GetNodeAsync(tile) is not TileNode node)
 			return EmptyDataset(tile);
 
-		foreach (var dtr in node.GetAllDatedTiles().SortByNearestDates(t => t.Date, desiredDates))
+		foreach (var dtr in node.GetAllDatedTiles().SortByNearestDates(desiredDates, DateMatch))
 		{
 			try
 			{
-				if (ExactMatch && !dtr.IsExactMatch)
+				if (DateMatch is DateMatchType.Exact && !dtr.IsExactMatch)
 					return EmptyDataset(tile, $"Exact date match not found for tile at {tile.Wgs84Center}. Closest tile date found: {DateString(dtr.DatedElement.Date)}");
 
 				if (await root.GetEarthAssetAsync(dtr.DatedElement) is byte[] imageBts)

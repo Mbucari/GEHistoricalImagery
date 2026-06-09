@@ -4,40 +4,41 @@ _Get imagery date availability in a specified region._
 This command shows a diagram of image tile availablity within the specified region of interest.
 Tiles that are available from a specific date are shaded, unavailable tiles are represented with a dot, and tiles outside of the region of interest are blank.
 
-
 To learn about defining a region of interest, please refer to the [Regions of Interest article](./regions.md).
-## Usage
-```Console
-GEHistoricalImagery availability [--region=[Lat0,Long0+Lat1,Long1+Lat2,Long2+..]] [--lower-left [LAT,LONG]] [--upper-right [LAT,LONG]] --zoom [N] [--min-date=yyyy/MM/dd] [--max-date=yyyy/MM/dd] [--complete] [--parallel [N]] [--provider [P]] [--no-cache]
 
-  -c, --complete                               Only display dates with complete coverage of the region
+## Options
+### `--complete` (`-c`)
+Optional. When specified, only dates which have complete coverage over the entire region are displayed.
+### `--min-date yyyy/MM/dd`
+Optional. The oldest image tiles to be displayed. Default is `0001/01/01`.
+### `--min-date yyyy/MM/dd`
+Optional. The youngest (most recent) image tiles to be displayed. Default is `TODAY`.
+### `--region-file <file.kmz>`
+Required (or an alternate region method). The path to a kmz/kml file containing polygons or line strings which define the region of interest. Cannot be used with `--region`, `--lower-left`, or`--upper-right`. [Read more about region files](./regions.md#using-geometry-from-a-kmz-or-kml-file). 
+### `--region <Lat0>,<Lon0>+<Lat1>,<Lon1>+<Lat2>,<Lon2>+...`
+Required (or an alternate region method). A list of WGS84 coordinates, delimited with a `+` symbol, which define the outer perimeter of a polygon. Cannot be used with `--region-file`, `--lower-left`, or`--upper-right`. [Read more about polygonal regions](./regions.md#polygonal-region-method). 
+### `--lower-left <LAT>,<LONG>`
+Required (or an alternate region method). The lower-left corner of a rectangular region. Must be used with `--upper-right`. Cannot be used with `--region` or `--region-file`. [Read more about rectangular regions](./regions.md#two-corner-rectangle-method)
+### `--upper-right <LAT>,<LONG>`
+Required (or an alternate region method). The upper-right corner of a rectangular region. Must be used with `--lower-left`. Cannot be used with `--region` or `--region-file`. [Read more about rectangular regions](./regions.md#two-corner-rectangle-method)
+### `--zoom <N>` (`-z <N>`)
+Required. The zoom level at which imagery is downloaded. Valid values are [1,23], although practically, Google Earth caps out at 21 and Wayback caps out at 20). [Read about zoom levels](https://developers.arcgis.com/documentation/mapping-and-location-services/reference/zoom-levels-and-scale/) 
+### `--parallel <N>` (`-p <N>`)
+Optional. The number of concurrent downloads and image processing threads. This number is capped to 10 when using `--provider=Wayback` because I determined empirically that any higher number resulted in a reduced speed. Default is `ALL_CPUS`
+### `--provider <Provider>`
+Optional. The aerial imagery provider to query. Options are:
+- `TM`: Google Earth time machine
+- `Wayback`: Esri Wayback provider.
 
-  --min-date=yyyy/MM/dd                        Oldest image tiles to consider
+Default is `TM`.
+### `--no-cache`
+Optional. Disables caching of imagery and metadata, causing APIs to be required on every run.
 
-  --max-date=yyyy/MM/dd                        Youngest (most recent) image tiles to consider
+**Notes on the Cache Directory**
 
-  --region-file=/path/to/kmzfile.kmz           Path to a kmz or kml file containing the region geometry (polygon or
-                                               polyline with at least three vertices)
-
-  --region=Lat0,Long0+Lat1,Long1+Lat2,Long2    A list of geographic coordinates which are the vertices of the polygonal
-                                               area of interest. Vertex coordinates delimiter with a '+'.
-
-  --lower-left=LAT,LONG                        Geographic coordinate of the lower-left (southwest) corner of the
-                                               rectangular area of interest.
-
-  --upper-right=LAT,LONG                       Geographic coordinate of the upper-right (northeast) corner of the
-                                               rectangular area of interest.
-
-  -z N, --zoom=N                               Required. Zoom level [1-23]
-
-  -p N, --parallel=N                           (Default: ALL_CPUS) Number of concurrent downloads
-
-  --provider=TM                                (Default: TM) Aerial imagery provider
-                                                [TM]      Google Earth Time Machine
-                                                [Wayback] ESRI World Imagery Wayback
-
-  --no-cache                                   (Default: false) Disable local caching
-```
+App data is cached in a directory named `GEHI_cache`, inside the app's directory or in the system's temp directory if the app has no write access to its directory. This location can be changed with an environment variable: `GEHistoricalImagery_Cache`.
+### `-q`
+Optional. Quiet mode. Nothing written to stderr.
 
 ## Example 1
 Gets the availability diagram for the rectangular region defined by the lower-left (southwest) corner `39.619819,-104.856121` and upper-right (northeast) corner `39.638393,-104.824990`.
@@ -250,4 +251,4 @@ Loading Quad Tree Packets: Done!
 Notice that there are now only 9 dates. The other 5 dates, which were displayed in Example 3 but which are absent here, only partially covered the region.
 
 ************************
-<p align="center"><i>Updated 2025/12/03</i></p>
+<p align="center"><i>Updated 2026/06/09</i></p>

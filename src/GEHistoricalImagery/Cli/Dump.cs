@@ -22,10 +22,10 @@ internal partial class Dump : FileDownloadVerb
 				  "{LD}" = tile's layer date (wayback only)
 				""";
 
-	[Option('o', "output", HelpText = "Output image tile save directory", MetaValue = "[Directory]", Required = true)]
+	[Option('o', "output", HelpText = "Output image tile save directory", MetaValue = "<Directory>", Required = true)]
 	public override string? SavePath { get; set; }
 
-	[Option('f', "format", HelpText = formatHelpText, Default = "z={Z}-Col={c}-Row={r}.jpg", MetaValue = "[FilenameFormat]")]
+	[Option('f', "format", HelpText = formatHelpText, Default = "z={Z}-Col={c}-Row={r}.jpg", MetaValue = "<FilenameFormat>")]
 	public string? Formatter { get; set; }
 
 	[Option('w', "world", HelpText = "Write a world file for each tile")]

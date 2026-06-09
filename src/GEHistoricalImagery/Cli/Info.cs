@@ -12,19 +12,19 @@ namespace GEHistoricalImagery.Cli;
 [Verb("info", HelpText = "Get imagery info at a specified location")]
 internal partial class Info : OptionsBase, IQuietCommand
 {
-	[Option('l', "location", Required = true, HelpText = "Geographic location", MetaValue = "LAT,LONG")]
+	[Option('l', "location", Required = true, HelpText = "Geographic location", MetaValue = "<LAT>,<LONG>")]
 	public Wgs1984? Coordinate { get; set; }
 
-	[Option('z', "zoom", Default = null, HelpText = "Zoom level (Optional, [1-23])", MetaValue = "N", Required = false)]
+	[Option('z', "zoom", Default = null, HelpText = "Zoom level (Optional, [1-23])", MetaValue = "<N>", Required = false)]
 	public int? ZoomLevel { get; set; }
 
-	[Option("min-zoom", Default = null, HelpText = "Minimum zoom level (Optional, [1-23])", MetaValue = "N", Required = false)]
+	[Option("min-zoom", Default = null, HelpText = "Minimum zoom level (Optional, [1-23])", MetaValue = "<N>", Required = false)]
 	public int? MinZoomLevel { get; set; }
 
-	[Option("max-zoom", Default = null, HelpText = "Maximum zoom level (Optional, [1-23])", MetaValue = "N", Required = false)]
+	[Option("max-zoom", Default = null, HelpText = "Maximum zoom level (Optional, [1-23])", MetaValue = "<N>", Required = false)]
 	public int? MaxZoomLevel { get; set; }
 
-	[Option('o', "output", HelpText = "Output image info JSON save location (dash (-) for console output)", MetaValue = "info.json", Required = false)]
+	[Option('o', "output", HelpText = "Output image info JSON save location (dash (-) for console output)", MetaValue = "<info.json>", Required = false)]
 	public string? SavePath { get; set; }
 	public bool Quiet { get; set; }
 	protected IEnumerable<string> GetInfoErrors()

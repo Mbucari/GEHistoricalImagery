@@ -2,20 +2,35 @@
 _Get imagery info at a specified location._
 
 This command prints out all arial imagery dates at a specified location.
-## Usage
-```Console
-GEHistoricalImagery info --location [LAT,LONG] [--zoom [N]] [--provider [P]] [--no-cache]
 
-  -l LAT,LONG, --location=LAT,LONG    Required. Geographic location
-  
-  -z N, --zoom=N                      Zoom level (Optional, [0-24])
+## Options
+### `--location <LAT>,<LONG>` (`-l <LAT>,<LONG>`)
+Required. Geographic location to query (WGS 84).
+### `--zoom <N>` (`-z <N>`)
+Required. The zoom level at which imagery is downloaded. Valid values are [1,23], although practically, Google Earth caps out at 21 and Wayback caps out at 20). [Read about zoom levels](https://developers.arcgis.com/documentation/mapping-and-location-services/reference/zoom-levels-and-scale/).  Cannot be used with the `--min-zoom` or `--max-zoom` options.
+### `--min-zoom <N>`
+Optional. The minimum zoom level in a range to query. Cannot be used with the `--zoom` option.
+### `--max-zoom <N>`
+Optional. The maximum zoom level in a range to query. Cannot be used with the `--zoom` option.
+### `--output=<info.json>` (`-o <info.json>`)
+Optional. File path to save the info data as JSON. Use `-o -` to write the JSON to the console's standard output.
+### `--parallel <N>` (`-p <N>`)
+Optional. The number of concurrent downloads and image processing threads. This number is capped to 10 when using `--provider=Wayback` because I determined empirically that any higher number resulted in a reduced speed. Default is `ALL_CPUS`
+### `--provider <Provider>`
+Optional. The aerial imagery provider to query. Options are:
+- `TM`: Google Earth time machine
+- `Wayback`: Esri Wayback provider.
 
-  --provider=TM                       (Default: TM) Aerial imagery provider
-                                       [TM]      Google Earth Time Machine
-                                       [Wayback] ESRI World Imagery Wayback
+Default is `TM`.
+### `--no-cache`
+Optional. Disables caching of imagery and metadata, causing APIs to be required on every run.
 
-  --no-cache                          (Default: false) Disable local caching
-```
+**Notes on the Cache Directory**
+
+App data is cached in a directory named `GEHI_cache`, inside the app's directory or in the system's temp directory if the app has no write access to its directory. This location can be changed with an environment variable: `GEHistoricalImagery_Cache`.
+### `-q`
+Optional. Quiet mode. Nothing written to stderr.
+
 ## Example 1 - Get imagery into at a location for a single zoom level
 **Command:**
 ```Console
@@ -1051,5 +1066,321 @@ GEHistoricalImagery info --location 39.630575,-104.841299
   ```
 </details>
 
+## Example 3 - Get imagery into at a location and export to JSON
+Use the `-q` option to silence stderr, and specify `-` for the output file to write the JSON to stdout.
+**Command:**
+```Console
+GEHistoricalImagery info --location 39.630575,-104.841299 --min-zoom 19 --max-zoom 21 -q -o -
+```
+**Output:**
+
+<details>
+ <summary>Expand to see the full command output</summary>
+
+  ```JSON
+  {
+    "latitude": 39.630575,
+    "longitude": -104.841299,
+    "web_mercator_x": -11670880.02,
+    "web_mercator_y": 4812402.78,
+    "provider": "TM",
+    "level_infos": [
+      {
+        "zoom_level": 19,
+        "column": 109457,
+        "row": 319860,
+        "quadtree_path": "03012320101213320301",
+        "tile_infos": [
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 366,
+            "imagery_date": "2025-11-02"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 366,
+            "imagery_date": "2025-10-28"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 361,
+            "imagery_date": "2025-06-07"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 363,
+            "imagery_date": "2025-03-03"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 362,
+            "imagery_date": "2025-02-05"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 349,
+            "imagery_date": "2024-06-05"
+          },
+          {
+            "epoch": 1019,
+            "imagery_date": "2023-10-20"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 320,
+            "imagery_date": "2023-05-28"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 318,
+            "imagery_date": "2023-04-29"
+          },
+          {
+            "provider": "Image © 2025 CNES / Airbus",
+            "epoch": 278,
+            "imagery_date": "2021-08-17"
+          },
+          {
+            "provider": "Image © 2025 Maxar Technologies",
+            "epoch": 276,
+            "imagery_date": "2021-06-15"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2021-06-11"
+          },
+          {
+            "epoch": 357,
+            "imagery_date": "2020-10-03"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2020-09-30"
+          },
+          {
+            "provider": "Image © 2025 Maxar Technologies",
+            "epoch": 270,
+            "imagery_date": "2020-06-07"
+          },
+          {
+            "epoch": 276,
+            "imagery_date": "2019-10-03"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2019-09-13"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2018-06-01"
+          },
+          {
+            "epoch": 212,
+            "imagery_date": "2017-06-10"
+          },
+          {
+            "epoch": 233,
+            "imagery_date": "2017-05-14"
+          },
+          {
+            "epoch": 179,
+            "imagery_date": "2015-10-10"
+          },
+          {
+            "epoch": 139,
+            "imagery_date": "2014-10-07"
+          },
+          {
+            "epoch": 119,
+            "imagery_date": "2014-06-03"
+          },
+          {
+            "epoch": 123,
+            "imagery_date": "2013-10-07"
+          },
+          {
+            "epoch": 112,
+            "imagery_date": "2012-10-08"
+          },
+          {
+            "epoch": 98,
+            "imagery_date": "2011-05-05"
+          },
+          {
+            "epoch": 64,
+            "imagery_date": "2010-06-16"
+          },
+          {
+            "epoch": 44,
+            "imagery_date": "2007-07-31"
+          },
+          {
+            "provider": "Image U.S. Geological Survey",
+            "epoch": 19,
+            "imagery_date": "2006-04-30"
+          },
+          {
+            "provider": "Image © 2025 Sanborn",
+            "epoch": 17,
+            "imagery_date": "2004-12-31"
+          },
+          {
+            "provider": "Image U.S. Geological Survey",
+            "epoch": 17,
+            "imagery_date": "2002-12-31"
+          }
+        ]
+      },
+      {
+        "zoom_level": 20,
+        "column": 218915,
+        "row": 639720,
+        "quadtree_path": "030123201012133203011",
+        "tile_infos": [
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 366,
+            "imagery_date": "2025-11-02"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 366,
+            "imagery_date": "2025-10-28"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 361,
+            "imagery_date": "2025-06-07"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 363,
+            "imagery_date": "2025-03-03"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 362,
+            "imagery_date": "2025-02-05"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 349,
+            "imagery_date": "2024-06-05"
+          },
+          {
+            "epoch": 1019,
+            "imagery_date": "2023-10-20"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 320,
+            "imagery_date": "2023-05-28"
+          },
+          {
+            "provider": "Image © 2025 Airbus",
+            "epoch": 318,
+            "imagery_date": "2023-04-29"
+          },
+          {
+            "provider": "Image © 2025 Maxar Technologies",
+            "epoch": 276,
+            "imagery_date": "2021-06-15"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2021-06-11"
+          },
+          {
+            "epoch": 357,
+            "imagery_date": "2020-10-03"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2020-09-30"
+          },
+          {
+            "provider": "Image © 2025 Maxar Technologies",
+            "epoch": 270,
+            "imagery_date": "2020-06-07"
+          },
+          {
+            "epoch": 276,
+            "imagery_date": "2019-10-03"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2019-09-13"
+          },
+          {
+            "epoch": 366,
+            "imagery_date": "2018-06-01"
+          },
+          {
+            "epoch": 212,
+            "imagery_date": "2017-06-10"
+          },
+          {
+            "epoch": 233,
+            "imagery_date": "2017-05-14"
+          },
+          {
+            "epoch": 179,
+            "imagery_date": "2015-10-10"
+          },
+          {
+            "epoch": 139,
+            "imagery_date": "2014-10-07"
+          },
+          {
+            "epoch": 119,
+            "imagery_date": "2014-06-03"
+          },
+          {
+            "epoch": 123,
+            "imagery_date": "2013-10-07"
+          },
+          {
+            "epoch": 112,
+            "imagery_date": "2012-10-08"
+          },
+          {
+            "epoch": 98,
+            "imagery_date": "2011-05-05"
+          },
+          {
+            "epoch": 64,
+            "imagery_date": "2010-06-16"
+          }
+        ]
+      },
+      {
+        "zoom_level": 21,
+        "column": 437831,
+        "row": 1279440,
+        "quadtree_path": "0301232010121332030111",
+        "tile_infos": [
+          {
+            "epoch": 1019,
+            "imagery_date": "2023-10-20"
+          },
+          {
+            "epoch": 357,
+            "imagery_date": "2020-10-03"
+          },
+          {
+            "epoch": 276,
+            "imagery_date": "2019-10-03"
+          },
+          {
+            "epoch": 233,
+            "imagery_date": "2017-05-14"
+          }
+        ]
+      }
+    ]
+  }
+  ```
+</details>
+
 ************************
-<p align="center"><i>Updated 2024/9/4</i></p>
+<p align="center"><i>Updated 2026/06/09</i></p>

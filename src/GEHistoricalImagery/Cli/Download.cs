@@ -48,8 +48,8 @@ internal class Download : FileDownloadVerb
 		else
 		{
 			RasterOptions
-				= OutputFormat == RasterOptions.GTiff_Jpeg.DriverName ? RasterOptions.GTiff_Jpeg
-				: OutputFormat == RasterOptions.COG_Jpeg.DriverName ? RasterOptions.COG_Jpeg
+				= format.ShortName == RasterOptions.GTiff_Jpeg.DriverName ? RasterOptions.GTiff_Jpeg
+				: format.ShortName == RasterOptions.COG_Jpeg.DriverName ? RasterOptions.COG_Jpeg
 				: new RasterOptions(format.ShortName);
 		}
 

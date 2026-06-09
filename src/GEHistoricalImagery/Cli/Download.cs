@@ -26,6 +26,47 @@ internal class Download : FileDownloadVerb
 	[Option("scale-first", HelpText = "Perform scaling before offsetting X and Y", Default = false)]
 	public bool ScaleFirst { get; set; }
 
+	[Option("of", HelpText = "GDAL raster file output format", Default = "GTiff")]
+	public string? OutputFormat { get; set; }
+
+	[Option("co", HelpText = "GDAL raster file creation options", MetaValue = "<NAME>=<VALUE>")]
+	public IEnumerable<string>? CreationOptions { get; set; }
+	private RasterOptions RasterOptions { get; set; } = null!;
+
+	protected override IEnumerable<string> GetFileDownloadErrors()
+	{
+		foreach (var error in base.GetFileDownloadErrors())
+		{
+			yield return error;
+		}
+
+		var format = GdalLib.EnumerateRasterDrivers().FirstOrDefault(d => d.ShortName.Equals(OutputFormat, StringComparison.OrdinalIgnoreCase));
+		if (format is null)
+		{
+			yield return $"Output format {OutputFormat} is not supported by the GDAL build being used.";
+		}
+		else
+		{
+			RasterOptions
+				= OutputFormat == RasterOptions.GTiff_Jpeg.DriverName ? RasterOptions.GTiff_Jpeg
+				: OutputFormat == RasterOptions.COG_Jpeg.DriverName ? RasterOptions.COG_Jpeg
+				: new RasterOptions(format.ShortName);
+		}
+
+		foreach (var option in CreationOptions ?? [])
+		{
+			var kvp = option.Split('=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+			if (kvp.Length == 2 && !string.IsNullOrEmpty(kvp[0]) && !string.IsNullOrEmpty(kvp[1]))
+			{
+				RasterOptions?.Options[kvp[0]] = kvp[1];
+			}
+			else
+			{
+				yield return $"Creation option '{option}' is not in the correct format. Must be in the format '<NAME>=<VALUE>'";
+			}
+		}
+	}
+
 	public override async Task RunAsync()
 	{
 		if (AnyFileDownloadErrors())
@@ -323,7 +364,7 @@ internal class Download : FileDownloadVerb
 
 			BeginProgress("Saving Image: ");
 			image.Saving += (_, e) => ReportProgress(e.Progress);
-			image.Save(saveFile.FullName, RasterOptions.GTiff_Jpeg, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
+			image.Save(saveFile.FullName, RasterOptions, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
 			ReplaceProgress();
 		}
 		finally

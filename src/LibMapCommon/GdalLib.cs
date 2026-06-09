@@ -6,6 +6,10 @@ namespace LibMapCommon;
 public class GdalLib
 {
 	private static bool _isRegistered = false;
+	static GdalLib()
+	{
+		Register();
+	}
 	public static void Register(int maxCache = 1024 * 1024 * 300)
 	{
 		if (Interlocked.CompareExchange(ref _isRegistered, true, false))
@@ -36,6 +40,15 @@ public class GdalLib
 		for (int i = 0; i < driverCount; i++)
 		{
 			yield return Gdal.GetDriver(i);
+		}
+	}
+
+	public static IEnumerable<OSGeo.OGR.Driver> EnumerateVectorDrivers()
+	{
+		int driverCount = OSGeo.OGR.Ogr.GetDriverCount();
+		for (int i = 0; i < driverCount; i++)
+		{
+			yield return OSGeo.OGR.Ogr.GetDriver(i);
 		}
 	}
 }

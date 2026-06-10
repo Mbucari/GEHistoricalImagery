@@ -25,6 +25,8 @@ Optional. The string format used to create the dumped tiles' filenames.
 Default is `z={Z}-Col={c}-Row={r}.jpg`
 ### `--world` (`-w`)
 Optional. When specified, a [world file](https://en.wikipedia.org/wiki/World_file) is written for each image tile.
+### `--dump-db`
+Optional. Save the image tile data into an SQLite geo database. Each dump command is saved in the `dump_operations` table, and tile info is saved in the `dumped_tiles` table. Successive dump runs can be appended to the same database file.
 ### `--date yyyy/MM/dd` (`-d yyyy/MM/dd`)
 Required. One or more dates used to search for matching imagery. Multiple dates can be specified by repeating the `--date` option, or by providing a string of dates delimited by a `,` (e.g. `--date 2025/01/01 --date 2025/08/31` or `--date 2025/01/01,2025/08/31`).
 ### `--date-match <MatchType>`

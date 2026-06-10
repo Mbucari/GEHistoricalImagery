@@ -4,7 +4,9 @@
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/Tests/">
-    <Project Path="LibMapCommonTest/LibMapCommonTest.csproj" Id="ac6d9b28-c436-49f0-98fd-716f99990c43" />
+    <Project Path="LibMapCommonTest/LibMapCommonTest.csproj" Id="ac6d9b28-c436-49f0-98fd-716f99990c43">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
     <Project Path="test/GEHistoricalImageryTest/GEHistoricalImageryTest.csproj">
       <Platform Solution="*|x64" Project="x64" />
     </Project>

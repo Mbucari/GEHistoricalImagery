@@ -30,6 +30,10 @@ internal partial class Dump : FileDownloadVerb
 
 	[Option('w', "world", HelpText = "Write a world file for each tile")]
 	public bool WriteWorldFile { get; set; }
+	[Option("dump-db", HelpText = "Path to SQLite database to save dump operations' tile data", MetaValue = "<out.sqlite3>")]
+	public string? DumpDatabaseFilename { get; set; }
+
+	private DumpDatabase? DumpDatabase { get; set; }
 
 	public override async Task RunAsync()
 	{
@@ -75,11 +79,19 @@ internal partial class Dump : FileDownloadVerb
 			return;
 		}
 
+		if (!string.IsNullOrWhiteSpace(DumpDatabaseFilename))
+		{
+			DumpDatabase = new DumpDatabase(DumpDatabaseFilename, Region, Provider, ZoomLevel, saveFolder.FullName);
+		}
+
 		var desiredDates = Dates!;
 		var task = Provider is Provider.Wayback ? Run_Esri(saveFolder, desiredDates)
 		: Run_Keyhole(saveFolder, desiredDates);
 
-		await task;
+		using (DumpDatabase)
+		{
+			await task;
+		}
 	}
 
 	#region Esri
@@ -238,6 +250,7 @@ internal partial class Dump : FileDownloadVerb
 				var saveFile = formatter.GetString(tds);
 				var savePath = Path.Combine(saveFolder.FullName, saveFile);
 				SaveDataset(savePath, tds);
+				DumpDatabase?.AddDumpedTile(tds, savePath);
 				numTilesDownload++;
 			}
 

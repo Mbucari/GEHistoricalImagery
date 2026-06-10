@@ -1,5 +1,6 @@
 ﻿using LibMapCommon;
 using OSGeo.GDAL;
+using OSGeo.OGR;
 
 namespace GEHistoricalImagery;
 
@@ -12,6 +13,7 @@ internal interface ITileDataset
 	string? Message { get; init; }
 	GeoTransform GetGeoTransform();
 	GDALWarpAppOptions GetWarpOptions(RasterOptions rasterOptions, string targetSr);
+	Geometry GetPolygonGeometry();
 }
 
 internal class TileDataset<TCoordinate>(ITile<TCoordinate> tile) : ITileDataset, IDisposable
@@ -26,6 +28,13 @@ internal class TileDataset<TCoordinate>(ITile<TCoordinate> tile) : ITileDataset,
 	public required string? Message { get; init; }
 
 	public GeoTransform GetGeoTransform() => Tile.GetGeoTransform();
+
+	public Geometry GetPolygonGeometry()
+	{
+		var ll = Tile.LowerLeft;
+		var ur = Tile.UpperRight;
+		return OgrExtensions.MakeRectangle(ll, ur.X - ll.X, ur.Y - ll.Y);
+	}
 
 	public GDALWarpAppOptions GetWarpOptions(RasterOptions rasterOptions, string targetSr)
 		=> rasterOptions.GetWarpOptions<TCoordinate>(targetSr);

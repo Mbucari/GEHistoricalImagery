@@ -30,6 +30,29 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 		MaxY = maxY;
 		m_Region = region;
 	}
+	public OSGeo.OGR.Geometry GetMultiPolygon()
+	{
+		var type = Region.GetGeometryType();
+		if (type is wkbGeometryType.wkbMultiPolygon or wkbGeometryType.wkbMultiPolygon25D or wkbGeometryType.wkbMultiPolygonM or wkbGeometryType.wkbMultiPolygonZM)
+		{
+			var multiPoly = Region.Clone();
+			multiPoly.FlattenTo2D();
+			return multiPoly;
+		}
+		else if (type is wkbGeometryType.wkbPolygon or wkbGeometryType.wkbPolygon25D or wkbGeometryType.wkbPolygonM or wkbGeometryType.wkbPolygonZM)
+		{
+			using var polygon = Region.Clone();
+			polygon.FlattenTo2D();
+			var multiPoly = new OSGeo.OGR.Geometry(wkbGeometryType.wkbMultiPolygon);
+			multiPoly.AddGeometryDirectly(polygon);
+			using var sr = Region.GetSpatialReference();
+			multiPoly.AssignSpatialReference(sr);
+			return multiPoly;
+		}
+		else
+			throw new InvalidOperationException("Invalid geometry type. Only polygon and multipolygon geometries are supported.");
+	}
+
 	public IEnumerable<OSGeo.OGR.Geometry> GetPolygons() => GetPolygons(Region);
 	private static IEnumerable<OSGeo.OGR.Geometry> GetPolygons(OSGeo.OGR.Geometry geometry)
 	{

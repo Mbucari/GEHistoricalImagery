@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\LibMapCommon\LibMapCommon.csproj" />
+    <ProjectReference Include="..\..\src\LibMapCommon\LibMapCommon.csproj" />
   </ItemGroup>
 
   <ItemGroup>

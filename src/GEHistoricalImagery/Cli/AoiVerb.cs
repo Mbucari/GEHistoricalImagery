@@ -8,6 +8,9 @@ namespace GEHistoricalImagery.Cli;
 
 internal abstract class AoiVerb : OptionsBase
 {
+	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "<N>", Required = true)]
+	public int ZoomLevel { get; set; }
+
 	[Option("region-file", SetName = "Region-File", HelpText = "Path to a kmz or kml file containing the region geometry (polygon or polyline with at least three vertices)", MetaValue = "<file.kmz>")]
 	public string? RegionFile { get; set; }
 
@@ -19,9 +22,6 @@ internal abstract class AoiVerb : OptionsBase
 
 	[Option("upper-right", SetName = "Rectangle-Corners", HelpText = "Geographic coordinate of the upper-right (northeast) corner of the rectangular area of interest.", MetaValue = "<LAT>,<LONG>")]
 	public Wgs1984? UpperRight { get; set; }
-
-	[Option('z', "zoom", HelpText = "Zoom level [1-23]", MetaValue = "<N>", Required = true)]
-	public int ZoomLevel { get; set; }
 
 	[Option('p', "parallel", HelpText = $"(Default: ALL_CPUS) Number of concurrent downloads", MetaValue = "<N>")]
 	public int ConcurrentDownload { get; set; }

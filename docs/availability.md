@@ -7,36 +7,48 @@ Tiles that are available from a specific date are shaded, unavailable tiles are 
 To learn about defining a region of interest, please refer to the [Regions of Interest article](./regions.md).
 
 ## Options
+
+### `--zoom <N>` (`-z <N>`)
+Required. The zoom level at which imagery is downloaded. Valid values are [1,23], although practically, Google Earth caps out at 21 and Wayback caps out at 20). [Read about zoom levels](https://developers.arcgis.com/documentation/mapping-and-location-services/reference/zoom-levels-and-scale/).
+
+### `--region-file <file.kmz>`
+Required (or an alternate region method). The path to a kmz/kml file containing polygons or line strings which define the region of interest. Cannot be used with `--region`, `--lower-left`, or`--upper-right`. [Read more about region files](./regions.md#using-geometry-from-a-kmz-or-kml-file).
+
+### `--region <Lat0>,<Lon0>+<Lat1>,<Lon1>+<Lat2>,<Lon2>+...`
+Required (or an alternate region method). A list of WGS84 coordinates, delimited with a `+` symbol, which define the outer perimeter of a polygon. Cannot be used with `--region-file`, `--lower-left`, or`--upper-right`. [Read more about polygonal regions](./regions.md#polygonal-region-method).
+
+### `--lower-left <LAT>,<LONG>`
+Required (or an alternate region method). The lower-left corner of a rectangular region. Must be used with `--upper-right`. Cannot be used with `--region` or `--region-file`. [Read more about rectangular regions](./regions.md#two-corner-rectangle-method).
+
+### `--upper-right <LAT>,<LONG>`
+Required (or an alternate region method). The upper-right corner of a rectangular region. Must be used with `--lower-left`. Cannot be used with `--region` or `--region-file`. [Read more about rectangular regions](./regions.md#two-corner-rectangle-method).
+
 ### `--complete` (`-c`)
 Optional. When specified, only dates which have complete coverage over the entire region are displayed.
+
 ### `--min-date yyyy/MM/dd`
 Optional. The oldest image tiles to be displayed. Default is `0001/01/01`.
+
 ### `--min-date yyyy/MM/dd`
 Optional. The youngest (most recent) image tiles to be displayed. Default is `TODAY`.
-### `--region-file <file.kmz>`
-Required (or an alternate region method). The path to a kmz/kml file containing polygons or line strings which define the region of interest. Cannot be used with `--region`, `--lower-left`, or`--upper-right`. [Read more about region files](./regions.md#using-geometry-from-a-kmz-or-kml-file). 
-### `--region <Lat0>,<Lon0>+<Lat1>,<Lon1>+<Lat2>,<Lon2>+...`
-Required (or an alternate region method). A list of WGS84 coordinates, delimited with a `+` symbol, which define the outer perimeter of a polygon. Cannot be used with `--region-file`, `--lower-left`, or`--upper-right`. [Read more about polygonal regions](./regions.md#polygonal-region-method). 
-### `--lower-left <LAT>,<LONG>`
-Required (or an alternate region method). The lower-left corner of a rectangular region. Must be used with `--upper-right`. Cannot be used with `--region` or `--region-file`. [Read more about rectangular regions](./regions.md#two-corner-rectangle-method)
-### `--upper-right <LAT>,<LONG>`
-Required (or an alternate region method). The upper-right corner of a rectangular region. Must be used with `--lower-left`. Cannot be used with `--region` or `--region-file`. [Read more about rectangular regions](./regions.md#two-corner-rectangle-method)
-### `--zoom <N>` (`-z <N>`)
-Required. The zoom level at which imagery is downloaded. Valid values are [1,23], although practically, Google Earth caps out at 21 and Wayback caps out at 20). [Read about zoom levels](https://developers.arcgis.com/documentation/mapping-and-location-services/reference/zoom-levels-and-scale/) 
+
 ### `--parallel <N>` (`-p <N>`)
 Optional. The number of concurrent downloads and image processing threads. This number is capped to 10 when using `--provider=Wayback` because I determined empirically that any higher number resulted in a reduced speed. Default is `ALL_CPUS`
+
 ### `--provider <Provider>`
 Optional. The aerial imagery provider to query. Options are:
 - `TM`: Google Earth time machine
 - `Wayback`: Esri Wayback provider.
 
 Default is `TM`.
+
 ### `--no-cache`
-Optional. Disables caching of imagery and metadata, causing APIs to be required on every run.
+Optional. Disables caching of imagery and metadata, causing fresh API calls to be required on every run.
 
 **Notes on the Cache Directory**
 
 App data is cached in a directory named `GEHI_cache`, inside the app's directory or in the system's temp directory if the app has no write access to its directory. This location can be changed with an environment variable: `GEHistoricalImagery_Cache`.
+
 ### `-q`
 Optional. Quiet mode. Nothing written to stderr.
 
@@ -251,4 +263,4 @@ Loading Quad Tree Packets: Done!
 Notice that there are now only 9 dates. The other 5 dates, which were displayed in Example 3 but which are absent here, only partially covered the region.
 
 ************************
-<p align="center"><i>Updated 2026/06/09</i></p>
+<p align="center"><i>Updated 2026/06/10</i></p>

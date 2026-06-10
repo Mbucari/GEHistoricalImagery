@@ -4,26 +4,34 @@ _Get imagery info at a specified location._
 This command prints out all arial imagery dates at a specified location.
 
 ## Options
+
 ### `--location <LAT>,<LONG>` (`-l <LAT>,<LONG>`)
 Required. Geographic location to query (WGS 84).
+
 ### `--zoom <N>` (`-z <N>`)
-Required. The zoom level at which imagery is downloaded. Valid values are [1,23], although practically, Google Earth caps out at 21 and Wayback caps out at 20). [Read about zoom levels](https://developers.arcgis.com/documentation/mapping-and-location-services/reference/zoom-levels-and-scale/).  Cannot be used with the `--min-zoom` or `--max-zoom` options.
+Required. The zoom level at which imagery is downloaded. Valid values are [1,23], although practically, Google Earth caps out at 21 and Wayback caps out at 20). [Read about zoom levels](https://developers.arcgis.com/documentation/mapping-and-location-services/reference/zoom-levels-and-scale/). Cannot be used with the `--min-zoom` or `--max-zoom` options.
+
 ### `--min-zoom <N>`
 Optional. The minimum zoom level in a range to query. Cannot be used with the `--zoom` option.
+
 ### `--max-zoom <N>`
 Optional. The maximum zoom level in a range to query. Cannot be used with the `--zoom` option.
+
 ### `--output=<info.json>` (`-o <info.json>`)
 Optional. File path to save the info data as JSON. Use `-o -` to write the JSON to the console's standard output.
+
 ### `--parallel <N>` (`-p <N>`)
 Optional. The number of concurrent downloads and image processing threads. This number is capped to 10 when using `--provider=Wayback` because I determined empirically that any higher number resulted in a reduced speed. Default is `ALL_CPUS`
+
 ### `--provider <Provider>`
 Optional. The aerial imagery provider to query. Options are:
 - `TM`: Google Earth time machine
 - `Wayback`: Esri Wayback provider.
 
 Default is `TM`.
+
 ### `--no-cache`
-Optional. Disables caching of imagery and metadata, causing APIs to be required on every run.
+Optional. Disables caching of imagery and metadata, causing fresh API calls to be required on every run.
 
 **Notes on the Cache Directory**
 
@@ -46,10 +54,10 @@ Dated Imagery at 39.6305750,-104.8412990
 ```
 ## Example 2 - Get imagery into at a location for all zoom levels
 
-**Command:**       
+**Command:**
 ```Console
-GEHistoricalImagery info --location 39.630575,-104.841299     
-```   
+GEHistoricalImagery info --location 39.630575,-104.841299
+```
 **Output:**
 <details>
  <summary>Expand to see the full command output</summary>
@@ -1062,7 +1070,7 @@ GEHistoricalImagery info --location 39.630575,-104.841299
     date = 2019/10/03, version = 276
     date = 2020/10/03, version = 909
   Level = 22, Path = 03012320101213320301113
-    NO AVAILABLE IMAGERY		
+    NO AVAILABLE IMAGERY
   ```
 </details>
 
@@ -1383,4 +1391,4 @@ GEHistoricalImagery info --location 39.630575,-104.841299 --min-zoom 19 --max-zo
 </details>
 
 ************************
-<p align="center"><i>Updated 2026/06/09</i></p>
+<p align="center"><i>Updated 2026/06/10</i></p>

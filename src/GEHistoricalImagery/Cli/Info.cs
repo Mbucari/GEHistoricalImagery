@@ -201,29 +201,32 @@ internal partial class Info : OptionsBase, IQuietCommand
 		public List<TileInfo> TileInfos { get; } = [];
 	}
 
-	internal class InfoData
+	internal class Wgs1984Info(Wgs1984 location)
 	{
 		[JsonPropertyName("latitude")]
-		public double Latitude { get; }
+		public double Latitude { get; } = Math.Round(location.Latitude, 6);
 		[JsonPropertyName("longitude")]
-		public double Longitude { get; }
-		[JsonPropertyName("web_mercator_x")]
-		public double WebMercatorX { get; }
-		[JsonPropertyName("web_mercator_y")]
-		public double WebMercatorY { get; }
+		public double Longitude { get; } = Math.Round(location.Longitude, 6);
+	}
+
+	internal class WebMercatorInfo(WebMercator location)
+	{
+		[JsonPropertyName("x")]
+		public double X { get; } = Math.Round(location.X, 2);
+		[JsonPropertyName("y")]
+		public double Y { get; } = Math.Round(location.Y, 2);
+	}
+
+	internal class InfoData(Wgs1984 location, Provider provider)
+	{
+		[JsonPropertyName("wgs_1984")]
+		public Wgs1984Info Wgs1984 { get; } = new Wgs1984Info(location);
+		[JsonPropertyName("web_mercator")]
+		public WebMercatorInfo WebMercator { get; } = new WebMercatorInfo(location.ToWebMercator());
 		[JsonPropertyName("provider")]
-		public Provider Provider { get; }
+		public Provider Provider { get; } = provider;
 		[JsonPropertyName("level_infos")]
 		public List<LevelInfo> LevelInfos { get; } = [];
-		public InfoData(Wgs1984 location, Provider provider)
-		{
-			Latitude = Math.Round(location.Latitude, 6);
-			Longitude = Math.Round(location.Longitude, 6);
-			WebMercator merc = location.ToWebMercator();
-			WebMercatorX = Math.Round(merc.X, 2);
-			WebMercatorY = Math.Round(merc.Y, 2);
-			Provider = provider;
-		}
 	}
 
 	[JsonSourceGenerationOptions(

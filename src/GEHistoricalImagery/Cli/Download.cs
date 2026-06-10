@@ -347,7 +347,7 @@ internal class Download : FileDownloadVerb
 					ReportProgress(++numTilesProcessed / tileCount);
 				}
 
-			ReplaceProgress();
+			EndProgress();
 			Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 			//Release the lock for either saving or deleting
@@ -363,7 +363,7 @@ internal class Download : FileDownloadVerb
 			BeginProgress("Saving Image: ");
 			image.Saving += (_, e) => ReportProgress(e.Progress);
 			image.Save(saveFile.FullName, RasterOptions, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
-			ReplaceProgress();
+			EndProgress();
 		}
 		finally
 		{

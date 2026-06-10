@@ -44,7 +44,7 @@ internal class Availability : AoiVerb
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
 		var all = await GetAllEsriRegions(wayBack, Region.Transform<WebMercator>());
-		ReplaceProgress();
+		EndProgress();
 
 		if (all.Sum(r => r.Availabilities.Length) == 0)
 		{
@@ -163,7 +163,7 @@ internal class Availability : AoiVerb
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var all = await GetAllDatesAsync(root, Region);
-		ReplaceProgress();
+		EndProgress();
 
 		if (all.Length == 0)
 		{

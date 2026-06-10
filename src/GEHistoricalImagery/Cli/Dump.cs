@@ -257,7 +257,7 @@ internal partial class Dump : FileDownloadVerb
 			ReportProgress(++numTilesProcessed / tileCount);
 		}
 
-		ReplaceProgress();
+		EndProgress();
 		Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 	}
 

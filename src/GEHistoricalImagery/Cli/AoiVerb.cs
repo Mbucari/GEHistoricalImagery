@@ -160,7 +160,7 @@ internal abstract class AoiVerb : OptionsBase
 	{
 		BeginProgress("Finding Tiles Inside Region: ");
 		var regionTiles = region.EnumerateTiles<EsriTile>(ZoomLevel, ReportProgress).ToArray();
-		ReplaceProgress();
+		EndProgress();
 		return regionTiles;
 	}
 
@@ -168,7 +168,7 @@ internal abstract class AoiVerb : OptionsBase
 	{
 		BeginProgress("Finding Tiles Inside Region: ");
 		var regionTiles = region.EnumerateTiles<KeyholeTile>(ZoomLevel, ReportProgress).ToArray();
-		ReplaceProgress();
+		EndProgress();
 		return regionTiles;
 	}
 

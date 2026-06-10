@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using System.Diagnostics;
 
 namespace GEHistoricalImagery.Cli;
 
@@ -50,8 +49,7 @@ internal abstract class OptionsBase
 		}
 	}
 
-
-	public double Progress { get; set; }
+	public double Progress { get; private set; }
 
 	private int lastProgLen;
 	protected void ReportProgress(double progress)
@@ -61,27 +59,31 @@ internal abstract class OptionsBase
 			if (progress >= Progress)
 			{
 				var p = progress.ToString("P");
-				Console.Error.Write(new string('\b', lastProgLen) + p);
+				var message = lastProgLen == 0 ? $"\e[K{p}" : $"\e[{lastProgLen}D\e[K{p}";
+				Console.Error.Write(message);
 				lastProgLen = p.Length;
 				Progress = progress;
 			}
 		}
 	}
-	private Stopwatch progressTimer = new Stopwatch();
+	private DateTime startTime;
+	private string? taskMessage;
 	protected void BeginProgress(string text)
 	{
+		if (text[^1] != ' ')
+			text += ' ';
+		taskMessage = text;
 		Console.Error.Write(text);
-		progressTimer.Restart();
+		startTime = DateTime.UtcNow;
+		lastProgLen = 0;
+		Progress = 0;
 		ReportProgress(0);
 	}
-	protected void ReplaceProgress()
+
+	protected void EndProgress()
 	{
-		progressTimer.Stop();
-		var newText = new string('\b', lastProgLen);
-
-		newText = newText + new string(' ', lastProgLen) + newText + $"Done! ({progressTimer.Elapsed:g})";
-
-		Console.Error.WriteLine(newText);
+		var elapsed = DateTime.UtcNow - startTime;
+		Console.Error.WriteLine($"\e[G\e[K{taskMessage}Done! ({elapsed:h\\:mm\\:ss\\.FF})");
 		Progress = 0;
 		lastProgLen = 0;
 	}

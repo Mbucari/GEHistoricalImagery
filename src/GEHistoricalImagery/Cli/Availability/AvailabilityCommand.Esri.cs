@@ -85,13 +85,13 @@ internal partial class AvailabilityCommand
 
 				foreach (var tile in regionTiles)
 				{
-					var cIndex = LibMapCommon.Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
+					var cIndex = Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
 					var rIndex = tile.Row - stats.MinRow;
 
-					availability[rIndex, cIndex] = regions[i].ContainsTile<EsriTile>(tile);
+					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
 				}
 
-				if (availability.HasAnyTiles() && (availability.HasAllTiles() || !CompleteOnly))
+				if (availability.HasAnyTiles() && (!CompleteOnly || availability.HasAllTiles()))
 					displays.Add(availability);
 			}
 

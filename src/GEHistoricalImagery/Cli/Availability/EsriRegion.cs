@@ -22,7 +22,7 @@ internal class EsriRegion(Layer layer, RegionAvailability[] regions) : IConsoleO
 		}
 		else if (Availabilities.Length > 1)
 		{
-			var availabilityStr = $"Layer {Layer.Title} has imagery from {Availabilities.Length} different dates";
+			var availabilityStr = $"Layer '{Layer.Title}' has imagery from {Availabilities.Length} different dates";
 			Console.Error.WriteLine(Environment.NewLine + availabilityStr);
 			Console.Error.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 

@@ -67,11 +67,13 @@ internal class Program
 	}
 	private static void GdalMessageHandler(int eclass, int code, nint msg)
 	{
-		if ((CPLErr)eclass > CPLErr.CE_Log) unsafe
+		CPLErr level = (CPLErr)eclass;
+		if (level > CPLErr.CE_Log) unsafe
 		{
 			var msgBts = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)msg);
 			var message = Encoding.UTF8.GetString(msgBts);
-			Console.Error.WriteLine(message);
+			string levelStr = level.ToString()[3..];
+			Console.Error.WriteLine($"GDAL {levelStr}: {message}");
 		}
 	}
 }

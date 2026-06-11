@@ -66,7 +66,7 @@ internal partial class AvailabilityCommand
 			}
 		}
 
-		return uniqueDates.Values.Where(r => r.HasAllTiles() || !CompleteOnly).OrderByDescending(r => r.Date).ToArray();
+		return uniqueDates.Values.Where(r => !CompleteOnly || !r.HasAllTiles()).OrderByDescending(r => r.Date).ToArray();
 
 		async Task<List<DatedTile>> getDatedTiles(KeyholeTile tile)
 		{

@@ -23,16 +23,9 @@ internal abstract class FileDownloadVerb : AoiVerb, IQuietCommand
 
 	public abstract string? SavePath { get; set; }
 
-	protected bool AnyFileDownloadErrors()
+	protected override IEnumerable<string> GetValidationErrors()
 	{
-		var errors = GetFileDownloadErrors().ToList();
-		errors.ForEach(Console.Error.WriteLine);
-		return errors.Count > 0;
-	}
-
-	protected virtual IEnumerable<string> GetFileDownloadErrors()
-	{
-		foreach (var errorMessage in GetAoiErrors())
+		foreach (var errorMessage in base.GetValidationErrors())
 			yield return errorMessage;
 
 		if (Dates?.Any() is not true)

@@ -32,14 +32,7 @@ internal abstract class AoiVerb : OptionsBase
 		GdalLib.Register();
 	}
 
-	protected bool AnyAoiErrors()
-	{
-		var errors = GetAoiErrors().ToList();
-		errors.ForEach(Console.Error.WriteLine);
-		return errors.Count > 0;
-	}
-
-	protected IEnumerable<string> GetAoiErrors()
+	protected override IEnumerable<string> GetValidationErrors()
 	{
 		if (ConcurrentDownload <= 0)
 			ConcurrentDownload = Environment.ProcessorCount;
@@ -52,7 +45,7 @@ internal abstract class AoiVerb : OptionsBase
 
 		if (RegionFile != null)
 		{
-			if (KmlFile.Parse(PathHelper.ReplaceUnixHomeDir(RegionFile)) is not { } kml)
+			if (KmlFile.Parse(RegionFile.ReplaceUnixHomeDir()) is not { } kml)
 				yield return "Invalid KMZ file";
 			else
 			{

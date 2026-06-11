@@ -1,5 +1,9 @@
 ﻿using CommandLine;
 using GEHistoricalImagery.Cli;
+using GEHistoricalImagery.Cli.Availability;
+using GEHistoricalImagery.Cli.Download;
+using GEHistoricalImagery.Cli.Dump;
+using GEHistoricalImagery.Cli.Info;
 using OSGeo.GDAL;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -27,16 +31,16 @@ internal class Program
 	}
 
 	[STAThread]
-	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Info))]
-	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Availability))]
-	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Download))]
-	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Dump))]
+	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(InfoCommand))]
+	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(AvailabilityCommand))]
+	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DownloadCommand))]
+	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DumpCommand))]
 	private static async Task Main(string[] args)
 	{
 		Console.OutputEncoding = Encoding.UTF8;
 
 		Parser parser = new(ConfigureParser);
-		ParserResult<object> result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
+		ParserResult<object> result = parser.ParseArguments<InfoCommand, AvailabilityCommand, DownloadCommand, DumpCommand>(args);
 		if (result.Value is IQuietCommand { Quiet: true })
 		{
 			Console.SetError(TextWriter.Null);

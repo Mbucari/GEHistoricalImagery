@@ -3,7 +3,7 @@ using LibMapCommon.Geometry;
 using OSGeo.OGR;
 using OSGeo.OSR;
 
-namespace GEHistoricalImagery.Cli;
+namespace GEHistoricalImagery.Cli.Dump;
 
 internal class DumpDatabase : IDisposable
 {

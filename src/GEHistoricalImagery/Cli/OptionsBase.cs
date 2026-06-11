@@ -32,7 +32,7 @@ internal abstract class OptionsBase
 			}
 			else if (Environment.GetEnvironmentVariable("GEHistoricalImagery_Cache") is string cd)
 			{
-				_cacheDir = PathHelper.ReplaceUnixHomeDir(cd);
+				_cacheDir = cd.ReplaceUnixHomeDir();
 			}
 			else
 			{
@@ -48,6 +48,12 @@ internal abstract class OptionsBase
 			return _cacheDir;
 		}
 	}
+	protected abstract IEnumerable<string> GetValidationErrors();
 
-	protected static string DateString(DateOnly? date) => date?.ToString("yyyy/MM/dd") ?? "N/A";
+	protected bool AnyValidationErrors()
+	{
+		List<string> errors = GetValidationErrors().ToList();
+		errors.ForEach(Console.Error.WriteLine);
+		return errors.Count > 0;
+	}
 }

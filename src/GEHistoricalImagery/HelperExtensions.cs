@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace GEHistoricalImagery;
 
-internal class PathHelper
+internal static class HelperExtensions
 {
 	//https://stackoverflow.com/questions/73523278/expand-paths-with-tilde-in-net-core
 	/// <summary>
@@ -15,13 +13,13 @@ internal class PathHelper
 	/// "~/foo" is not "/home/users/johndoe/foo"
 	/// but something like "app/foo".
 	/// </remarks>
-	public static string ReplaceUnixHomeDir(string path)
+	[return: NotNullIfNotNull(nameof(path))]
+	public static string? ReplaceUnixHomeDir(this string? path)
 	{
-		if (!path.StartsWith('~'))
+		if (string.IsNullOrEmpty(path) || !path.StartsWith('~'))
 		{
 			return path;
 		}
-
 
 		string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
@@ -33,4 +31,7 @@ internal class PathHelper
 								path[2..]),
 		};
 	}
+
+	public static string ToDateString(this DateOnly? date) => date?.ToDateString() ?? "N/A";
+	public static string ToDateString(this DateOnly date) => date.ToString("yyyy/MM/dd");
 }

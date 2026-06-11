@@ -1,6 +1,9 @@
 ﻿using CommandLine;
 using GEHistoricalImagery.Cli;
+using OSGeo.GDAL;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace GEHistoricalImagery;
 
@@ -30,23 +33,41 @@ internal class Program
 	[DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Dump))]
 	private static async Task Main(string[] args)
 	{
-		Console.OutputEncoding = System.Text.Encoding.UTF8;
+		Console.OutputEncoding = Encoding.UTF8;
 
 		Parser parser = new(ConfigureParser);
 		ParserResult<object> result = parser.ParseArguments(args, typeof(Info), typeof(Availability), typeof(Download), typeof(Dump));
 		if (result.Value is IQuietCommand { Quiet: true })
 		{
-			Console.SetError(new StreamWriter(Stream.Null));
-			OSGeo.GDAL.Gdal.SetErrorHandler((_, _, _) => { }, 0);
+			Console.SetError(TextWriter.Null);
+		}
+		else
+		{
+			Console.SetError(ProgressWriter.Instance);
 		}
 
 		try
 		{
+			Gdal.SetConfigOption("CPL_DEBUG", "ON");
+			Gdal.SetErrorHandler(GdalMessageHandler, 0);
 			await result.WithParsedAsync<OptionsBase>(opt => opt.RunAsync());
 		}
 		catch (Exception ex)
 		{
 			Console.Error.WriteLine("An error occurred:" + Environment.NewLine + Environment.NewLine + ex.ToString());
+		}
+		finally
+		{
+			Gdal.SetErrorHandler(null, 0);
+		}
+	}
+	private static void GdalMessageHandler(int eclass, int code, nint msg)
+	{
+		if ((CPLErr)eclass > CPLErr.CE_Log) unsafe
+		{
+			var msgBts = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)msg);
+			var message = Encoding.UTF8.GetString(msgBts);
+			Console.Error.WriteLine(message);
 		}
 	}
 }

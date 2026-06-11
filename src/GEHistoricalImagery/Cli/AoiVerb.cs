@@ -158,17 +158,17 @@ internal abstract class AoiVerb : OptionsBase
 
 	protected EsriTile[] GetTiles(GeoRegion<WebMercator> region)
 	{
-		BeginProgress("Finding Tiles Inside Region: ");
-		var regionTiles = region.EnumerateTiles<EsriTile>(ZoomLevel, ReportProgress).ToArray();
-		EndProgress();
+		ProgressWriter.Instance.BeginProgress("Finding Tiles Inside Region: ");
+		var regionTiles = region.EnumerateTiles<EsriTile>(ZoomLevel, ProgressWriter.Instance.ReportProgress).ToArray();
+		ProgressWriter.Instance.EndProgress();
 		return regionTiles;
 	}
 
 	protected KeyholeTile[] GetTiles(GeoRegion<Wgs1984> region)
 	{
-		BeginProgress("Finding Tiles Inside Region: ");
-		var regionTiles = region.EnumerateTiles<KeyholeTile>(ZoomLevel, ReportProgress).ToArray();
-		EndProgress();
+		ProgressWriter.Instance.BeginProgress("Finding Tiles Inside Region: ");
+		var regionTiles = region.EnumerateTiles<KeyholeTile>(ZoomLevel, ProgressWriter.Instance.ReportProgress).ToArray();
+		ProgressWriter.Instance.EndProgress();
 		return regionTiles;
 	}
 

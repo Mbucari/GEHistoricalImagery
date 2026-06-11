@@ -44,7 +44,7 @@ internal class Availability : AoiVerb
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
 		var all = await GetAllEsriRegions(wayBack, Region.Transform<WebMercator>());
-		EndProgress();
+		ProgressWriter.Instance.EndProgress();
 
 		if (all.Sum(r => r.Availabilities.Length) == 0)
 		{
@@ -68,7 +68,7 @@ internal class Availability : AoiVerb
 
 		var mercAoi = aoi.Transform<WebMercator>();
 		var regionTiles = GetTiles(mercAoi);
-		BeginProgress("Loading World Atlas WayBack Layer Info: ");
+		ProgressWriter.Instance.BeginProgress("Loading World Atlas WayBack Layer Info: ");
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 
 		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
@@ -79,7 +79,7 @@ internal class Availability : AoiVerb
 			if (region.Availabilities.Any(a => a.Date <= MaxDate))
 			{
 				allLayers.Add(region);
-				ReportProgress(++count / (double)numTiles);
+				ProgressWriter.Instance.ReportProgress(++count / (double)numTiles);
 			}
 		}
 
@@ -163,7 +163,7 @@ internal class Availability : AoiVerb
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
 		var all = await GetAllDatesAsync(root, Region);
-		EndProgress();
+		ProgressWriter.Instance.EndProgress();
 
 		if (all.Length == 0)
 		{
@@ -180,7 +180,7 @@ internal class Availability : AoiVerb
 
 		var regionTiles = GetTiles(reg);
 		var stats = reg.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
-		BeginProgress("Loading Quad Tree Packets: ");
+		ProgressWriter.Instance.BeginProgress("Loading Quad Tree Packets: ");
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
 
 		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();
@@ -203,7 +203,7 @@ internal class Availability : AoiVerb
 				region[rIndex, cIndex] = await root.GetNodeAsync(d.Tile) is not null;
 			}
 
-			ReportProgress(++count / (double)stats.TileCount);
+			ProgressWriter.Instance.ReportProgress(++count / (double)stats.TileCount);
 		}
 
 		//Go back and mark unavailable tiles within the region of interest

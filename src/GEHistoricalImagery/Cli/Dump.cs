@@ -121,12 +121,12 @@ internal partial class Dump : FileDownloadVerb
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
 				}
-				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
+				ProgressWriter.Instance.BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, datedLayer.DatedElement, formatter.HasTileDate)));
 			}
 			else
 			{
-				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				ProgressWriter.Instance.BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadEsriTile(wayBack, t, desiredDates)));
 			}
 		}
@@ -193,7 +193,7 @@ internal partial class Dump : FileDownloadVerb
 		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
 		var formatter = new FilenameFormatter(Formatter!, stats);
 
-		BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+		ProgressWriter.Instance.BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 		await Run_Common(saveFolder, stats.TileCount, formatter, generateWork());
 
 		IEnumerable<Task<ITileDataset>> generateWork()
@@ -243,7 +243,7 @@ internal partial class Dump : FileDownloadVerb
 		await foreach (var tds in processor.EnumerateResults(generator))
 		{
 			if (tds.Message is not null)
-				Console.Error.WriteLine($"{Environment.NewLine}{tds.Message}");
+				Console.Error.WriteLine(tds.Message);
 
 			if (tds.TileBytes is not null)
 			{
@@ -254,10 +254,10 @@ internal partial class Dump : FileDownloadVerb
 				numTilesDownload++;
 			}
 
-			ReportProgress(++numTilesProcessed / tileCount);
+			ProgressWriter.Instance.ReportProgress(++numTilesProcessed / tileCount);
 		}
 
-		EndProgress();
+		ProgressWriter.Instance.EndProgress();
 		Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 	}
 
@@ -267,7 +267,7 @@ internal partial class Dump : FileDownloadVerb
 		{
 			if (tds.TileBytes is null)
 			{
-				Console.Error.WriteLine($"{Environment.NewLine}Dataset for tile {tds.Tile} is empty");
+				Console.Error.WriteLine($"Dataset for tile {tds.Tile} is empty");
 				return;
 			}
 			File.WriteAllBytes(filePath, tds.TileBytes);

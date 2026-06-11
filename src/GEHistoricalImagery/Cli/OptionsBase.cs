@@ -49,44 +49,5 @@ internal abstract class OptionsBase
 		}
 	}
 
-	public double Progress { get; private set; }
-
-	private int lastProgLen;
-	protected void ReportProgress(double progress)
-	{
-		lock (this)
-		{
-			if (progress >= Progress)
-			{
-				var p = progress.ToString("P");
-				var message = lastProgLen == 0 ? $"\e[K{p}" : $"\e[{lastProgLen}D\e[K{p}";
-				Console.Error.Write(message);
-				lastProgLen = p.Length;
-				Progress = progress;
-			}
-		}
-	}
-	private DateTime startTime;
-	private string? taskMessage;
-	protected void BeginProgress(string text)
-	{
-		if (text[^1] != ' ')
-			text += ' ';
-		taskMessage = text;
-		Console.Error.Write(text);
-		startTime = DateTime.UtcNow;
-		lastProgLen = 0;
-		Progress = 0;
-		ReportProgress(0);
-	}
-
-	protected void EndProgress()
-	{
-		var elapsed = DateTime.UtcNow - startTime;
-		Console.Error.WriteLine($"\e[G\e[K{taskMessage}Done! ({elapsed:h\\:mm\\:ss\\.FF})");
-		Progress = 0;
-		lastProgLen = 0;
-	}
-
 	protected static string DateString(DateOnly? date) => date?.ToString("yyyy/MM/dd") ?? "N/A";
 }

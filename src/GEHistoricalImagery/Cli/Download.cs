@@ -117,12 +117,12 @@ internal class Download : FileDownloadVerb
 					Console.Error.WriteLine($"ERROR: Exact layer date match not found. Closest layer date found: {DateString(datedLayer.DatedElement.Date)}");
 					return [];
 				}
-				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
+				ProgressWriter.Instance.BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles From {datedLayer.DatedElement.Title}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadTile(mercAoi, wayBack, t, datedLayer.DatedElement)));
 			}
 			else
 			{
-				BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+				ProgressWriter.Instance.BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 				return regionTiles.Select(t => Task.Run(() => DownloadTile(mercAoi, wayBack, t, desiredDates)));
 			}
 		}
@@ -218,7 +218,7 @@ internal class Download : FileDownloadVerb
 
 		IEnumerable<Task<TileDataset<Wgs1984>>> generateWork()
 		{
-			BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
+			ProgressWriter.Instance.BeginProgress($"Grabbing {regionTiles.Length:N0} Image Tiles {DateMatchPreposition} Specified Date{(desiredDates.Count() > 1 ? "s" : "")}: ");
 
 			return regionTiles.Select(t => Task.Run(() => DownloadTile(Region, root, t, desiredDates)));
 		}
@@ -342,12 +342,12 @@ internal class Download : FileDownloadVerb
 					}
 
 					if (tds.Message is not null)
-						Console.Error.WriteLine($"{Environment.NewLine}{tds.Message}");
+						Console.Error.WriteLine(tds.Message);
 
-					ReportProgress(++numTilesProcessed / tileCount);
+					ProgressWriter.Instance.ReportProgress(++numTilesProcessed / tileCount);
 				}
 
-			EndProgress();
+			ProgressWriter.Instance.EndProgress();
 			Console.Error.WriteLine($"{numTilesDownload} out of {tileCount} downloaded");
 
 			//Release the lock for either saving or deleting
@@ -360,10 +360,10 @@ internal class Download : FileDownloadVerb
 				return;
 			}
 
-			BeginProgress("Saving Image: ");
-			image.Saving += (_, e) => ReportProgress(e.Progress);
+			ProgressWriter.Instance.BeginProgress("Saving Image: ");
+			image.Saving += (_, e) => ProgressWriter.Instance.ReportProgress(e.Progress);
 			image.Save(saveFile.FullName, RasterOptions, TargetSpatialReference, ConcurrentDownload, ScaleFactor, OffsetX, OffsetY, ScaleFirst);
-			EndProgress();
+			ProgressWriter.Instance.EndProgress();
 		}
 		finally
 		{

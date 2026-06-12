@@ -2,7 +2,6 @@
 using LibEsri;
 using LibGoogleEarth;
 using LibMapCommon;
-using System.Text.Json;
 
 namespace GEHistoricalImagery.Cli.Info;
 
@@ -87,8 +86,9 @@ internal partial class InfoCommand : OptionsBase, IQuietCommand
 
 		if (SavePath != null)
 		{
-			using Stream output = SavePath == "-" ? Console.OpenStandardOutput() : File.OpenWrite(SavePath.ReplaceUnixHomeDir());
-			await JsonSerializer.SerializeAsync(output, infoData, InfoDataSerilizer.Default.InfoData);
+			GdalLib.Register();
+			string savefile = SavePath is "-" ? "/vsistdout/out.json" : SavePath.ReplaceUnixHomeDir();
+			infoData.SaveInfoData(savefile);
 		}
 	}
 

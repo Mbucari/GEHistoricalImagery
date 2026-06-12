@@ -10,7 +10,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MaxRev.Gdal.Universal" Version="3.13.0.527" />
+		<PackageReference Include="MaxRev.Gdal.Universal" Version="3.13.1.534" />
 	</ItemGroup>
 
 </Project>

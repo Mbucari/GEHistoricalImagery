@@ -36,6 +36,18 @@ public static class OgrExtensions
 		ring.CloseRings();
 		Geometry polygon = new Geometry(wkbGeometryType.wkbPolygon);
 		polygon.AddGeometryDirectly(ring);
+		if (!polygon.IsValid())
+		{
+			var gValid = polygon.MakeValid(["MODE=STRUCTURE"]);
+			if (gValid is null || !gValid.IsValid())
+			{
+				gValid?.Dispose();
+				throw new InvalidOperationException("The provided coordinates do not form a valid polygon.");
+			}
+			polygon.Dispose();
+			polygon = gValid;
+		}
+
 		using SpatialReference sr = new SpatialReference(null);
 		sr.Import<TCoordinate>();
 		polygon.AssignSpatialReference(sr);

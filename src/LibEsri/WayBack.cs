@@ -64,7 +64,12 @@ public class WayBack
 			Gdal.FileFromMemBuffer(memFile, ss);
 			using var driver = Ogr.GetDriverByName("ESRIJSON");
 			using var ds = driver.Open(memFile, 0);
-			return ds.ToDatedRegions(region)?.ToArray() is DatedRegion[] regions ? regions : Array.Empty<DatedRegion>();
+			if (ds.ToDatedRegions(layer, region)?.ToArray() is DatedRegion[] regions)
+			{
+				if (regions.Length == 1)
+					regions[0].MarkComplete();
+				return regions;
+			}
 		}
 		catch { }
 		finally

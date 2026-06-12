@@ -1,6 +1,6 @@
 ﻿using LibGoogleEarth;
-using LibMapCommon;
-using LibMapCommon.Geometry;
+using LibGoogleEarth.Geometry;
+using System.Reflection;
 
 namespace GEHistoricalImagery.Cli.Availability;
 
@@ -9,64 +9,42 @@ internal partial class AvailabilityCommand
 	private async Task Run_Keyhole()
 	{
 		var root = await DbRoot.CreateAsync(Database.TimeMachine, CacheDir);
-		var all = await GetAllDatesAsync(root, Region);
-		ProgressWriter.Instance.EndProgress();
 
-		if (all.Length == 0)
+		var regionTiles = GetTiles(Region);
+		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
+		var datedRegions = await GetAllKeyholeDatedRegionsAsync(root, regionTiles);
+
+		if (!Quiet)
 		{
-			Console.Error.WriteLine($"No dated imagery available within specified constraints");
-			return;
+			var availabilities = await GetRegionAvailabilities(stats, regionTiles, datedRegions);
+			PresentRegions(availabilities);
 		}
-
-		OptionChooser<RegionAvailability>.WaitForOptions(all);
 	}
 
-	private async Task<RegionAvailability[]> GetAllDatesAsync(DbRoot root, GeoRegion<Wgs1984> reg)
+	private async Task<DatedRegion[]> GetAllKeyholeDatedRegionsAsync(DbRoot root, KeyholeTile[] regionTiles)
 	{
 		int count = 0;
-
-		var regionTiles = GetTiles(reg);
-		var stats = reg.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
-		ProgressWriter.Instance.BeginProgress("Loading Quad Tree Packets: ");
+		ProgressWriter.Instance.BeginProgress("Building dated tile regions: ");
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
-
-		Dictionary<DateOnly, RegionAvailability> uniqueDates = new();
-		HashSet<Tuple<int, int>> uniquePoints = new();
-
-		await foreach (var dSet in processor.EnumerateResults(regionTiles.Select(getDatedTiles)))
+		var datedRegions = await root.GetDateRegionsAsync(processor.EnumerateResults(regionTiles.Select(getDatedTiles)));
+		for (int i = 0; i < datedRegions.Length; i++)
 		{
-			foreach (var d in dSet)
-			{
-				if (!uniqueDates.TryGetValue(d.Date, out RegionAvailability? region))
-				{
-					region = new RegionAvailability(d.Date, stats.NumRows, stats.NumColumns);
-					uniqueDates.Add(d.Date, region);
-				}
-
-				var cIndex = LibMapCommon.Util.Mod(d.Tile.Column - stats.MinColumn, 1 << d.Tile.Level);
-				var rIndex = stats.MaxRow - d.Tile.Row;
-
-				uniquePoints.Add(new Tuple<int, int>(rIndex, cIndex));
-				region[rIndex, cIndex] = await root.GetNodeAsync(d.Tile) is not null;
-			}
-
-			ProgressWriter.Instance.ReportProgress(++count / (double)stats.TileCount);
+			if (datedRegions[i].TileCount == regionTiles.Length)
+				datedRegions[i].MarkComplete();
 		}
+		if (CompleteOnly)
+			datedRegions = datedRegions.Where(d => d.IsComplete).ToArray();
+		ProgressWriter.Instance.EndProgress();
 
-		//Go back and mark unavailable tiles within the region of interest
-		foreach (var a in uniqueDates.Values)
+		ProgressWriter.Instance.BeginProgress("Flattening tile regions: ");
+		await Parallel.ForAsync(0, datedRegions.Length, async (i, _) =>
 		{
-			for (int r = 0; r < a.Height; r++)
-			{
-				for (int c = 0; c < a.Width; c++)
-				{
-					if (uniquePoints.Contains(new Tuple<int, int>(r, c)) && a[r, c] is null)
-						a[r, c] = false;
-				}
-			}
-		}
-
-		return uniqueDates.Values.Where(r => !CompleteOnly || !r.HasAllTiles()).OrderByDescending(r => r.Date).ToArray();
+			using var datedRegion = datedRegions[i];
+			datedRegions[i] = datedRegion.MergePolygons();
+			ProgressWriter.Instance.ReportProgress(i / (double)datedRegions.Length);
+		});
+		ProgressWriter.Instance.EndProgress();
+		return datedRegions;
 
 		async Task<List<DatedTile>> getDatedTiles(KeyholeTile tile)
 		{
@@ -80,6 +58,8 @@ internal partial class AvailabilityCommand
 				if (!dates.Any(d => d.Date == datedTile.Date))
 					dates.Add(datedTile);
 			}
+
+			ProgressWriter.Instance.ReportProgress(++count / (double)regionTiles.Length);
 			return dates;
 		}
 	}

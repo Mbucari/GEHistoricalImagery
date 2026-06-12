@@ -4,12 +4,13 @@ using OSGeo.OGR;
 
 namespace LibEsri.Geometry;
 
-public class DatedRegion : GeoRegion<WebMercator>
+public class DatedRegion : DatedRegion<WebMercator>
 {
-	internal DatedRegion(DateOnly date, Envelope envelope, OSGeo.OGR.Geometry region)
-		: base(envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, region)
+	internal void MarkComplete() => IsComplete = true;
+	public Layer Layer { get; }
+	internal DatedRegion(Layer layer, DateOnly date, Envelope envelope, OSGeo.OGR.Geometry region)
+		: base(date, envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, region)
 	{
-		Date = date;
+		Layer = layer;
 	}
-	public DateOnly Date { get; }
 }

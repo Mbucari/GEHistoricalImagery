@@ -1,7 +1,11 @@
 ﻿using Keyhole;
 using Keyhole.Dbroot;
+using LibGoogleEarth.Geometry;
 using LibMapCommon;
+using LibMapCommon.Geometry;
 using Microsoft.Extensions.Caching.Memory;
+using OSGeo.OGR;
+using OSGeo.OSR;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -78,6 +82,56 @@ public abstract class DbRoot
 			packet?.SparseQuadtreeNode?.SingleOrDefault(n => n.Index == tile.SubIndex)?.Node is IQuadtreeNode n
 			? new TileNode(tile, n)
 			: null;
+	}
+	private class KeyholeTileCollection
+	{
+		public int TileCount { get; private set; }
+		public OSGeo.OGR.Geometry MultiPolygon { get; }
+		public KeyholeTileCollection()
+		{
+			MultiPolygon = new OSGeo.OGR.Geometry(wkbGeometryType.wkbMultiPolygon);
+		}
+		public void AddTile(KeyholeTile tile)
+		{
+			using var tileRegion = tile.GetPolygon();
+			MultiPolygon.AddGeometryDirectly(tileRegion);
+			TileCount++;
+		}
+	}
+	public async Task<DatedRegion[]> GetDateRegionsAsync(IAsyncEnumerable<IEnumerable<DatedTile>> tiles)
+	{
+		//Build a map of Date to Geometry by unioning the tile polygons for each date together
+		Dictionary<DateOnly, KeyholeTileCollection> dateTileMap = new();
+
+		await foreach (var dt in tiles)
+		{
+			foreach (var tile in dt)
+			{
+				if (!dateTileMap.TryGetValue(tile.Date, out var geom))
+				{
+					dateTileMap[tile.Date] = geom = new KeyholeTileCollection();
+				}
+				geom.AddTile(tile.Tile);
+			}
+		}
+
+		DatedRegion[] regions = new DatedRegion[dateTileMap.Count];
+		DateOnly[] keys = dateTileMap.Keys.ToArray();
+		using var sr = new SpatialReference(null);
+		sr.Import<Wgs1984>();
+		for (int i = 0; i < dateTileMap.Count; i++)
+		{
+			var datedRegion = dateTileMap[keys[i]];
+			var geometry = datedRegion.MultiPolygon;
+			using var envelope = new Envelope();
+			geometry.GetEnvelope(envelope);
+			geometry.ExportToWkt(out var wkt);
+			geometry.AssignSpatialReference(sr);
+			//I can't find a reason why LeftMostX and RightMostX actually matter for this use case,
+			//but know that when crossing anitmeridian, LeftMostX = -180 and RightMostX = 180
+			regions[i] = new DatedRegion(datedRegion.TileCount, keys[i], envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, geometry);
+		}
+		return regions;
 	}
 
 	public string? GetProviderCopyright(DatedTile tile)

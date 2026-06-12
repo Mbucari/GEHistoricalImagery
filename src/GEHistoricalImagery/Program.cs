@@ -41,7 +41,7 @@ internal class Program
 
 		Parser parser = new(ConfigureParser);
 		ParserResult<object> result = parser.ParseArguments<InfoCommand, AvailabilityCommand, DownloadCommand, DumpCommand>(args);
-		if (result.Value is IQuietCommand { Quiet: true })
+		if (result.Value is OptionsBase { Quiet: true })
 		{
 			Console.SetError(TextWriter.Null);
 		}

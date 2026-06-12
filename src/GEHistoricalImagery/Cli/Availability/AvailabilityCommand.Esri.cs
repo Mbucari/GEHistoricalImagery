@@ -1,4 +1,5 @@
 ﻿using LibEsri;
+using LibEsri.Geometry;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 
@@ -13,89 +14,92 @@ internal partial class AvailabilityCommand
 			ConcurrentDownload = 10;
 			Console.Error.WriteLine($"Limiting to {ConcurrentDownload} concurrent scrapes of Esri metadata.");
 		}
-
+		var mercAoi = Region.Transform<WebMercator>();
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
-		var all = await GetAllEsriRegions(wayBack, Region.Transform<WebMercator>());
-		ProgressWriter.Instance.EndProgress();
+		var regionTiles = GetTiles(mercAoi);
+		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.Length };
+		var datedRegions = await GetAllEsriDatedRegionsAsync(wayBack, mercAoi);
 
-		if (all.Sum(r => r.Availabilities.Length) == 0)
+		if (!Quiet)
 		{
-			Console.Error.WriteLine($"No imagery available at zoom level {ZoomLevel}");
-			return;
+			var availabilities = await GetAllEsriRegions(stats, regionTiles, datedRegions);
+			PresentRegions(availabilities);
 		}
-
-		OptionChooser<EsriRegion>.WaitForOptions(all);
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(WayBack wayBack, GeoRegion<WebMercator> aoi)
+	private async Task<EsriRegion[]> GetAllEsriRegions(TileStats stats, EsriTile[] regionTiles, DatedRegion[] datedRegions)
+	{
+		List<EsriRegion> allLayers = new();
+
+		foreach (var layerRegions in datedRegions.OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).GroupBy(dr => dr.Layer))
+		{
+			var all = await GetRegionAvailabilities(stats, regionTiles, layerRegions.ToArray());
+			if (all.Length > 0)
+			{
+				var esriRegion = new EsriRegion(layerRegions.Key, all);
+
+				//Check if a layer with the same availabilities already exists, and if so, don't add this layer.
+				if (!allLayers.Any(e => e.Availabilities.SequenceEqual(esriRegion.Availabilities)))
+					allLayers.Add(esriRegion);
+			}
+		}
+
+		return allLayers.OrderByDescending(l => l.Date).ToArray();
+	}
+
+	private async Task<DatedRegion[]> GetAllEsriDatedRegionsAsync(WayBack wayBack, GeoRegion<WebMercator> mercAoi)
 	{
 		//A layer date < MinDate will not have imagery captured after MinDate, but
 		//a layer date > MaxDate may still have imagery captured before MaxDate.
 		//Truncate the Layers whose layer date is older than MinDate, then search layers from
 		//oldest to newest, stopping when a layer contains no imagery captured before MaxDate
 		var layers = wayBack.Layers.Where(l => l.Date >= MinDate).OrderBy(l => l.Date).ToArray();
+		ParallelProcessor<LayerDatedRegion?> processor = new(ConcurrentDownload);
 
+		//Set with the first layer found that has no imagery captured before MaxDate
+		Layer? cancelIfAfter = null;
+
+		List<DatedRegion> allRegions = new(layers.Length);
 		int count = 0;
-		int numTiles = layers.Length;
+		ProgressWriter.Instance.BeginProgress("Building dated tile regions: ");
 
-		var mercAoi = aoi.Transform<WebMercator>();
-		var regionTiles = GetTiles(mercAoi);
-		ProgressWriter.Instance.BeginProgress("Loading World Atlas WayBack Layer Info: ");
-		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.LongLength };
-
-		ParallelProcessor<EsriRegion> processor = new(ConcurrentDownload);
-		List<EsriRegion> allLayers = new();
-
-		await foreach (var region in processor.EnumerateResults(layers.Select(getLayerDates)))
+		await foreach (var layerRegions in processor.EnumerateResults(layers.Select(getDatedRegions)).OfType<LayerDatedRegion>())
 		{
-			if (region.Availabilities.Any(a => a.Date <= MaxDate))
+			var layersWithDateMatches = layerRegions.Regions.Where(d => d.Date >= MinDate && d.Date <= MaxDate).ToArray();
+			if (layersWithDateMatches.Length == 0)
 			{
-				allLayers.Add(region);
-				ProgressWriter.Instance.ReportProgress(++count / (double)numTiles);
-			}
-		}
-
-		//De-duplicate list
-		allLayers.Sort((a, b) => a.Layer.Date.CompareTo(b.Layer.Date));
-
-		for (int i = 1; i < allLayers.Count; i++)
-		{
-			for (int k = i - 1; k >= 0; k--)
-			{
-				if (allLayers[i].Availabilities.SequenceEqual(allLayers[k].Availabilities))
+				if (layerRegions.Regions.Any(r => r.Date > MaxDate))
 				{
-					allLayers.RemoveAt(i--);
-					break;
+					//This layer has no imagery captured before MaxDate, therefore no further layers
+					//will have imagery captured before MaxDate. Set cancelIfAfter so that no more
+					//calls to GetDateRegionsAsync will be made for layers after this layer.
+					if (cancelIfAfter is null || layerRegions.Layer.Date < cancelIfAfter.Date)
+						cancelIfAfter = layerRegions.Layer;
 				}
 			}
-		}
-
-		return allLayers.OrderByDescending(l => l.Date).ToArray();
-
-		async Task<EsriRegion> getLayerDates(Layer layer)
-		{
-			var regions = await wayBack.GetDateRegionsAsync(layer, mercAoi, ZoomLevel);
-
-			List<RegionAvailability> displays = new(regions.Length);
-
-			for (int i = 0; i < regions.Length; i++)
+			else if (!CompleteOnly)
 			{
-				var availability = new RegionAvailability(regions[i].Date, stats.NumRows, stats.NumColumns);
-
-				foreach (var tile in regionTiles)
-				{
-					var cIndex = Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
-					var rIndex = tile.Row - stats.MinRow;
-
-					availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
-				}
-
-				if (availability.HasAnyTiles() && (!CompleteOnly || availability.HasAllTiles()))
-					displays.Add(availability);
+				allRegions.AddRange(layersWithDateMatches);
+			}
+			else if (layersWithDateMatches.Length == 1 && layersWithDateMatches[0].IsComplete)
+			{
+				allRegions.Add(layersWithDateMatches[0]);
 			}
 
-			return new EsriRegion(layer, displays.OrderByDescending(d => d.Date).ToArray());
+			ProgressWriter.Instance.ReportProgress(++count / (double)layers.Length);
+		}
+		ProgressWriter.Instance.EndProgress();
+		return allRegions.ToArray();
+
+		async Task<LayerDatedRegion?> getDatedRegions(Layer layer)
+		{
+			if (cancelIfAfter is { Date: var cancelDate } && layer.Date > cancelDate)
+				return null;
+
+			var datedRegions = await wayBack.GetDateRegionsAsync(layer, mercAoi, ZoomLevel);
+			return new LayerDatedRegion(layer, datedRegions);
 		}
 	}
+	private record LayerDatedRegion(Layer Layer, DatedRegion[] Regions);
 }

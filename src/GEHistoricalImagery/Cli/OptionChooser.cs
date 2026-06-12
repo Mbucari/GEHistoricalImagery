@@ -8,17 +8,17 @@
 		bool DrawOption();
 	}
 
-	internal class OptionChooser<T> where T : class, IConsoleOption
+	internal class OptionChooser
 	{
 		private static readonly string INDICES = "0123456789abcdefghijklmnopqrstuvwxyz";
 		public OptionChooser() { }
 
-		public static T? WaitForOptions(T[] options)
+		public static T? WaitForOptions<T>(T[] options) where T : class, IConsoleOption
 			=> options.Length <= INDICES.Length
 			? WaitForSingleCharSelection(options)
 			: WaitForMultiCharSelection(options);
 
-		private static T? WaitForSingleCharSelection(T[] options)
+		private static T? WaitForSingleCharSelection<T>(T[] options) where T : class, IConsoleOption
 		{
 			const string finalOption = "[Esc]  Exit";
 			var dateDict = options.Select((d, i) => new KeyValuePair<char, T>(INDICES[i], d)).ToDictionary();
@@ -38,7 +38,7 @@
 			return null;
 		}
 
-		private static T? WaitForMultiCharSelection(T[] options)
+		private static T? WaitForMultiCharSelection<T>(T[] options) where T : class, IConsoleOption
 		{
 			const string finalOption = "[E]  Exit";
 
@@ -60,7 +60,7 @@
 			return null;
 		}
 
-		private static void WriteOptions<S>(IEnumerable<KeyValuePair<S, T>> dateDict, string finalOption) where S : notnull
+		private static void WriteOptions<S,T>(IEnumerable<KeyValuePair<S, T>> dateDict, string finalOption) where S : notnull where T : class, IConsoleOption
 		{
 			const string spacer = "  ";
 			var entries = dateDict.Select((kvp, i) => $"[{kvp.Key}]  {kvp.Value.DisplayValue}").Append(finalOption).ToArray();

@@ -3,7 +3,7 @@ using LibMapCommon;
 
 namespace GEHistoricalImagery.Cli;
 
-internal abstract class FileDownloadVerb : AoiVerb, IQuietCommand
+internal abstract class FileDownloadVerb : AoiVerb
 {
 	[Option('d', "date", HelpText = "Imagery Date(s). One or more dates, either separated by a comma (,) or supplied with multiple --date options.", MetaValue = "<yyyy/MM/dd>", Required = true, Separator = ',')]
 	public IEnumerable<DateOnly>? Dates { get; set; }
@@ -19,7 +19,6 @@ internal abstract class FileDownloadVerb : AoiVerb, IQuietCommand
 
 	[Option("target-sr", HelpText = "Warp image to Spatial Reference. Either EPSG:#### or path to projection file (file system or web)", MetaValue = "<SpatialReference>", Default = null)]
 	public string? TargetSpatialReference { get; set; }
-	public bool Quiet { get; set; }
 
 	public abstract string? SavePath { get; set; }
 

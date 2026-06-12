@@ -19,7 +19,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	/// The polygon or multipolygon geometry representing the region. The geometry is guaranteed to be in the same spatial reference as the input coordinates used to create the region, and to have a bounding box defined by LeftMostX, RightMostX, MinY, and MaxY.
 	/// </summary>
 	private OSGeo.OGR.Geometry? m_Region;
-	private OSGeo.OGR.Geometry Region => m_Region ?? throw new ObjectDisposedException(nameof(GeoRegion<>));
+	protected OSGeo.OGR.Geometry Region => m_Region ?? throw new ObjectDisposedException(nameof(GeoRegion<>));
 	protected GeoRegion(double leftmostX, double rightmostX, double minY, double maxY, OSGeo.OGR.Geometry region)
 	{
 		if (leftmostX == rightmostX)
@@ -72,6 +72,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	public OSGeo.OGR.Geometry Intersect(OSGeo.OGR.Geometry other) => Region.Intersection(other);
 	public bool Overlaps(OSGeo.OGR.Geometry other) => Region.Overlaps(other);
 	public double GeodesicArea => Region.GeodesicArea();
+	public double Area => Region.Area();
 
 	public GeoRegion<TOther> Transform<TOther>() where TOther : IGeoCoordinate<TOther>
 	{
@@ -110,7 +111,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 		=> typeof(TCoordinate) == typeof(Wgs1984) ? GeoRegion<Wgs1984>.Create(placemark.Geometry)
 		 : throw new InvalidOperationException($"This method can only be used to create GeoRegion<{typeof(Wgs1984).Name}>");
 
-	private static GeoRegion<TCoordinate> Create(OSGeo.OGR.Geometry aoi)
+	public static GeoRegion<TCoordinate> Create(OSGeo.OGR.Geometry aoi)
 	{
 		var geoType = aoi.GetGeometryType();
 		if (geoType is not (wkbGeometryType.wkbPolygon or wkbGeometryType.wkbMultiPolygon))
@@ -188,7 +189,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	/// </summary>
 	/// <param name="tile">A map tile to test</param>
 	/// <returns>True if any part of the tile is within this polygon, otherwise false</returns>
-	public bool ContainsTile<TTile>(TTile tile) where TTile : ITile<TCoordinate>
+	public virtual bool ContainsTile<TTile>(TTile tile) where TTile : ITile<TCoordinate>
 	{
 		using var tilePolygon = tile.GetPolygon();
 		return Region.Intersects(tilePolygon);

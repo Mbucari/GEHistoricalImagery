@@ -7,7 +7,7 @@ internal class EsriRegion(Layer layer, RegionAvailability[] regions) : IConsoleO
 	public Layer Layer { get; } = layer;
 	public RegionAvailability[] Availabilities { get; } = regions;
 
-	public DateOnly Date => Layer.Date;
+	public DateOnly Date => Availabilities.Length > 1 ? Layer.Date : Availabilities[0].Date;
 	public string DisplayValue => Date.ToDateString();
 
 	public bool DrawOption()
@@ -26,7 +26,7 @@ internal class EsriRegion(Layer layer, RegionAvailability[] regions) : IConsoleO
 			Console.Error.WriteLine(Environment.NewLine + availabilityStr);
 			Console.Error.WriteLine(new string('=', availabilityStr.Length) + Environment.NewLine);
 
-			OptionChooser<RegionAvailability>.WaitForOptions(Availabilities);
+			OptionChooser.WaitForOptions(Availabilities);
 		}
 		return false;
 	}

@@ -54,7 +54,7 @@ internal abstract class AoiVerb : OptionsBase
 				{
 					yield return "Keyhole file doesn't contain any enclosed regions";
 				}
-				else if (placemarkOptions.Length == 1 || this is IQuietCommand { Quiet: true })
+				else if (placemarkOptions.Length == 1 || Quiet)
 				{
 					Region = GeoRegion<Wgs1984>.Create(placemarkOptions[0].Placemark);
 				}
@@ -64,7 +64,7 @@ internal abstract class AoiVerb : OptionsBase
 					Console.Error.WriteLine(prompt);
 					Console.Error.WriteLine(new string('=', prompt.Length));
 
-					var placemark = OptionChooser<PlacemarkOption>.WaitForOptions(placemarkOptions)?.Placemark;
+					var placemark = OptionChooser.WaitForOptions(placemarkOptions)?.Placemark;
 					if (placemark is null)
 						yield return "No placemark was selected";
 					else
@@ -131,7 +131,7 @@ internal abstract class AoiVerb : OptionsBase
 			else
 				rectStats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel);
 
-			if (rectStats.TileCount < 100_000 || this is IQuietCommand { Quiet: true })
+			if (rectStats.TileCount < 100_000 || Quiet)
 				yield break;
 
 			string? result;

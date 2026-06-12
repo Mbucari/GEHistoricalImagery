@@ -15,6 +15,9 @@ internal abstract class OptionsBase
 
 	[Option("no-cache", HelpText = "Disable local caching", Default = false)]
 	public bool DisableCache { get; set; }
+
+	[Option('q', HelpText = "Quiet mode", Default = false)]
+	public bool Quiet { get; set; }
 	public abstract Task RunAsync();
 
 	string? _cacheDir = null;

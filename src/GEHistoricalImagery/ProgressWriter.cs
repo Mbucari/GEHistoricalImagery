@@ -80,6 +80,9 @@ internal class ProgressWriter : TextWriter
 	{
 		lock (progressReportLock)
 		{
+			if (Progress < 0)
+				throw new InvalidOperationException("Progress has already been ended.");
+
 			var elapsed = DateTime.UtcNow - startTime;
 			Write($"\e[G\e[K{taskMessage}Done! ({elapsed:h\\:mm\\:ss\\.FF}){Environment.NewLine}");
 			lastProgLen = 0;

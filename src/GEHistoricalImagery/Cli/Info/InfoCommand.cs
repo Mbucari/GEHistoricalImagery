@@ -84,7 +84,8 @@ internal partial class InfoCommand : OptionsBase, IQuietCommand
 				break;
 			}
 		}
-
+		using var cccc = new InfoDatabase("out.json");
+		cccc.AddInfo(infoData);	
 		if (SavePath != null)
 		{
 			using Stream output = SavePath == "-" ? Console.OpenStandardOutput() : File.OpenWrite(SavePath.ReplaceUnixHomeDir());

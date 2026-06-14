@@ -1,6 +1,5 @@
 ﻿using LibGoogleEarth;
 using LibGoogleEarth.Geometry;
-using System.Reflection;
 
 namespace GEHistoricalImagery.Cli.Availability;
 
@@ -13,6 +12,7 @@ internal partial class AvailabilityCommand
 		var regionTiles = GetTiles(Region);
 		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var datedRegions = await GetAllKeyholeDatedRegionsAsync(root, regionTiles);
+		HandleDatedRegions(datedRegions);
 
 		if (!Quiet)
 		{

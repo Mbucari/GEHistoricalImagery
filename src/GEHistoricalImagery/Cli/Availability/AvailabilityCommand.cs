@@ -17,6 +17,9 @@ internal partial class AvailabilityCommand : AoiVerb
 	[Option("max-date", HelpText = "Youngest (most recent) image tiles to consider", MetaValue = "yyyy/MM/dd")]
 	public DateOnly MaxDate { get; set; }
 
+	[Option('o', "output", HelpText = "Output image availability regions JSON save location (dash (-) for console output)", MetaValue = "<out.json>", Required = false)]
+	public string? SavePath { get; set; }
+
 	public override async Task RunAsync()
 	{
 		if (AnyValidationErrors())
@@ -28,6 +31,16 @@ internal partial class AvailabilityCommand : AoiVerb
 		Console.OutputEncoding = Encoding.Unicode;
 
 		await (Provider is Provider.Wayback ? Run_Esri() : Run_Keyhole());
+	}
+
+	private void HandleDatedRegions<TCoordinate>(DatedRegion<TCoordinate>[] regions)
+		where TCoordinate : IGeoCoordinate<TCoordinate>
+	{
+		if (SavePath is not null)
+		{
+			string savefile = SavePath is "-" ? "/vsistdout/out.json" : SavePath.ReplaceUnixHomeDir();
+			regions.SaveInfoData(savefile, ZoomLevel, Provider);
+		}
 	}
 
 	private void PresentRegions(IConsoleOption[] options)

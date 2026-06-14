@@ -25,5 +25,8 @@ public class DatedRegion : DatedRegion<Wgs1984>
 	}
 
 	public DatedRegion MergePolygons()
-		=> new DatedRegion(TileCount, Date, LeftMostX, RightMostX, MinY, MaxY, Region.UnionCascaded());
+		=> new DatedRegion(TileCount, Date, LeftMostX, RightMostX, MinY, MaxY, Region.UnionCascaded())
+		{
+			IsComplete = IsComplete
+		};
 }

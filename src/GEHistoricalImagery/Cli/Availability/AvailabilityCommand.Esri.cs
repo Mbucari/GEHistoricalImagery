@@ -20,6 +20,7 @@ internal partial class AvailabilityCommand
 		var regionTiles = GetTiles(mercAoi);
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var datedRegions = await GetAllEsriDatedRegionsAsync(wayBack, mercAoi);
+		HandleDatedRegions(datedRegions);
 
 		if (!Quiet)
 		{

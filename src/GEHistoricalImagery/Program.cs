@@ -47,12 +47,15 @@ internal class Program
 		}
 		else
 		{
+			ProgressWriter.Instance.SetErrorStream(Console.OpenStandardError());
 			Console.SetError(ProgressWriter.Instance);
 		}
 
 		try
 		{
+#if DEBUG
 			Gdal.SetConfigOption("CPL_DEBUG", "ON");
+#endif
 			Gdal.SetErrorHandler(GdalMessageHandler, 0);
 			await result.WithParsedAsync<OptionsBase>(opt => opt.RunAsync());
 		}

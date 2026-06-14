@@ -12,7 +12,8 @@ internal class ProgressWriter : TextWriter
 	private string? taskMessage;
 	private int lastProgLen;
 	private readonly Lock progressReportLock = new();
-	private readonly Stream StdErrStream = Console.OpenStandardError();
+	private Stream? StdErrStream;
+	public void SetErrorStream(Stream stream) { StdErrStream = stream; }
 	private ProgressWriter() { }
 	public override void WriteLine() => WriteLine(string.Empty);
 	public override void WriteLine(string? message)
@@ -41,7 +42,7 @@ internal class ProgressWriter : TextWriter
 	{
 		Span<byte> bytes = new byte[Encoding.GetByteCount(buffer)];
 		Encoding.GetBytes(buffer, bytes);
-		StdErrStream.Write(bytes);
+		StdErrStream?.Write(bytes);
 	}
 	public override void Write(char value)
 		=> throw new NotSupportedException();

@@ -57,6 +57,7 @@ internal class Program
 			Gdal.SetConfigOption("CPL_DEBUG", "ON");
 #endif
 			Gdal.SetErrorHandler(GdalMessageHandler, 0);
+			Gdal.SetConfigOption("GDAL_DISABLE_READDIR_ON_OPEN", "TRUE");
 			await result.WithParsedAsync<OptionsBase>(opt => opt.RunAsync());
 		}
 		catch (Exception ex)

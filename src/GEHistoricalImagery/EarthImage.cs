@@ -3,6 +3,7 @@ using LibMapCommon.Geometry;
 using OSGeo.GDAL;
 using OSGeo.OGR;
 using OSGeo.OSR;
+using System.Buffers;
 
 namespace GEHistoricalImagery;
 
@@ -12,7 +13,7 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 	protected int Width { get; init; }
 	protected int Height { get; init; }
 
-	protected Dataset? TempDataset { get; init; }
+	protected Dataset TempDataset { get; }
 
 	/// <summary> The x-coordinate of the output dataset's top-left corner relative to global pixel space </summary>
 	protected int RasterX { get; init; }
@@ -48,6 +49,7 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 		};
 
 		TempDataset = CreateEmptyDataset(Width, Height, cacheFile);
+		TempDataset.CreateMaskBand(GdalConst.GMF_PER_DATASET);
 		TempDataset.SetSpatialRef(sourceSr);
 		TempDataset.SetGeoTransform(geoTransform);
 	}
@@ -94,14 +96,21 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 			return;
 
 		int bandCount = image.RasterCount;
-		var rasterBuff = GC.AllocateUninitializedArray<byte>(size_x * size_y * bandCount);
-		image.ReadRaster(read_x, read_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, null, bandCount, size_x * bandCount, 1);
-		TempDataset?.WriteRaster(write_x, write_y, size_x, size_y, rasterBuff, size_x, size_y, bandCount, null, bandCount, size_x * bandCount, 1);
+		using var rasterBuff = MemoryPool<byte>.Shared.Rent(size_x * size_y * bandCount);
+		var bytes = rasterBuff.Memory.Span;
+		unsafe
+		{
+			fixed (byte* p = bytes)
+			{
+				nint ptr = (nint)p;
+				image.ReadRaster(read_x, read_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, bandCount, null, bandCount, size_x * bandCount, 1);
+				TempDataset.WriteRaster(write_x, write_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, bandCount, null, bandCount, size_x * bandCount, 1);
+			}
+		}
 	}
 
 	public void Save(string path, RasterOptions rasterOptions, string? outSR, int cpuCount, double scale, double offsetX, double offsetY, bool scaleFirst)
 	{
-		if (TempDataset == null) return;
 		TempDataset.FlushCache();
 
 		Dataset saved;

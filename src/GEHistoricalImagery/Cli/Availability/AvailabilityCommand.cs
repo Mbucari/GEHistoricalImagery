@@ -74,7 +74,7 @@ internal partial class AvailabilityCommand : AoiVerb
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
 		HashSet<(int row, int col)> tilesWithData = new(stats.NumRows * stats.NumColumns);
-		RegionAvailability?[] displays = new RegionAvailability[regions.Length];
+		RegionAvailability[] displays = new RegionAvailability[regions.Length];
 
 		for (int i = 0; i < regions.Length; i++)
 		{
@@ -94,10 +94,9 @@ internal partial class AvailabilityCommand : AoiVerb
 				}
 			}
 			ProgressWriter.Instance.ReportProgress(i / (double)regions.Length);
-			if (availability.HasAnyTiles() && (!CompleteOnly || availability.HasAllTiles()))
-				displays[i] = availability;
+			displays[i] = availability;
 		}
-		RegionAvailability[] availabilities = displays.OfType<RegionAvailability>().OrderByDescending(d => d.Date).ToArray();
+		RegionAvailability[] availabilities = displays.OrderByDescending(d => d.Date).ToArray();
 
 		//Mark tiles that are not available in any region as unavailable in all regions,
 		//to avoid confusion when viewing the results

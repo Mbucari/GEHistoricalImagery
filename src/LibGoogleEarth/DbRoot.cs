@@ -119,18 +119,17 @@ public abstract class DbRoot
 		DateOnly[] keys = dateTileMap.Keys.ToArray();
 		using var sr = new SpatialReference(null);
 		sr.Import<Wgs1984>();
-		for (int i = 0; i < dateTileMap.Count; i++)
+		await Parallel.ForAsync(0, dateTileMap.Count, async (i, _) =>
 		{
 			var datedRegion = dateTileMap[keys[i]];
 			var geometry = datedRegion.MultiPolygon;
 			using var envelope = new Envelope();
 			geometry.GetEnvelope(envelope);
-			geometry.ExportToWkt(out var wkt);
 			geometry.AssignSpatialReference(sr);
 			//I can't find a reason why LeftMostX and RightMostX actually matter for this use case,
 			//but know that when crossing anitmeridian, LeftMostX = -180 and RightMostX = 180
 			regions[i] = new DatedRegion(datedRegion.TileCount, keys[i], envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, geometry);
-		}
+		});
 		return regions;
 	}
 

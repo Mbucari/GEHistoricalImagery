@@ -15,8 +15,8 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 	public string DisplayValue => Date.ToDateString();
 	private Availability[,] Availabilities { get; }
 
-	public int Height => Availabilities.GetLength(0);
-	public int Width => Availabilities.GetLength(1);
+	public int Height { get; }
+	public int Width { get; }
 	public Availability this[int rIndex, int cIndex]
 	{
 		get => Availabilities[rIndex, cIndex];
@@ -26,11 +26,10 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 	public RegionAvailability(DateOnly date, int height, int width)
 	{
 		Date = date;
+		Height = height;
+		Width = width;
 		Availabilities = new Availability[height, width];
 	}
-
-	public bool HasAnyTiles() => Availabilities.OfType<Availability>().Any(b => b == Availability.Available);
-	public bool HasAllTiles() => Availabilities.OfType<Availability>().All(b => b != Availability.Unavailable);
 
 	public static bool operator ==(RegionAvailability a, RegionAvailability b) => a.Equals(b);
 	public static bool operator !=(RegionAvailability a, RegionAvailability b) => !a.Equals(b);
@@ -38,8 +37,6 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 	{
 		HashCode hashCode = new();
 		hashCode.Add(Date.GetHashCode());
-		hashCode.Add(Width);
-		hashCode.Add(Height);
 		Span<byte> flatSpan = MemoryMarshal.CreateSpan(ref MemoryMarshal.GetArrayDataReference(Availabilities), Height * Width);
 		hashCode.AddBytes(flatSpan);
 		return hashCode.ToHashCode();
@@ -106,7 +103,7 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 				}
 			}
 
-			Console.Error.WriteLine(new string(row));
+			Console.Error.WriteLine(row);
 		}
 	}
 }

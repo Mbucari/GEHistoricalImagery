@@ -1,31 +1,49 @@
-﻿namespace GEHistoricalImagery.Cli.Availability;
+﻿using System.Runtime.InteropServices;
+
+namespace GEHistoricalImagery.Cli.Availability;
+
+public enum Availability : byte
+{
+	None,
+	Available,
+	Unavailable,
+}
 
 internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOption
 {
 	public DateOnly Date { get; }
 	public string DisplayValue => Date.ToDateString();
-	private bool?[,] Availability { get; }
+	private Availability[,] Availabilities { get; }
 
-	public int Height => Availability.GetLength(0);
-	public int Width => Availability.GetLength(1);
-	public bool? this[int rIndex, int cIndex]
+	public int Height => Availabilities.GetLength(0);
+	public int Width => Availabilities.GetLength(1);
+	public Availability this[int rIndex, int cIndex]
 	{
-		get => Availability[rIndex, cIndex];
-		set => Availability[rIndex, cIndex] = value;
+		get => Availabilities[rIndex, cIndex];
+		set => Availabilities[rIndex, cIndex] = value;
 	}
 
 	public RegionAvailability(DateOnly date, int height, int width)
 	{
 		Date = date;
-		Availability = new bool?[height, width];
+		Availabilities = new Availability[height, width];
 	}
 
-	public bool HasAnyTiles() => Availability.OfType<bool>().Any(b => b);
-	public bool HasAllTiles() => Availability.OfType<bool>().All(b => b);
+	public bool HasAnyTiles() => Availabilities.OfType<Availability>().Any(b => b == Availability.Available);
+	public bool HasAllTiles() => Availabilities.OfType<Availability>().All(b => b == Availability.Available);
 
 	public static bool operator ==(RegionAvailability a, RegionAvailability b) => a.Equals(b);
 	public static bool operator !=(RegionAvailability a, RegionAvailability b) => !a.Equals(b);
-	public override int GetHashCode() => HashCode.Combine(Date, Availability);
+	public override int GetHashCode()
+	{
+		HashCode hashCode = new();
+		hashCode.Add(Date.GetHashCode());
+		hashCode.Add(Width);
+		hashCode.Add(Height);
+		Span<byte> flatSpan = MemoryMarshal.CreateSpan(ref MemoryMarshal.GetArrayDataReference(Availabilities), Height * Width);
+		hashCode.AddBytes(flatSpan);
+		return hashCode.ToHashCode();
+	}
 	public override bool Equals(object? obj) => Equals(obj as RegionAvailability);
 	public bool Equals(RegionAvailability? other)
 	{
@@ -36,7 +54,7 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 		{
 			for (int j = 0; j < Width; j++)
 			{
-				if (other.Availability[i, j] != Availability[i, j])
+				if (other.Availabilities[i, j] != Availabilities[i, j])
 					return false;
 			}
 		}
@@ -70,21 +88,21 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 			char[] row = new char[Width];
 			for (int x = 0; x < Width; x++)
 			{
-				var top = Availability[y, x];
+				var top = Availabilities[y, x];
 				if (has2Rows)
 				{
-					var bottom = Availability[y + 1, x];
-					row[x] = top is true & bottom is true ? '█' :
-						top is true ? '▀' :
-						bottom is true ? '▄' :
-						top is false & bottom is false ? ':' :
-						top is false ? '˙' :
-						bottom is false ? '.' : ' ';
+					var bottom = Availabilities[y + 1, x];
+					row[x] = top == Availability.Available & bottom == Availability.Available ? '█' :
+						top == Availability.Available ? '▀' :
+						bottom == Availability.Available ? '▄' :
+						top == Availability.Unavailable & bottom == Availability.Unavailable ? ':' :
+						top == Availability.Unavailable ? '˙' :
+						bottom == Availability.Unavailable ? '.' : ' ';
 				}
 				else
 				{
-					row[x] = top is true ? '▀' :
-						top is false ? '˙' : ' ';
+					row[x] = top == Availability.Available ? '▀' :
+						top == Availability.Unavailable ? '˙' : ' ';
 				}
 			}
 

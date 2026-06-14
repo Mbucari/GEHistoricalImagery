@@ -20,15 +20,30 @@ internal partial class AvailabilityCommand : AoiVerb
 	[Option('o', "output", HelpText = "Output image availability regions JSON save location (dash (-) for console output)", MetaValue = "<out.json>", Required = false)]
 	public string? SavePath { get; set; }
 
+	protected override IEnumerable<string> GetValidationErrors()
+	{
+		foreach (var error in base.GetValidationErrors())
+		{
+			yield return error;
+		}
+		if (Provider is Provider.Wayback && ZoomLevel < 10)
+		{
+			yield return "Esri provides no data for zoom levels below 10.";
+		}
+		if (MaxDate.DayNumber == 0)
+		{
+			MaxDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+		}
+		if (MinDate > MaxDate)
+		{
+			yield return "Min date must be less than or equal to max date.";
+		}
+	}
+
 	public override async Task RunAsync()
 	{
 		if (AnyValidationErrors())
 			return;
-
-		if (MaxDate.DayNumber == 0)
-			MaxDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
-
-		Console.OutputEncoding = Encoding.Unicode;
 
 		await (Provider is Provider.Wayback ? Run_Esri() : Run_Keyhole());
 	}
@@ -43,7 +58,7 @@ internal partial class AvailabilityCommand : AoiVerb
 		}
 	}
 
-	private void PresentRegions(IConsoleOption[] options)
+	private static void PresentRegions(IConsoleOption[] options)
 	{
 		if (options.Length == 0)
 		{
@@ -58,7 +73,7 @@ internal partial class AvailabilityCommand : AoiVerb
 		where TTile : ITile<TCoordinate>
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
-		HashSet<ValueTuple<int, int>> tilesWithData = new(stats.NumRows * stats.NumColumns);
+		HashSet<(int row, int col)> tilesWithData = new(stats.NumRows * stats.NumColumns);
 		RegionAvailability?[] displays = new RegionAvailability[regions.Length];
 
 		for (int i = 0; i < regions.Length; i++)
@@ -68,11 +83,14 @@ internal partial class AvailabilityCommand : AoiVerb
 			{
 				var cIndex = Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
 				var rIndex = tile.RowsIncreaseToSouth ? tile.Row - stats.MinRow : stats.MaxRow - tile.Row;
-				availability[rIndex, cIndex] = regions[i].ContainsTile(tile);
-
-				if (availability[rIndex, cIndex]!.Value)
+				if (regions[i].ContainsTile(tile))
 				{
-					tilesWithData.Add(new ValueTuple<int, int>(rIndex, cIndex));
+					availability[rIndex, cIndex] = Availability.Available;
+					tilesWithData.Add((rIndex, cIndex));
+				}
+				else
+				{
+					availability[rIndex, cIndex] = Availability.Unavailable;
 				}
 			}
 			ProgressWriter.Instance.ReportProgress(i / (double)regions.Length);
@@ -83,17 +101,15 @@ internal partial class AvailabilityCommand : AoiVerb
 
 		//Mark tiles that are not available in any region as unavailable in all regions,
 		//to avoid confusion when viewing the results
-		ValueTuple<int, int> checkPoint = new();
+		(int row, int col) checkPoint = new();
 		foreach (var region in availabilities)
 		{
-			for (int r = 0; r < region.Height; r++)
+			for (checkPoint.row = 0; checkPoint.row < region.Height; checkPoint.row++)
 			{
-				checkPoint.Item1 = r;
-				for (int c = 0; c < region.Width; c++)
+				for (checkPoint.col = 0; checkPoint.col < region.Width; checkPoint.col++)
 				{
-					checkPoint.Item2 = c;
 					if (!tilesWithData.Contains(checkPoint))
-						region[r, c] = null;
+						region[checkPoint.row, checkPoint.col] = Availability.None;
 				}
 			}
 		}

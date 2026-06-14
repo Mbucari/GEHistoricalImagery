@@ -59,7 +59,7 @@ internal partial class AvailabilityCommand
 					dates.Add(datedTile);
 			}
 
-			ProgressWriter.Instance.ReportProgress(++count / (double)regionTiles.Length);
+			ProgressWriter.Instance.ReportProgress(Interlocked.Add(ref count, 1) / (double)regionTiles.Length);
 			return dates;
 		}
 	}

@@ -2,6 +2,7 @@
 using LibEsri.Geometry;
 using LibMapCommon;
 using LibMapCommon.Geometry;
+using System.Collections.Concurrent;
 
 namespace GEHistoricalImagery.Cli.Availability;
 
@@ -14,6 +15,7 @@ internal partial class AvailabilityCommand
 			ConcurrentDownload = 10;
 			Console.Error.WriteLine($"Limiting to {ConcurrentDownload} concurrent scrapes of Esri metadata.");
 		}
+
 		var mercAoi = Region.Transform<WebMercator>();
 		var wayBack = await WayBack.CreateAsync(CacheDir);
 
@@ -31,22 +33,32 @@ internal partial class AvailabilityCommand
 
 	private async Task<EsriRegion[]> GetAllEsriRegions(TileStats stats, EsriTile[] regionTiles, DatedRegion[] datedRegions)
 	{
-		List<EsriRegion> allLayers = new();
+		ProgressWriter.Instance.BeginProgress("Collating Dated Regions: ");
+		ConcurrentDictionary<int, EsriRegion> regionDict = new();
 
-		foreach (var layerRegions in datedRegions.OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).GroupBy(dr => dr.Layer))
+		int count = 0;
+		await Parallel.ForEachAsync(datedRegions.OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).GroupBy(dr => dr.Layer), async (layerRegionsGrouping, _) =>
 		{
-			var all = await GetRegionAvailabilities(stats, regionTiles, layerRegions.ToArray());
-			if (all.Length > 0)
+			var layerRegions = layerRegionsGrouping.ToArray();
+			var availabilities = await GetRegionAvailabilities(stats, regionTiles, layerRegions);
+			if (availabilities.Length > 0)
 			{
-				var esriRegion = new EsriRegion(layerRegions.Key, all);
-
 				//Check if a layer with the same availabilities already exists, and if so, don't add this layer.
-				if (!allLayers.Any(e => e.Availabilities.SequenceEqual(esriRegion.Availabilities)))
-					allLayers.Add(esriRegion);
+				var esriRegion = new EsriRegion(layerRegionsGrouping.Key, availabilities);
+				HashCode codeHash = new();
+				foreach (var availability in availabilities)
+				{
+					codeHash.Add(availability);
+				}
+				var code = codeHash.ToHashCode();
+				regionDict.TryAdd(code, esriRegion);
 			}
-		}
 
-		return allLayers.OrderByDescending(l => l.Date).ToArray();
+			ProgressWriter.Instance.ReportProgress(Interlocked.Add(ref count, layerRegions.Length) / (double)datedRegions.Length);
+		});
+
+		ProgressWriter.Instance.EndProgress();
+		return regionDict.Values.OrderByDescending(l => l.Date).ToArray();
 	}
 
 	private async Task<DatedRegion[]> GetAllEsriDatedRegionsAsync(WayBack wayBack, GeoRegion<WebMercator> mercAoi)

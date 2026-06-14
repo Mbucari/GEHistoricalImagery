@@ -18,7 +18,7 @@ Optional. The minimum zoom level in a range to query. Cannot be used with the `-
 Optional. The maximum zoom level in a range to query. Cannot be used with the `--zoom` option.
 
 ### `--output=<info.json>` (`-o <info.json>`)
-Optional. File path to save the info data as JSON. Use `-o -` to write the JSON to the console's standard output.
+Optional. File path to save the info data as GeoJSON. Use `-o -` to write the GeoJSON to the console's standard output.
 
 ### `--parallel <N>` (`-p <N>`)
 Optional. The number of concurrent downloads and image processing threads. This number is capped to 10 when using `--provider=Wayback` because I determined empirically that any higher number resulted in a reduced speed. Default is `ALL_CPUS`

@@ -17,7 +17,7 @@ internal partial class AvailabilityCommand : AoiVerb
 	[Option("max-date", HelpText = "Youngest (most recent) image tiles to consider", MetaValue = "yyyy/MM/dd")]
 	public DateOnly MaxDate { get; set; }
 
-	[Option('o', "output", HelpText = "Output image availability regions JSON save location (dash (-) for console output)", MetaValue = "<out.json>", Required = false)]
+	[Option('o', "output", HelpText = "Filename to save the image availability regions to GeoJSON (dash (-) for console output)", MetaValue = "<out.json>", Required = false)]
 	public string? SavePath { get; set; }
 
 	protected override IEnumerable<string> GetValidationErrors()

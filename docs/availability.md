@@ -32,6 +32,9 @@ Optional. The oldest image tiles to be displayed. Default is `0001/01/01`.
 ### `--min-date yyyy/MM/dd`
 Optional. The youngest (most recent) image tiles to be displayed. Default is `TODAY`.
 
+### `--output=<out.json>` (`-o <out.json>`)
+Optional. File path to save the availability data as GeoJSON. Use `-o -` to write the GeoJSON to the console's standard output.
+
 ### `--parallel <N>` (`-p <N>`)
 Optional. The number of concurrent downloads and image processing threads. This number is capped to 10 when using `--provider=Wayback` because I determined empirically that any higher number resulted in a reduced speed. Default is `ALL_CPUS`
 

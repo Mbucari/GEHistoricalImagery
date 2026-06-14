@@ -20,7 +20,7 @@ internal partial class InfoCommand : OptionsBase
 	[Option("max-zoom", Default = null, HelpText = "Maximum zoom level (Optional, [1-23])", MetaValue = "<N>", Required = false)]
 	public int? MaxZoomLevel { get; set; }
 
-	[Option('o', "output", HelpText = "Output image info JSON save location (dash (-) for console output)", MetaValue = "<info.json>", Required = false)]
+	[Option('o', "output", HelpText = "Filename to save the tile info data to GeoJSON (dash (-) for console output)", MetaValue = "<info.json>", Required = false)]
 	public string? SavePath { get; set; }
 	protected override IEnumerable<string> GetValidationErrors()
 	{

@@ -96,15 +96,25 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 			return;
 
 		int bandCount = image.RasterCount;
-		using var rasterBuff = MemoryPool<byte>.Shared.Rent(size_x * size_y * bandCount);
+		using var rasterBuff = MemoryPool<byte>.Shared.Rent(size_x * size_y);
 		var bytes = rasterBuff.Memory.Span;
 		unsafe
 		{
 			fixed (byte* p = bytes)
 			{
 				nint ptr = (nint)p;
-				image.ReadRaster(read_x, read_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, bandCount, null, bandCount, size_x * bandCount, 1);
-				TempDataset.WriteRaster(write_x, write_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, bandCount, null, bandCount, size_x * bandCount, 1);
+				for (int i = 1; i <= bandCount; i++)
+				{
+					using var srcBand = image.GetRasterBand(i);
+					using var destBand = TempDataset.GetRasterBand(i);
+					srcBand.ReadRaster(read_x, read_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, 1, size_x);
+					destBand.WriteRaster(write_x, write_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, 1, size_x);
+
+					using var srcMask = srcBand.GetMaskBand();
+					using var destMask = destBand.GetMaskBand();
+					srcMask.ReadRaster(read_x, read_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, 1, size_x);
+					destMask.WriteRaster(write_x, write_y, size_x, size_y, ptr, size_x, size_y, DataType.GDT_Byte, 1, size_x);
+				}
 			}
 		}
 	}

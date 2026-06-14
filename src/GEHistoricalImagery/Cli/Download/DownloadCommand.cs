@@ -180,14 +180,14 @@ internal partial class DownloadCommand : FileDownloadVerb
 
 			using Geometry pt = new Geometry(wkbGeometryType.wkbPoint);
 			var zeroPixel = new byte[image.RasterCount];
-			var tileImage = new TileImage(image);
+			using var tileImage = new TileImage(image);
 			for (int y = 0; y < image.RasterYSize; y++)
 			{
 				for (int x = 0; x < image.RasterXSize; x++)
 				{
 					pt.SetPoint_2D(0, minX + x * geoXform.PixelWidth, minY + y * geoXform.PixelHeight);
 					if (!intersection.Contains(pt))
-						tileImage.SetPixel(x, y, zeroPixel);
+						tileImage.SetNoData(x, y);
 				}
 			}
 			return tileImage.ToDataset();
@@ -209,8 +209,8 @@ internal partial class DownloadCommand : FileDownloadVerb
 		if (!gotTile.RowsIncreaseToSouth)
 			(ystart, yend) = (TILE_SIZE - yend, TILE_SIZE - ystart);
 
-		var image = new TileImage(gotDataset);
-		var enlarged = new TileImage(TILE_SIZE, TILE_SIZE, NUM_BANDS);
+		using var image = new TileImage(gotDataset);
+		using var enlarged = new TileImage(TILE_SIZE, TILE_SIZE, NUM_BANDS);
 
 		for (int xr = xstart, xw = 0; xr < xend; xr++, xw += dimScale)
 		{

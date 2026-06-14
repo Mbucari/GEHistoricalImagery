@@ -30,7 +30,7 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 	}
 
 	public bool HasAnyTiles() => Availabilities.OfType<Availability>().Any(b => b == Availability.Available);
-	public bool HasAllTiles() => Availabilities.OfType<Availability>().All(b => b == Availability.Available);
+	public bool HasAllTiles() => Availabilities.OfType<Availability>().All(b => b != Availability.Unavailable);
 
 	public static bool operator ==(RegionAvailability a, RegionAvailability b) => a.Equals(b);
 	public static bool operator !=(RegionAvailability a, RegionAvailability b) => !a.Equals(b);

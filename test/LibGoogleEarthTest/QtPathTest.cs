@@ -12,11 +12,23 @@ public class QtPathTest
 	private static readonly ReadOnlyDictionary<string, int> RootIndexDict;
 	#endregion
 
+	static string FindFile(string filename)
+	{
+		string dir = Directory.GetCurrentDirectory();
+		do
+		{
+			var path = Path.Combine(dir, filename);
+			if (File.Exists(path))
+				return path;
+			dir = Path.GetDirectoryName(dir)
+				?? throw new FileNotFoundException($"Could not find {filename}");
+		} while (true);
+	}
+
 	static QtPathTest()
 	{
-		var projectDir = Path.Combine(".", "..", "..", "..", "..");
-		var rootIndicesPath = Path.Combine(projectDir, "RootIndexDictionary.json");
-		var subIndicesPath = Path.Combine(projectDir, "SubIndexDictionary.json");
+		var rootIndicesPath = FindFile("RootIndexDictionary.json");
+		var subIndicesPath = FindFile("SubIndexDictionary.json");
 		RootIndexDict = JsonSerializer.Deserialize<Dictionary<string, int>>(File.OpenRead(rootIndicesPath))!.AsReadOnly();
 		SubIndexDict = JsonSerializer.Deserialize<Dictionary<string, int>>(File.OpenRead(subIndicesPath))!.AsReadOnly();
 	}

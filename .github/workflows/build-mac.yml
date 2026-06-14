@@ -86,6 +86,7 @@ jobs:
         id: bundle
         run: | 
           artifact="GEHistoricalImagery.${{ inputs.software-version }}-macOS-${{ inputs.architecture }}.dmg"
+          sync
           hdiutil create -srcFolder ./GEHistoricalImagery -o "$artifact"          
           echo "artifact=${artifact}" >> "${GITHUB_OUTPUT}"
           

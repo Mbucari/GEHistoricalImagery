@@ -1,7 +1,6 @@
 ﻿using CommandLine;
 using LibMapCommon;
 using LibMapCommon.Geometry;
-using System.Text;
 
 namespace GEHistoricalImagery.Cli.Availability;
 
@@ -69,16 +68,18 @@ internal partial class AvailabilityCommand : AoiVerb
 		OptionChooser.WaitForOptions(options);
 	}
 
-	private async Task<RegionAvailability[]> GetRegionAvailabilities<TTile, TCoordinate>(TileStats stats, TTile[] regionTiles, DatedRegion<TCoordinate>[] regions)
+	private static async Task<RegionAvailability[]> GetRegionAvailabilities<TTile, TCoordinate>(TileStats stats, TTile[] regionTiles, DatedRegion<TCoordinate>[] regions, bool parallel = false)
 		where TTile : ITile<TCoordinate>
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
-		HashSet<(int row, int col)> tilesWithData = new(stats.NumRows * stats.NumColumns);
-		RegionAvailability[] displays = new RegionAvailability[regions.Length];
+		if (parallel)
+			ProgressWriter.Instance.BeginProgress("Collating Dated Regions: ");
 
-		for (int i = 0; i < regions.Length; i++)
+		byte[,] tilesWithData = new byte[stats.NumRows, stats.NumColumns];
+		RegionAvailability[] availabilities = new RegionAvailability[regions.Length];		
+		Action<int> processRegion = i =>
 		{
-			var availability = new RegionAvailability(regions[i].Date, stats.NumRows, stats.NumColumns);
+			var availability = availabilities[i] = new(regions[i].Date, stats.NumRows, stats.NumColumns);
 			foreach (var tile in regionTiles)
 			{
 				var cIndex = Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
@@ -86,32 +87,44 @@ internal partial class AvailabilityCommand : AoiVerb
 				if (regions[i].ContainsTile(tile))
 				{
 					availability[rIndex, cIndex] = Availability.Available;
-					tilesWithData.Add((rIndex, cIndex));
+					tilesWithData[rIndex, cIndex] = 1;
 				}
 				else
 				{
 					availability[rIndex, cIndex] = Availability.Unavailable;
 				}
 			}
-			ProgressWriter.Instance.ReportProgress(i / (double)regions.Length);
-			displays[i] = availability;
+
+			if (parallel)
+				ProgressWriter.Instance.ReportProgress((i + 1) / (double)regions.Length);
+		};
+		if (parallel)
+		{
+			Parallel.For(0, regions.Length, processRegion);
 		}
-		RegionAvailability[] availabilities = displays.OrderByDescending(d => d.Date).ToArray();
+		else
+		{
+			for (int i = 0; i < regions.Length; i++)
+				processRegion(i);
+		}
 
 		//Mark tiles that are not available in any region as unavailable in all regions,
 		//to avoid confusion when viewing the results
-		(int row, int col) checkPoint = new();
 		foreach (var region in availabilities)
 		{
-			for (checkPoint.row = 0; checkPoint.row < region.Height; checkPoint.row++)
+			for (int row = 0; row < region.Height; row++)
 			{
-				for (checkPoint.col = 0; checkPoint.col < region.Width; checkPoint.col++)
+				for (int col = 0; col < region.Width; col++)
 				{
-					if (!tilesWithData.Contains(checkPoint))
-						region[checkPoint.row, checkPoint.col] = Availability.None;
+					if (tilesWithData[row, col] == 0)
+						region[row, col] = Availability.None;
 				}
 			}
 		}
+
+		Array.Sort(availabilities, (a, b) => b.Date.CompareTo(a.Date));
+		if (parallel)
+			ProgressWriter.Instance.EndProgress();
 		return availabilities;
 	}
 }

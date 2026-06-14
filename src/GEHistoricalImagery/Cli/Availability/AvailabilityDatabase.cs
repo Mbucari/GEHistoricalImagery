@@ -36,6 +36,7 @@ internal static class AvailabilityDatabase
 			return;
 		}
 
+		ProgressWriter.Instance.BeginProgress("Saving availability data to GeoJSON");
 		using var layerDef = infoDataLayer.GetLayerDefn();
 		using var targetSr = new SpatialReference(null);
 		targetSr.Import<Wgs1984>();
@@ -43,8 +44,9 @@ internal static class AvailabilityDatabase
 		infoDataLayer.EnsureSharedFields(layerDef);
 		infoDataLayer.EnsureWaybackFields(layerDef);
 
-		foreach (var region in regions)
+		for (int i = 0; i < regions.Length; i++)
 		{
+			var region = regions[i];
 			using var feature = new Feature(layerDef);
 			using var geometry = region.GetMultiPolygon();
 			geometry.TransformTo(targetSr);
@@ -63,7 +65,9 @@ internal static class AvailabilityDatabase
 			}
 			
 			infoDataLayer.CreateFeature(feature);
+			ProgressWriter.Instance.ReportProgress(i / (double)regions.Length);
 		}
+		ProgressWriter.Instance.EndProgress();
 	}
 
 	private static Layer GetOrCreateLayer(this DataSource database)

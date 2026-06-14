@@ -16,7 +16,7 @@ internal partial class AvailabilityCommand
 
 		if (!Quiet)
 		{
-			var availabilities = await GetRegionAvailabilities(stats, regionTiles, datedRegions);
+			var availabilities = await GetRegionAvailabilities(stats, regionTiles, datedRegions, parallel: true);
 			PresentRegions(availabilities);
 		}
 	}

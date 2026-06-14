@@ -31,7 +31,7 @@ internal partial class AvailabilityCommand
 		}
 	}
 
-	private async Task<EsriRegion[]> GetAllEsriRegions(TileStats stats, EsriTile[] regionTiles, DatedRegion[] datedRegions)
+	private static async Task<EsriRegion[]> GetAllEsriRegions(TileStats stats, EsriTile[] regionTiles, DatedRegion[] datedRegions)
 	{
 		ProgressWriter.Instance.BeginProgress("Collating Dated Regions: ");
 		ConcurrentDictionary<int, EsriRegion> regionDict = new();

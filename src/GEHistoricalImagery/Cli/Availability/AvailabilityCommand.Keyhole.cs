@@ -33,7 +33,13 @@ internal partial class AvailabilityCommand
 				datedRegions[i].MarkComplete();
 		}
 		if (CompleteOnly)
-			datedRegions = datedRegions.Where(d => d.IsComplete).ToArray();
+		{
+			foreach (var unused in datedRegions.Where(r => !r.IsComplete))
+			{
+				unused.Dispose();
+			}
+			datedRegions = datedRegions.Where(r => r.IsComplete).ToArray();
+		}
 		ProgressWriter.Instance.EndProgress();
 
 		ProgressWriter.Instance.BeginProgress("Flattening tile regions: ");

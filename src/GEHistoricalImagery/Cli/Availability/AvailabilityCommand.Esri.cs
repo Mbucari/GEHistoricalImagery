@@ -99,7 +99,10 @@ internal partial class AvailabilityCommand
 			{
 				allRegions.Add(layersWithDateMatches[0]);
 			}
-
+			foreach (var unused in layerRegions.Regions.Except(layersWithDateMatches))
+			{
+				unused.Dispose();
+			}
 			ProgressWriter.Instance.ReportProgress(++count / (double)layers.Length);
 		}
 		ProgressWriter.Instance.EndProgress();

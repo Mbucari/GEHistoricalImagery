@@ -5,12 +5,11 @@ namespace GEHistoricalImagery.Cli.Download;
 
 internal class TileImage : IDisposable
 {
-	private byte[] ImageBytes { get; }
 	private int BandCount { get; }
 	private int RasterX { get; }
 	private int RasterY { get; }
+	private byte[]? ImageBytes;
 	private byte[]? MaskBand;
-	private bool m_Disposed;
 	public TileImage(Dataset tile)
 	{
 		ArgumentNullException.ThrowIfNull(tile, nameof(tile));
@@ -52,6 +51,7 @@ internal class TileImage : IDisposable
 
 	public byte[] GetPixel(int x, int y)
 	{
+		ObjectDisposedException.ThrowIf(ImageBytes is null, this);
 		ArgumentOutOfRangeException.ThrowIfNegative(x, nameof(x));
 		ArgumentOutOfRangeException.ThrowIfNegative(y, nameof(y));
 		ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(x, RasterX, nameof(x));
@@ -67,6 +67,7 @@ internal class TileImage : IDisposable
 
 	public void SetPixel(int x, int y, byte[] values)
 	{
+		ObjectDisposedException.ThrowIf(ImageBytes is null, this);
 		ArgumentNullException.ThrowIfNull(values, nameof(values));
 		ArgumentOutOfRangeException.ThrowIfNegative(x, nameof(x));
 		ArgumentOutOfRangeException.ThrowIfNegative(y, nameof(y));
@@ -85,6 +86,7 @@ internal class TileImage : IDisposable
 
 	public void SetNoData(int x, int y)
 	{
+		ObjectDisposedException.ThrowIf(ImageBytes is null, this);
 		ArgumentOutOfRangeException.ThrowIfNegative(x, nameof(x));
 		ArgumentOutOfRangeException.ThrowIfNegative(y, nameof(y));
 		ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(x, RasterX, nameof(x));
@@ -93,7 +95,7 @@ internal class TileImage : IDisposable
 		if (MaskBand is null)
 		{
 			MaskBand = ArrayPool<byte>.Shared.Rent(RasterX * RasterY);
-			new Span<byte>(MaskBand).Fill(255);
+			new Span<byte>(MaskBand, 0, RasterX * RasterY).Fill(255);
 		}
 		
 		var index = (y * RasterX + x) * BandCount;
@@ -107,11 +109,13 @@ internal class TileImage : IDisposable
 	~TileImage() => Dispose();
 	public void Dispose()
 	{
-		if (!Interlocked.CompareExchange(ref m_Disposed, true, false))
+		var imageBtsArr = Interlocked.Exchange(ref ImageBytes, null);
+		if (imageBtsArr is not null)
 		{
-			ArrayPool<byte>.Shared.Return(ImageBytes);
+			ArrayPool<byte>.Shared.Return(imageBtsArr);
 			if (MaskBand is not null)
 				ArrayPool<byte>.Shared.Return(MaskBand);
+			MaskBand = null;
 			GC.SuppressFinalize(this);
 		}
 	}

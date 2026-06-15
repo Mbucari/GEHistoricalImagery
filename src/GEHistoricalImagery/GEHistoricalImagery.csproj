@@ -47,9 +47,18 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Update="curl-ca-bundle.crt">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
+  <Target Name="DownloadRootCA" BeforeTargets="Restore">
+    <DownloadFile
+      SourceUrl="https://curl.se/ca/cacert.pem"
+      DestinationFileName="curl-ca-bundle.crt"
+      DestinationFolder="$(MSBuildProjectDirectory)/">
+      <Output TaskParameter="DownloadedFile" ItemName="Content" />
+    </DownloadFile>
+  </Target>	
+	
+  <ItemGroup>
+    <None Update="curl-ca-bundle.crt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

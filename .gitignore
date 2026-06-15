@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 launchSettings.json
+/src/GEHistoricalImagery/curl-ca-bundle.crt

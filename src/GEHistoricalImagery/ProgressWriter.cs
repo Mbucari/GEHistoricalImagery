@@ -64,7 +64,7 @@ internal class ProgressWriter : TextWriter
 
 	public void ReportProgress(double progress)
 	{
-		lock (progressReportLock)
+		if (progressReportLock.TryEnter())
 		{
 			if (Progress >= 0 && progress >= Progress)
 			{
@@ -74,6 +74,7 @@ internal class ProgressWriter : TextWriter
 				lastProgLen = p.Length;
 				Progress = progress;
 			}
+			progressReportLock.Exit();
 		}
 	}
 

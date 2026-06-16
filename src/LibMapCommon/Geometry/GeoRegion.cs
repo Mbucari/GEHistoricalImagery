@@ -198,59 +198,66 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	/// <summary>
 	/// Enumerate the tiles that intersect with the AOI region.  Progress is reported as the tiles are being enumerated.
 	/// </summary>
-	public IEnumerable<TTile> EnumerateTiles<TTile>(int zoomLevel, Action<double>? reportProgress = null)
+	public IEnumerable<TTile> EnumerateTiles<TTile>(int zoomLevel, IProgress<double>? reportProgress = null)
 		where TTile : ITile<TTile, TCoordinate>
 	{
-
 		var polygons = GetPolygons().ToArray();
 		var allRectStats = polygons.Select(p => p.GetRectangularRegionStats<TTile, TCoordinate>(zoomLevel)).ToArray();
 		double totalTileCount = allRectStats.Sum(s => s.TileCount);
-		reportProgress?.Invoke(0);
-		long numTilesChecked = 0;
+		long totalTilesChecked = 0;
 
-		for (int i = 0; i < allRectStats.Length; i++)
+		var subregionProgress = new Progress<int>(additionalTilesChecked =>
 		{
-			var polygon = polygons[i];
-			var stats = allRectStats[i];
-			var polygonTiles = EnumerateTiles<TTile>(polygon, stats, () =>
+			var count = Interlocked.Add(ref totalTilesChecked, additionalTilesChecked);
+			reportProgress?.Report(count / totalTileCount);
+		});
+
+		reportProgress?.Report(0);
+		for (int i = 0; i < polygons.Length; i++)
+		{
+			using var polygon = polygons[i];
+			foreach (var tile in EnumerateTiles<TTile>(polygon, allRectStats[i], subregionProgress))
 			{
-				var progress = ++numTilesChecked / totalTileCount;
-				reportProgress?.Invoke(progress);
-			});
-			foreach (var tile in polygonTiles)
 				yield return tile;
+			}
 		}
 	}
 
-	private static IEnumerable<TTile> EnumerateTiles<TTile>(OSGeo.OGR.Geometry polygon, TileStats stats, Action? progress = null)
+	private static IEnumerable<TTile> EnumerateTiles<TTile>(OSGeo.OGR.Geometry polygon, TileStats stats, IProgress<int> progress)
 		where TTile : ITile<TTile, TCoordinate>
 	{
 		if (stats.TileCount == 1)
 		{
-			yield return TTile.Create(stats.MinRow, stats.MinColumn, stats.Zoom);
-			progress?.Invoke();
-			yield break;
+			progress.Report(1);
+			return [TTile.Create(stats.MinRow, stats.MinColumn, stats.Zoom)];
 		}
 
-		int numTiles = 1 << stats.Zoom;
+		return
+			Enumerable.Range(0, stats.NumRows)
+			.Select(r => new Func<TTile?[]>(() => getColumnTiles(r)))
+			.AsParallel()
+			.WithDegreeOfParallelism(Environment.ProcessorCount)
+			.SelectMany(x => x().OfType<TTile>());
 
-		for (int r = 0; r < stats.NumRows; r++)
+		TTile?[] getColumnTiles(int r)
 		{
+			TTile?[] tiles = new TTile?[stats.NumColumns];
+			var numTiles = 1 << stats.Zoom;
 			for (int c = 0; c < stats.NumColumns; c++)
 			{
 				var row = (stats.MinRow + r) % numTiles;
 				var col = (stats.MinColumn + c) % numTiles;
 				var tile = TTile.Create(row, col, stats.Zoom);
 				using OSGeo.OGR.Geometry tilePoly = tile.GetPolygon();
-
 				if (tilePoly.Intersects(polygon))
-					yield return tile;
-				progress?.Invoke();
+					tiles[c] = tile;
 			}
+			progress.Report(tiles.Length);
+			return tiles;
 		}
 	}
 	~GeoRegion() => Dispose();
-	public void Dispose()
+	public virtual void Dispose()
 	{
 		var region = Interlocked.Exchange(ref m_Region, null);
 		if (region != null)

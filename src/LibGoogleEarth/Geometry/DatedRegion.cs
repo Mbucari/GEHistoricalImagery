@@ -12,6 +12,7 @@ public class DatedRegion : DatedRegion<Wgs1984>
 	{
 		TileCount = tileCount;
 	}
+	private OSGeo.OGR.Geometry? singlePoint;
 
 	// To avoid returning true for tiles which are outside the GeoRegion but still intersect (touch) the region,
 	// we check if the center of the tile is contained in the region. This works because DatedRegions for keyhole
@@ -19,9 +20,9 @@ public class DatedRegion : DatedRegion<Wgs1984>
 	public override bool ContainsTile<TTile>(TTile tile)
 	{
 		var center = tile.Center;
-		using var pointGeo = new OSGeo.OGR.Geometry(OSGeo.OGR.wkbGeometryType.wkbPoint);
-		pointGeo.AddPoint_2D(center.X, center.Y);
-		return pointGeo.Within(Region);
+		singlePoint ??= new OSGeo.OGR.Geometry(OSGeo.OGR.wkbGeometryType.wkbPoint);
+		singlePoint.SetPoint_2D(0, center.X, center.Y);
+		return singlePoint.Within(Region);
 	}
 
 	public DatedRegion MergePolygons()
@@ -29,4 +30,10 @@ public class DatedRegion : DatedRegion<Wgs1984>
 		{
 			IsComplete = IsComplete
 		};
+
+	public override void Dispose()
+	{
+		base.Dispose();
+		singlePoint?.Dispose();
+	}
 }

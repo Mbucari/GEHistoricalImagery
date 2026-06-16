@@ -1,10 +1,6 @@
 ﻿using LibMapCommon;
 using LibMapCommon.Geometry;
-using OSGeo.OGR;
 using OSGeo.OSR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OSGeo.OGR;
 

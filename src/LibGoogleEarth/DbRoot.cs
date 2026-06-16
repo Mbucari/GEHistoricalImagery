@@ -47,6 +47,15 @@ public abstract class DbRoot
 		DbRootBuffer = DbRootProto.Parser.ParseFrom(DecompressBuffer(bts));
 	}
 
+	public void ClearCache()
+	{
+		lock (PacketCache)
+		{
+			PacketCache.Clear();
+			LastCacheComact = DateTime.UtcNow;
+		}
+	}
+
 	/// <summary>
 	/// Create a new instance of the Google Earth database
 	/// </summary>
@@ -98,37 +107,35 @@ public abstract class DbRoot
 			TileCount++;
 		}
 	}
-	public async Task<DatedRegion[]> GetDateRegionsAsync(IAsyncEnumerable<IEnumerable<DatedTile>> tiles)
+
+	public async Task<DatedRegion[]> GetDateRegionsAsync(IAsyncEnumerable<DatedTile> tiles)
 	{
 		//Build a map of Date to Geometry by unioning the tile polygons for each date together
 		Dictionary<DateOnly, KeyholeTileCollection> dateTileMap = new();
 
-		await foreach (var dt in tiles)
+		await foreach (var tile in tiles)
 		{
-			foreach (var tile in dt)
+			if (!dateTileMap.TryGetValue(tile.Date, out var geom))
 			{
-				if (!dateTileMap.TryGetValue(tile.Date, out var geom))
-				{
-					dateTileMap[tile.Date] = geom = new KeyholeTileCollection();
-				}
-				geom.AddTile(tile.Tile);
+				dateTileMap[tile.Date] = geom = new KeyholeTileCollection();
 			}
+			geom.AddTile(tile.Tile);
 		}
-
 		DatedRegion[] regions = new DatedRegion[dateTileMap.Count];
 		DateOnly[] keys = dateTileMap.Keys.ToArray();
+		using var envelope = new Envelope();
 		using var sr = new SpatialReference(null);
 		sr.Import<Wgs1984>();
-		await Parallel.ForAsync(0, dateTileMap.Count, async (i, _) =>
+		Parallel.For(0, dateTileMap.Count, i =>
 		{
-			var datedRegion = dateTileMap[keys[i]];
+			var date = keys[i];
+			var datedRegion = dateTileMap[date];
 			var geometry = datedRegion.MultiPolygon;
-			using var envelope = new Envelope();
 			geometry.GetEnvelope(envelope);
 			geometry.AssignSpatialReference(sr);
 			//I can't find a reason why LeftMostX and RightMostX actually matter for this use case,
 			//but know that when crossing anitmeridian, LeftMostX = -180 and RightMostX = 180
-			regions[i] = new DatedRegion(datedRegion.TileCount, keys[i], envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, geometry);
+			regions[i] = new DatedRegion(datedRegion.TileCount, date, envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, geometry);
 		});
 		return regions;
 	}

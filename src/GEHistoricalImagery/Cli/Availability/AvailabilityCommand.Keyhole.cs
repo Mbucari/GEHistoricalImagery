@@ -17,6 +17,10 @@ internal partial class AvailabilityCommand
 		if (!Quiet)
 		{
 			var availabilities = await GetRegionAvailabilities(stats, regionTiles, datedRegions, parallel: true);
+			foreach (var dr in datedRegions)
+			{
+				dr.Dispose();
+			}
 			PresentRegions(availabilities);
 		}
 	}
@@ -26,7 +30,9 @@ internal partial class AvailabilityCommand
 		int count = 0;
 		ProgressWriter.Instance.BeginProgress("Building dated tile regions: ");
 		ParallelProcessor<List<DatedTile>> processor = new(ConcurrentDownload);
-		var datedRegions = await root.GetDateRegionsAsync(processor.EnumerateResults(regionTiles.Select(getDatedTiles)));
+		var datedRegions = await root.GetDateRegionsAsync(processor.EnumerateResults(regionTiles.Select(getDatedTiles)).SelectMany(x => x));
+		root.ClearCache();
+
 		for (int i = 0; i < datedRegions.Length; i++)
 		{
 			if (datedRegions[i].TileCount == regionTiles.Length)
@@ -40,6 +46,7 @@ internal partial class AvailabilityCommand
 			}
 			datedRegions = datedRegions.Where(r => r.IsComplete).ToArray();
 		}
+		GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive);
 		ProgressWriter.Instance.EndProgress();
 
 		ProgressWriter.Instance.BeginProgress("Flattening tile regions: ");

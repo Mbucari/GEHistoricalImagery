@@ -72,12 +72,10 @@ internal partial class AvailabilityCommand : AoiVerb
 		where TTile : ITile<TCoordinate>
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
-		if (parallel)
-			ProgressWriter.Instance.BeginProgress("Collating Dated Regions: ");
-
+		int count = 0;
 		byte[,] tilesWithData = new byte[stats.NumRows, stats.NumColumns];
-		RegionAvailability[] availabilities = new RegionAvailability[regions.Length];		
-		Action<int> processRegion = i =>
+		RegionAvailability[] availabilities = new RegionAvailability[regions.Length];
+		void processRegion(int i, IProgress<int>? progress = null)
 		{
 			var availability = availabilities[i] = new(regions[i].Date, stats.NumRows, stats.NumColumns);
 			foreach (var tile in regionTiles)
@@ -94,37 +92,39 @@ internal partial class AvailabilityCommand : AoiVerb
 					availability[rIndex, cIndex] = Availability.Unavailable;
 				}
 			}
-
-			if (parallel)
-				ProgressWriter.Instance.ReportProgress((i + 1) / (double)regions.Length);
+			progress?.Report(Interlocked.Add(ref count, 1));
 		};
+
+		//Mark tiles that are not available in any region as unavailable in all regions,
+		//to avoid confusion when viewing the results
+		void markUnavailableRows(int row)
+		{
+			for (int col = 0; col < stats.NumColumns; col++)
+			{
+				if (tilesWithData[row, col] == 0)
+				{
+					for (int i = 0; i < availabilities.Length; i++)
+						availabilities[i][row, col] = Availability.None;
+				}
+			}
+		}
 		if (parallel)
 		{
-			Parallel.For(0, regions.Length, processRegion);
+			ProgressWriter.Instance.BeginProgress("Collating Dated Regions: ");
+			var progress = new Progress<int>(c => ProgressWriter.Instance.ReportProgress(c / (double)regions.Length));
+			Parallel.For(0, regions.Length, i => processRegion(i, progress));
+			Parallel.For(0, stats.NumRows, markUnavailableRows);
+			ProgressWriter.Instance.EndProgress();
 		}
 		else
 		{
 			for (int i = 0; i < regions.Length; i++)
 				processRegion(i);
-		}
-
-		//Mark tiles that are not available in any region as unavailable in all regions,
-		//to avoid confusion when viewing the results
-		foreach (var region in availabilities)
-		{
-			for (int row = 0; row < region.Height; row++)
-			{
-				for (int col = 0; col < region.Width; col++)
-				{
-					if (tilesWithData[row, col] == 0)
-						region[row, col] = Availability.None;
-				}
-			}
+			for (int i = 0; i < stats.NumRows; i++)
+				markUnavailableRows(i);
 		}
 
 		Array.Sort(availabilities, (a, b) => b.Date.CompareTo(a.Date));
-		if (parallel)
-			ProgressWriter.Instance.EndProgress();
 		return availabilities;
 	}
 }

@@ -22,25 +22,39 @@ internal partial class AvailabilityCommand
 		var regionTiles = GetTiles(mercAoi);
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var datedRegions = await GetAllEsriDatedRegionsAsync(wayBack, mercAoi);
-		HandleDatedRegions(datedRegions);
+		if (SavePath is not null)
+		{
+			SaveDatedRegions(SavePath, datedRegions);
+		}
 
 		if (!Quiet)
 		{
-			var availabilities = await GetAllEsriRegions(stats, regionTiles, datedRegions);
+			var availabilities = await GetAllEsriRegions(stats, datedRegions, regionTiles);
 			PresentRegions(availabilities);
 		}
 	}
 
-	private static async Task<EsriRegion[]> GetAllEsriRegions(TileStats stats, EsriTile[] regionTiles, DatedRegion[] datedRegions)
+	private static async Task<EsriRegion[]> GetAllEsriRegions(TileStats stats, DatedRegion[] datedRegions, EsriTile[] regionTiles)
 	{
 		ProgressWriter.Instance.BeginProgress("Collating Dated Regions: ");
 		ConcurrentDictionary<int, EsriRegion> regionDict = new();
 
-		int count = 0;
-		await Parallel.ForEachAsync(datedRegions.OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).GroupBy(dr => dr.Layer), async (layerRegionsGrouping, _) =>
+		//Create a BoolMap of the tiles inside the region. Unlike Keyhole, every layer at
+		//every zoom level has full coverage of the region, so this map is just a map
+		//of tiles within the region.
+		BoolMap insideRegion = new BoolMap(stats.NumColumns, stats.NumRows);
+		foreach (var tile in regionTiles)
 		{
-			var layerRegions = layerRegionsGrouping.ToArray();
-			var availabilities = await GetRegionAvailabilities(stats, regionTiles, layerRegions);
+			var cIndex = Util.Mod(tile.Column - stats.MinColumn, 1 << tile.Level);
+			var rIndex = tile.Row - stats.MinRow;
+			insideRegion[rIndex, cIndex] = true;
+		}
+
+		int count = 0;
+		await Parallel.ForEachAsync(datedRegions.OrderBy(d => d.Layer.Date).ThenByDescending(d => d.Date).GroupBy(dr => dr.Layer), async (layerRegionsGrouping, _) =>
+		{
+			var layerRegions = layerRegionsGrouping.ToArray();			
+			var availabilities = layerRegions.Select(dr => new RegionAvailability(dr, insideRegion)).ToArray();
 			if (availabilities.Length > 0)
 			{
 				//Check if a layer with the same availabilities already exists, and if so, don't add this layer.
@@ -48,7 +62,7 @@ internal partial class AvailabilityCommand
 				HashCode codeHash = new();
 				foreach (var availability in availabilities)
 				{
-					codeHash.Add(availability);
+					codeHash.Add(availability.Date);
 				}
 				var code = codeHash.ToHashCode();
 				regionDict.TryAdd(code, esriRegion);

@@ -2,23 +2,27 @@
 
 namespace LibMapCommon;
 
-public interface ITile<TTile, TCoordinate> : ITile<TCoordinate> where TCoordinate : IGeoCoordinate<TCoordinate>
+public interface IGeoTile<TTile, TCoordinate> : IGeoTile<TCoordinate>, ITile<TTile> where TTile : ITile<TTile> where TCoordinate : IGeoCoordinate<TCoordinate>
 {
 	static abstract TTile GetTile(TCoordinate coordinate, int level);
+}
+
+public interface ITile<TTile> where TTile : ITile<TTile>
+{
 	static abstract TTile Create(int row, int col, int level);
 }
 
-public interface ITile<TCoordinate> : ITile where TCoordinate : IGeoCoordinate<TCoordinate>
+public interface IGeoTile<TCoordinate> : ITile where TCoordinate : IGeoCoordinate<TCoordinate>
 {
-	/// <summary> The lower-left (southwest) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	/// <summary> The lower-left (southwest) coordinate of this <see cref="IGeoTile{TCoordinate}"/> </summary>
 	TCoordinate LowerLeft { get; }
-	/// <summary> The lower-right (southeast) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	/// <summary> The lower-right (southeast) coordinate of this <see cref="IGeoTile{TCoordinate}"/> </summary>
 	TCoordinate LowerRight { get; }
-	/// <summary> The upper-left (northwest) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	/// <summary> The upper-left (northwest) coordinate of this <see cref="IGeoTile{TCoordinate}"/> </summary>
 	TCoordinate UpperLeft { get; }
-	/// <summary> The upper-right (northeast) coordinate of this <see cref="ITile{TCoordinate}"/> </summary>
+	/// <summary> The upper-right (northeast) coordinate of this <see cref="IGeoTile{TCoordinate}"/> </summary>
 	TCoordinate UpperRight { get; }
-	/// <summary> coordinate of the center of this <see cref="ITile{TCoordinate}"/> </summary>
+	/// <summary> coordinate of the center of this <see cref="IGeoTile{TCoordinate}"/> </summary>
 	TCoordinate Center { get; }
 }
 
@@ -33,7 +37,7 @@ public interface ITile
 	int Column { get; }
 	/// <summary> The <see cref="ITile"/>'s zoom level. </summary>
 	int Level { get; }
-	/// <summary> coordinate of the center of this <see cref="ITile{TCoordinate}"/> </summary>
+	/// <summary> coordinate of the center of this <see cref="IGeoTile{TCoordinate}"/> </summary>
 	Wgs1984 Wgs84Center { get; }
 	/// <summary>
 	/// True if the row numbers increase from north to south, false if they increase from south to north. 

@@ -68,7 +68,7 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 		}
 	}
 
-	public void AddTile(ITile<TSource> tile, Dataset image)
+	public void AddTile(IGeoTile<TSource> tile, Dataset image)
 	{
 		//Tile's global pixel coordinates of the tile's top-left corner.
 		var gpx = tile.GetTopLeftPixel();

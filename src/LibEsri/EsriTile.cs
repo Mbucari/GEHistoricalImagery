@@ -2,7 +2,7 @@
 
 namespace LibEsri;
 
-public class EsriTile : ITile<EsriTile, WebMercator>
+public class EsriTile : IGeoTile<EsriTile, WebMercator>
 {
 	public int Level { get; }
 	/// <summary> The number of <see cref="EsriTile"/> rows from the top-most (north-most) edge of the map. </summary>

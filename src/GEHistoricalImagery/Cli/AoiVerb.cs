@@ -125,7 +125,7 @@ internal abstract class AoiVerb : OptionsBase
 			TileStats rectStats;
 			if (Provider is Provider.Wayback)
 			{
-				var webMerc = Region.Transform<WebMercator>();
+				using var webMerc = Region.Transform<WebMercator>();
 				rectStats = webMerc.GetRectangularRegionStats<EsriTile>(ZoomLevel);
 			}
 			else

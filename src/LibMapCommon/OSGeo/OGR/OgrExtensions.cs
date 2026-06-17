@@ -6,7 +6,7 @@ namespace OSGeo.OGR;
 
 public static class OgrExtensions
 {
-	public static Geometry GetPolygon<TCoordinate>(this ITile<TCoordinate> tile)
+	public static Geometry GetPolygon<TCoordinate>(this IGeoTile<TCoordinate> tile)
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
 		return MakePolygon(tile.UpperLeft, tile.LowerLeft, tile.LowerRight, tile.UpperRight);
@@ -103,7 +103,7 @@ public static class OgrExtensions
 		}
 	}
 
-	public static TileStats GetRectangularRegionStats<TTile, TCoordinate>(this Geometry geometry, int level) where TTile : ITile<TTile, TCoordinate>
+	public static TileStats GetRectangularRegionStats<TTile, TCoordinate>(this Geometry geometry, int level) where TTile : IGeoTile<TTile, TCoordinate>
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
 		using var envelope = new Envelope();

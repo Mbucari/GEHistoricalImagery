@@ -60,11 +60,12 @@ public class WayBack
 
 		try
 		{
+			var stats = region.GetRectangularRegionStats<EsriTile>(zoom);
 			var ss = await HttpClient.GetByteArrayAsync(metadataUrl);
 			Gdal.FileFromMemBuffer(memFile, ss);
 			using var driver = Ogr.GetDriverByName("ESRIJSON");
 			using var ds = driver.Open(memFile, 0);
-			if (ds.ToDatedRegions(layer, region)?.ToArray() is DatedRegion[] regions)
+			if (ds.ToDatedRegions(layer, stats, region)?.ToArray() is DatedRegion[] regions)
 			{
 				if (regions.Length == 1)
 					regions[0].MarkComplete();

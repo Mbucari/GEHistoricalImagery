@@ -168,7 +168,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	/// Gets the tile statistics for the region defined by this polygon's rectangular envelope
 	/// </summary>
 	/// <param name="level">The zoom level of interest</param>
-	public TileStats GetRectangularRegionStats<TTile>(int level) where TTile : ITile<TTile, TCoordinate>
+	public TileStats GetRectangularRegionStats<TTile>(int level) where TTile : IGeoTile<TTile, TCoordinate>
 	{
 		var llCoord = TCoordinate.Create(LeftMostX, MinY);
 		var urCoord = TCoordinate.Create(RightMostX, MaxY);
@@ -185,22 +185,12 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	}
 
 	/// <summary>
-	/// Determines whether this polygon contains any portion of the tile's polygon.
-	/// </summary>
-	/// <param name="tile">A map tile to test</param>
-	/// <returns>True if any part of the tile is within this polygon, otherwise false</returns>
-	public virtual bool ContainsTile<TTile>(TTile tile) where TTile : ITile<TCoordinate>
-	{
-		using var tilePolygon = tile.GetPolygon();
-		return Region.Intersects(tilePolygon);
-	}
-
-	/// <summary>
 	/// Enumerate the tiles that intersect with the AOI region.  Progress is reported as the tiles are being enumerated.
 	/// </summary>
 	public IEnumerable<TTile> EnumerateTiles<TTile>(int zoomLevel, IProgress<double>? reportProgress = null)
-		where TTile : ITile<TTile, TCoordinate>
+		where TTile : IGeoTile<TTile, TCoordinate>
 	{
+		//Owned by the GeoRegion. Do not dispose.
 		var polygons = GetPolygons().ToArray();
 		var allRectStats = polygons.Select(p => p.GetRectangularRegionStats<TTile, TCoordinate>(zoomLevel)).ToArray();
 		double totalTileCount = allRectStats.Sum(s => s.TileCount);
@@ -215,7 +205,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 		reportProgress?.Report(0);
 		for (int i = 0; i < polygons.Length; i++)
 		{
-			using var polygon = polygons[i];
+			var polygon = polygons[i];
 			foreach (var tile in EnumerateTiles<TTile>(polygon, allRectStats[i], subregionProgress))
 			{
 				yield return tile;
@@ -224,7 +214,7 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 	}
 
 	private static IEnumerable<TTile> EnumerateTiles<TTile>(OSGeo.OGR.Geometry polygon, TileStats stats, IProgress<int> progress)
-		where TTile : ITile<TTile, TCoordinate>
+		where TTile : IGeoTile<TTile, TCoordinate>
 	{
 		if (stats.TileCount == 1)
 		{
@@ -233,30 +223,12 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 		}
 
 		return
-			Enumerable.Range(0, stats.NumRows)
-			.Select(r => new Func<TTile?[]>(() => getColumnTiles(r)))
+			stats.EnumerateTiles<TTile>(progress)
 			.AsParallel()
 			.WithDegreeOfParallelism(Environment.ProcessorCount)
-			.SelectMany(x => x().OfType<TTile>());
-
-		TTile?[] getColumnTiles(int r)
-		{
-			TTile?[] tiles = new TTile?[stats.NumColumns];
-			var numTiles = 1 << stats.Zoom;
-			for (int c = 0; c < stats.NumColumns; c++)
-			{
-				var row = (stats.MinRow + r) % numTiles;
-				var col = (stats.MinColumn + c) % numTiles;
-				var tile = TTile.Create(row, col, stats.Zoom);
-				using OSGeo.OGR.Geometry tilePoly = tile.GetPolygon();
-				if (tilePoly.Intersects(polygon))
-					tiles[c] = tile;
-			}
-			progress.Report(tiles.Length);
-			return tiles;
-		}
+			.Where(tile => { using var p = tile.GetPolygon(); return p.Intersects(polygon); });
 	}
-	~GeoRegion() => Dispose();
+
 	public virtual void Dispose()
 	{
 		var region = Interlocked.Exchange(ref m_Region, null);
@@ -266,4 +238,5 @@ public class GeoRegion<TCoordinate> : IDisposable where TCoordinate : IGeoCoordi
 			GC.SuppressFinalize(this);
 		}
 	}
+	~GeoRegion() => Dispose();
 }

@@ -159,12 +159,12 @@ internal partial class DownloadCommand : FileDownloadVerb
 		}
 	}
 
-	private static TileDataset<T> EmptyDataset<T>(ITile<T> tile, string? messageOverride = null) where T : IGeoCoordinate<T> => new(tile)
+	private static TileDataset<T> EmptyDataset<T>(IGeoTile<T> tile, string? messageOverride = null) where T : IGeoCoordinate<T> => new(tile)
 	{
 		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"
 	};
 
-	private static Dataset TrimDataset<T>(Dataset image, GeoRegion<T> aoi, ITile<T> tile) where T : IGeoCoordinate<T>
+	private static Dataset TrimDataset<T>(Dataset image, GeoRegion<T> aoi, IGeoTile<T> tile) where T : IGeoCoordinate<T>
 	{
 		using Geometry tileg = tile.GetPolygon();
 

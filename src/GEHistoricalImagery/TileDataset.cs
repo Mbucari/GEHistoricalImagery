@@ -16,11 +16,11 @@ internal interface ITileDataset
 	Geometry GetPolygonGeometry();
 }
 
-internal class TileDataset<TCoordinate>(ITile<TCoordinate> tile) : ITileDataset, IDisposable
+internal class TileDataset<TCoordinate>(IGeoTile<TCoordinate> tile) : ITileDataset, IDisposable
 	where TCoordinate : IGeoCoordinate<TCoordinate>
 {
 	public Dataset? Dataset { get; init; }
-	public ITile<TCoordinate> Tile { get; } = tile;
+	public IGeoTile<TCoordinate> Tile { get; } = tile;
 	ITile ITileDataset.Tile => Tile;
 	public DateOnly? LayerDate { get; init; }
 	public DateOnly TileDate { get; init; }

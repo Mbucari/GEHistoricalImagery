@@ -5,7 +5,7 @@ namespace LibGoogleEarth;
 /// <summary>
 /// A square tile on earth's surface at a particular zoom level.
 /// </summary>
-public class KeyholeTile : ITile<KeyholeTile, Wgs1984>
+public class KeyholeTile : IGeoTile<KeyholeTile, Wgs1984>
 {
 	/// <summary> The quadtree path string </summary>
 	public string Path { get; }

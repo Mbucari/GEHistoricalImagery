@@ -163,7 +163,7 @@ internal partial class DumpCommand : FileDownloadVerb
 		}
 	}
 
-	private static ITileDataset EmptyDataset<TCoordinate>(ITile<TCoordinate> tile, string? messageOverride = null)
+	private static ITileDataset EmptyDataset<TCoordinate>(IGeoTile<TCoordinate> tile, string? messageOverride = null)
 		where TCoordinate : IGeoCoordinate<TCoordinate> => new TileDataset<TCoordinate>(tile)
 	{
 		Message = messageOverride ?? $"No imagery available for tile at {tile.Wgs84Center}"

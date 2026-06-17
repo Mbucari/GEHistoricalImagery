@@ -4,8 +4,7 @@ using LibGoogleEarth.Geometry;
 using LibMapCommon;
 using LibMapCommon.Geometry;
 using Microsoft.Extensions.Caching.Memory;
-using OSGeo.OGR;
-using OSGeo.OSR;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -92,52 +91,28 @@ public abstract class DbRoot
 			? new TileNode(tile, n)
 			: null;
 	}
-	private class KeyholeTileCollection
-	{
-		public int TileCount { get; private set; }
-		public OSGeo.OGR.Geometry MultiPolygon { get; }
-		public KeyholeTileCollection()
-		{
-			MultiPolygon = new OSGeo.OGR.Geometry(wkbGeometryType.wkbMultiPolygon);
-		}
-		public void AddTile(KeyholeTile tile)
-		{
-			using var tileRegion = tile.GetPolygon();
-			MultiPolygon.AddGeometryDirectly(tileRegion);
-			TileCount++;
-		}
-	}
 
-	public async Task<DatedRegion[]> GetDateRegionsAsync(IAsyncEnumerable<DatedTile> tiles)
+	public async Task<DatedRegion[]> GetDateRegionsAsync(KeyholeTile[] regionTiles, int concurrency, TileStats stats, DateOnly minDate, DateOnly maxDate, IProgress<double> progress)
 	{
 		//Build a map of Date to Geometry by unioning the tile polygons for each date together
-		Dictionary<DateOnly, KeyholeTileCollection> dateTileMap = new();
+		ConcurrentDictionary<DateOnly, DatedRegion> dateTileMap = new();
+		int count = 0;
+		var options = new ParallelOptions() { MaxDegreeOfParallelism = concurrency };
+		await Parallel.ForAsync(0, regionTiles.Length, options, async (i, ct) =>
+		{
+			if (await GetNodeAsync(regionTiles[i]) is not TileNode node)
+				return;
 
-		await foreach (var tile in tiles)
-		{
-			if (!dateTileMap.TryGetValue(tile.Date, out var geom))
+			foreach (var dt in node.GetAllDatedTiles().Where(d => d.Date.Year != 1 && d.Date >= minDate && d.Date <= maxDate))
 			{
-				dateTileMap[tile.Date] = geom = new KeyholeTileCollection();
+				var dr = dateTileMap.GetOrAdd(dt.Date, d => new DatedRegion(d, stats));
+				dr.AddTile(dt.Tile);
 			}
-			geom.AddTile(tile.Tile);
-		}
-		DatedRegion[] regions = new DatedRegion[dateTileMap.Count];
-		DateOnly[] keys = dateTileMap.Keys.ToArray();
-		using var envelope = new Envelope();
-		using var sr = new SpatialReference(null);
-		sr.Import<Wgs1984>();
-		Parallel.For(0, dateTileMap.Count, i =>
-		{
-			var date = keys[i];
-			var datedRegion = dateTileMap[date];
-			var geometry = datedRegion.MultiPolygon;
-			geometry.GetEnvelope(envelope);
-			geometry.AssignSpatialReference(sr);
-			//I can't find a reason why LeftMostX and RightMostX actually matter for this use case,
-			//but know that when crossing anitmeridian, LeftMostX = -180 and RightMostX = 180
-			regions[i] = new DatedRegion(datedRegion.TileCount, date, envelope.MinX, envelope.MaxX, envelope.MinY, envelope.MaxY, geometry);
+
+			double c = Interlocked.Add(ref count, 1);
+			progress.Report(c / regionTiles.Length);
 		});
-		return regions;
+		return dateTileMap.Values.OrderByDescending(v => v.Date).ToArray();
 	}
 
 	public string? GetProviderCopyright(DatedTile tile)

@@ -59,8 +59,8 @@ public static class GdalExtensions
 		dataset.SetGeoTransform(transform.Transformation);
 	}
 
-	/// <summary> Create a GDAL GeoTransform from the <see cref="ITile{TCoordinate}"/>'s properties </summary>
-	public static GeoTransform GetGeoTransform<TCoordinate>(this ITile<TCoordinate> tile)
+	/// <summary> Create a GDAL GeoTransform from the <see cref="IGeoTile{TCoordinate}"/>'s properties </summary>
+	public static GeoTransform GetGeoTransform<TCoordinate>(this IGeoTile<TCoordinate> tile)
 		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
 		const int TILE_SZ = 256;

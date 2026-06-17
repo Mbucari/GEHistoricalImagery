@@ -1,39 +1,72 @@
 ﻿using LibMapCommon;
 using LibMapCommon.Geometry;
+using OSGeo.OGR;
+using OSGeo.OSR;
 
 namespace LibGoogleEarth.Geometry;
 
-public class DatedRegion : DatedRegion<Wgs1984>
+public class DatedRegion : IDatedRegion
 {
-	public int TileCount { get; }
-	public void MarkComplete() => IsComplete = true;
-	internal DatedRegion(int tileCount, DateOnly date, double leftmostX, double rightmostX, double minY, double maxY, OSGeo.OGR.Geometry region)
-		: base(date, leftmostX, rightmostX, minY, maxY, region)
-	{
-		TileCount = tileCount;
-	}
-	private OSGeo.OGR.Geometry? singlePoint;
+	public BoolMap HasDataMap { get; }
+	public TileStats Stats { get; }
+	public DateOnly Date { get; }
+	public bool IsComplete => Stats.TileCount == TileCount;
+	public int ZoomLevel => Stats.Zoom;
+	private int TileCount { get; set; }
+	private OSGeo.OGR.Geometry MultiPolygon => m_MultiPolygon ?? throw new ObjectDisposedException(nameof(DatedRegion));
+	private OSGeo.OGR.Geometry? m_MultiPolygon;
 
-	// To avoid returning true for tiles which are outside the GeoRegion but still intersect (touch) the region,
-	// we check if the center of the tile is contained in the region. This works because DatedRegions for keyhole
-	// are built from tile rectangles, so if a tile's center is in the region then the whole tile is in the region.
-	public override bool ContainsTile<TTile>(TTile tile)
+	internal DatedRegion(DateOnly date, TileStats stats)
 	{
-		var center = tile.Center;
-		singlePoint ??= new OSGeo.OGR.Geometry(OSGeo.OGR.wkbGeometryType.wkbPoint);
-		singlePoint.SetPoint_2D(0, center.X, center.Y);
-		return singlePoint.Within(Region);
+		Date = date;
+		m_MultiPolygon = new OSGeo.OGR.Geometry(wkbGeometryType.wkbMultiPolygon);
+		using var sr = new SpatialReference(null);
+		sr.Import<Wgs1984>();
+		m_MultiPolygon.AssignSpatialReference(sr);
+		HasDataMap = new BoolMap(stats.NumColumns, stats.NumRows);
+		Stats = stats;
 	}
-
-	public DatedRegion MergePolygons()
-		=> new DatedRegion(TileCount, Date, LeftMostX, RightMostX, MinY, MaxY, Region.UnionCascaded())
+	public OSGeo.OGR.Geometry GetMultiPolygon() => MultiPolygon.Clone();
+	private readonly Lock locker = new();
+	internal void AddTile(KeyholeTile tile)
+	{
+		using var tileRegion = tile.GetPolygon();
+		lock (locker)
 		{
-			IsComplete = IsComplete
-		};
-
-	public override void Dispose()
-	{
-		base.Dispose();
-		singlePoint?.Dispose();
+			MultiPolygon.AddGeometryDirectly(tileRegion);
+		}
+		TileCount++;
+		var cIndex = LibMapCommon.Util.Mod(tile.Column - Stats.MinColumn, 1 << tile.Level);
+		var rIndex = Stats.MaxRow - tile.Row;
+		HasDataMap[rIndex, cIndex] = true;
 	}
+
+	public void Flatten()
+	{
+		lock (locker)
+		{
+			var toReturn = MultiPolygon.UnionCascaded();
+			if (toReturn.GetGeometryType() == wkbGeometryType.wkbPolygon)
+			{
+				var multiPoly = new OSGeo.OGR.Geometry(wkbGeometryType.wkbMultiPolygon);
+				multiPoly.AddGeometryDirectly(toReturn);
+				using var sr = toReturn.GetSpatialReference();
+				multiPoly.AssignSpatialReference(sr);
+				toReturn.Dispose();
+				toReturn = multiPoly;
+			}
+			Interlocked.Exchange(ref m_MultiPolygon, toReturn)?.Dispose();
+		}
+	}
+
+	public void Dispose()
+	{
+		var polygon = Interlocked.Exchange(ref m_MultiPolygon, null);
+		if (polygon != null)
+		{
+			polygon.Dispose();
+			GC.SuppressFinalize(this);
+		}
+	}
+	~DatedRegion() => Dispose();
 }

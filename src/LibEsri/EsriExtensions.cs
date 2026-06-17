@@ -7,7 +7,7 @@ namespace LibEsri;
 
 public static class EsriExtensions
 {
-	internal static IEnumerable<DatedRegion> ToDatedRegions(this DataSource? result, Layer layer, GeoRegion<WebMercator> region)
+	internal static IEnumerable<DatedRegion> ToDatedRegions(this DataSource? result, Layer layer, TileStats stats, GeoRegion<WebMercator> region)
 	{
 		if (result is null)
 			yield break;
@@ -56,7 +56,7 @@ public static class EsriExtensions
 					//should all be split at antimeridean, so if we have a width of 180 or more, it's likely an error.
 					throw new Exception("envelope too wide, likely invalid geometry");
 				}
-				yield return new DatedRegion(layer, new DateOnly(year, month, day), envelope, intersect);
+				yield return new DatedRegion(layer, stats, new DateOnly(year, month, day), intersect);
 			}
 		}
 	}

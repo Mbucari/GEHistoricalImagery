@@ -1,61 +1,36 @@
-﻿using System.Runtime.InteropServices;
+﻿using LibMapCommon.Geometry;
 
 namespace GEHistoricalImagery.Cli.Availability;
 
-public enum Availability : byte
+public enum Availability
 {
 	None,
-	Available,
 	Unavailable,
+	Available
 }
 
-internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOption
+internal class RegionAvailability : IConsoleOption
 {
 	public DateOnly Date { get; }
 	public string DisplayValue => Date.ToDateString();
-	private Availability[,] Availabilities { get; }
 
 	public int Height { get; }
 	public int Width { get; }
 	public Availability this[int rIndex, int cIndex]
-	{
-		get => Availabilities[rIndex, cIndex];
-		set => Availabilities[rIndex, cIndex] = value;
-	}
+		=> DatedRegion.HasDataMap[rIndex, cIndex] ? Availability.Available
+		: AllRegionsAvailability[rIndex, cIndex] ? Availability.Unavailable
+		: Availability.None;
 
-	public RegionAvailability(DateOnly date, int height, int width)
-	{
-		Date = date;
-		Height = height;
-		Width = width;
-		Availabilities = new Availability[height, width];
-	}
+	private IDatedRegion DatedRegion { get; }
+	private BoolMap AllRegionsAvailability { get; }
 
-	public static bool operator ==(RegionAvailability a, RegionAvailability b) => a.Equals(b);
-	public static bool operator !=(RegionAvailability a, RegionAvailability b) => !a.Equals(b);
-	public override int GetHashCode()
+	public RegionAvailability(IDatedRegion datedRegion, BoolMap allRegionsAvailability)
 	{
-		HashCode hashCode = new();
-		hashCode.Add(Date.GetHashCode());
-		Span<byte> flatSpan = MemoryMarshal.CreateSpan(ref MemoryMarshal.GetArrayDataReference(Availabilities), Height * Width);
-		hashCode.AddBytes(flatSpan);
-		return hashCode.ToHashCode();
-	}
-	public override bool Equals(object? obj) => Equals(obj as RegionAvailability);
-	public bool Equals(RegionAvailability? other)
-	{
-		if (other is null || other.Date != Date || other.Height != Height || other.Width != Width)
-			return false;
-
-		for (int i = 0; i < Height; i++)
-		{
-			for (int j = 0; j < Width; j++)
-			{
-				if (other.Availabilities[i, j] != Availabilities[i, j])
-					return false;
-			}
-		}
-		return true;
+		Width = datedRegion.Stats.NumColumns;
+		Height = datedRegion.Stats.NumRows;
+		Date = datedRegion.Date;
+		AllRegionsAvailability = allRegionsAvailability;
+		DatedRegion = datedRegion;
 	}
 
 	public bool DrawOption()
@@ -85,10 +60,10 @@ internal class RegionAvailability : IEquatable<RegionAvailability>, IConsoleOpti
 			char[] row = new char[Width];
 			for (int x = 0; x < Width; x++)
 			{
-				var top = Availabilities[y, x];
+				var top = this[y, x];
 				if (has2Rows)
 				{
-					var bottom = Availabilities[y + 1, x];
+					var bottom = this[y + 1, x];
 					row[x] = top == Availability.Available & bottom == Availability.Available ? '█' :
 						top == Availability.Available ? '▀' :
 						bottom == Availability.Available ? '▄' :

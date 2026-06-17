@@ -18,8 +18,7 @@ internal static class AvailabilityDatabase
 	const string WBLayerIdField = "wb_layer_id";
 	const string WBLayerDateField = "wb_layer_date";
 
-	public static void SaveInfoData<T>(this DatedRegion<T>[] regions, string filename, int zoomLevel, Provider provider)
-		where T : IGeoCoordinate<T>
+	public static void SaveAvailabilityData(this IDatedRegion[] regions, string filename, Provider provider)
 	{
 		using var driver = Ogr.GetDriverByName("GeoJSON");
 		using var database = File.Exists(filename) ? driver.Open(filename, 1) : driver.CreateDataSource(filename, null);
@@ -53,7 +52,7 @@ internal static class AvailabilityDatabase
 
 			feature.SetGeometryDirectly(geometry);
 			feature.SetField(ProviderField, provider.ToString());
-			feature.SetField(ZoomLevelField, zoomLevel);
+			feature.SetField(ZoomLevelField, region.ZoomLevel);
 			feature.SetField(ImageryDateField, region.Date);
 			feature.SetField(IsCompleteField, region.IsComplete ? 1 : 0);
 

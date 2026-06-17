@@ -29,10 +29,10 @@ public static class Util
 		=> CoordinateToPixel(coordinate.X, coordinate.Y, level, T.Equator);
 
 	/// <summary>
-	/// Get the global pixel coordinates of the <see cref="ITile{T}.UpperLeft"/> corner of this tile.
+	/// Get the global pixel coordinates of the <see cref="IGeoTile{T}.UpperLeft"/> corner of this tile.
 	/// </summary>
 	/// <returns>X and Y coordinates of the pixel in global pixel space</returns>
-	public static PixelPoint GetTopLeftPixel<T>(this ITile<T> tile)
+	public static PixelPoint GetTopLeftPixel<T>(this IGeoTile<T> tile)
 		where T : IGeoCoordinate<T>
 	{
 		var topLeft = tile.UpperLeft;

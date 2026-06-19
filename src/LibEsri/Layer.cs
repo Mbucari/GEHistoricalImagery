@@ -78,13 +78,13 @@ public class Layer : IDatedElement
 				var pCount = g.GetPointCount();
 
 				var points = new JsonArray();
-				arrayOfRings.Add(points);
+				arrayOfRings.Add(points as JsonNode);
 				double[] point = new double[2];
 				for (int k = 0; k < pCount; k++)
 				{
 					g.GetPoint_2D(k, point);
 					//We only need meter precision for the query, so we can round to int 
-					points.Add(new JsonArray((int)point[0], (int)point[1]));
+					points.Add(new JsonArray((int)point[0], (int)point[1]) as JsonNode);
 				}
 			}
 		}

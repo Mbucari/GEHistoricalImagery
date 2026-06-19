@@ -6,7 +6,8 @@
     <Nullable>enable</Nullable>
 	<DebugType>embedded</DebugType>
     <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-    <Platforms>AnyCPU;x64</Platforms> 
+    <Platforms>AnyCPU;x64</Platforms>
+	<PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>

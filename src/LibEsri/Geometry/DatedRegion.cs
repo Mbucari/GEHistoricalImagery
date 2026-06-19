@@ -11,20 +11,20 @@ public class DatedRegion : IDatedRegion
 	private OSGeo.OGR.Geometry MultiPolygon => m_MultiPolygon ?? throw new ObjectDisposedException(nameof(DatedRegion));
 
 	public DateOnly Date { get; }
-	public bool IsComplete { get; private set; }
+	public bool IsComplete { get; }
 	public Layer Layer { get; }
 	public int ZoomLevel => Stats.Zoom;
 	public TileStats Stats { get; }
-	internal void MarkComplete() => IsComplete = true;
 
 	private readonly Lazy<BoolMap> lazyHasData;
 	public BoolMap HasDataMap => lazyHasData.Value;
 
-	internal DatedRegion(Layer layer, TileStats stats, DateOnly date, OSGeo.OGR.Geometry multiPolygon)
+	internal DatedRegion(Layer layer, bool complete, TileStats stats, DateOnly date, OSGeo.OGR.Geometry multiPolygon)
 	{
 		Stats = stats;
 		Layer = layer;
 		Date = date;
+		IsComplete = complete;
 		switch(multiPolygon.GetGeometryType())
 		{
 			case wkbGeometryType.wkbPolygon:
@@ -44,20 +44,22 @@ public class DatedRegion : IDatedRegion
 
 	public OSGeo.OGR.Geometry GetMultiPolygon() => MultiPolygon.Clone();
 
-	BoolMap BuildBoolMap()
+	private BoolMap BuildBoolMap()
 	{
 		var hasData = new BoolMap(Stats.NumColumns, Stats.NumRows);
-		foreach (var tile in Stats.EnumerateTiles<EsriTile>())
+		var bt = new bool[Stats.NumColumns * Stats.NumRows];
+
+		Parallel.ForEach(Stats.EnumerateTiles<EsriTile>(), tile =>
 		{
 			using var polygon = tile.GetPolygon();
 			if (polygon.Intersects(MultiPolygon))
 			{
 				var cIndex = Util.Mod(tile.Column - Stats.MinColumn, 1 << tile.Level);
 				var rIndex = tile.Row - Stats.MinRow;
-				hasData[rIndex, cIndex] = true;
+				bt[rIndex *  Stats.NumColumns + cIndex] = true;
 			}
-		}
-		return hasData;
+		});
+		return new BoolMap(Stats.NumColumns, Stats.NumRows, bt);
 	}
 
 	public void Dispose()

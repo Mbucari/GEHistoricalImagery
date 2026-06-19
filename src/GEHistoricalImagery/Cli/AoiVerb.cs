@@ -150,20 +150,20 @@ internal abstract class AoiVerb : OptionsBase
 	}
 
 	protected EsriTile[] GetTiles(GeoRegion<WebMercator> region)
-	{
-		ProgressWriter.Instance.BeginProgress("Finding Tiles Inside Region: ");
-		var progress = new Progress<double>(ProgressWriter.Instance.ReportProgress);
-		var regionTiles = region.EnumerateTiles<EsriTile>(ZoomLevel, progress).ToArray();
-		ProgressWriter.Instance.EndProgress();
-		return regionTiles;
-	}
+		=> GetTiles<EsriTile, WebMercator>(region);
 
 	protected KeyholeTile[] GetTiles(GeoRegion<Wgs1984> region)
+		=> GetTiles<KeyholeTile, Wgs1984>(region);
+
+	private TTile[] GetTiles<TTile, TCoordinate>(GeoRegion<TCoordinate> region)
+		where TTile : IGeoTile<TTile, TCoordinate>
+		where TCoordinate : IGeoCoordinate<TCoordinate>
 	{
 		ProgressWriter.Instance.BeginProgress("Finding Tiles Inside Region: ");
 		var progress = new Progress<double>(ProgressWriter.Instance.ReportProgress);
-		var regionTiles = region.EnumerateTiles<KeyholeTile>(ZoomLevel, progress).ToArray();
+		var regionTiles = region.EnumerateTiles<TTile>(ZoomLevel, progress).ToArray();
 		ProgressWriter.Instance.EndProgress();
+		Console.Error.WriteLine("Found {0} tiles inside region.", regionTiles.Length.ToString("N0"));
 		return regionTiles;
 	}
 

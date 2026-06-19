@@ -1,6 +1,7 @@
 ﻿using LibMapCommon;
 using LibMapCommon.Geometry;
 using System.Diagnostics;
+using System.Text.Json.Nodes;
 using System.Xml.Linq;
 
 namespace LibEsri;
@@ -39,7 +40,7 @@ public class Layer : IDatedElement
 		return new Layer(title, identifier, format, resourceUrl, matrixSets);
 	}
 
-	private string GetMetadataUrl(int level, bool returnGeometry, params string[] outFields)
+	public string GetMetadataQueryUrl(int level)
 	{
 		const string KEY_TEXT = "/World_Imagery";
 
@@ -48,69 +49,63 @@ public class Layer : IDatedElement
 		int start = ResourceURL.IndexOf("//") + 2;
 		int end2 = ResourceURL.IndexOf('.', start);
 
-		var newDomain = ResourceURL.Substring(0, start) + "metadata" + ResourceURL.Substring(end2);
+		var newDomain = string.Concat(
+			ResourceURL.AsSpan(0, start),
+			"metadata",
+			ResourceURL.AsSpan(end2));
 
 		int end = newDomain.IndexOf(KEY_TEXT) + KEY_TEXT.Length;
-
-		var retStr = returnGeometry ? "true" : "false";
-		var query = string.Join(",", outFields);
-
-		var url = newDomain.Substring(0, end) + "_Metadata" + Identifier.Replace("WB", "").ToLowerInvariant() +
-			$"/MapServer/{scale}/query?f=json&where=1%3D1&outFields={query}&returnGeometry={retStr}";
-
+		var url = string.Concat(
+			newDomain.AsSpan(0, end),
+			"_Metadata",
+			Identifier.Replace("WB", "").ToLowerInvariant(),
+			$"/MapServer/{scale}/query");
 		return url;
 	}
 
-	public string GetEnvelopeQueryUrl(GeoRegion<WebMercator> region, int level)
+	public static EsriQuery GetPolygonQuery(GeoRegion<WebMercator> region)
 	{
-		var ring = $"%7B%22rings%22%3A{GetRings(region)}%2C%22spatialReference%22%3A%7B%22wkid%22%3A{WebMercator.EpsgNumber}%7D%7D";
-
-		var metadataUrl
-			= GetMetadataUrl(level, returnGeometry: true, "SRC_DATE2")
-			+ "&geometryType=esriGeometryPolygon&spatialRel=esriSpatialRelIntersects&geometry="
-			+ ring;
-		return metadataUrl;
-	}
-
-	private static string GetRings(GeoRegion<WebMercator> region)
-	{
-		var polygons = region.GetPolygons().ToArray();
-		List<string> rings = new List<string>(polygons.Length);
-		foreach (var polygon in polygons)
+		var arrayOfRings = new JsonArray();
+		foreach (var polygon in region.GetPolygons())
 		{
-			var gType = polygon.GetGeometryType();
 			int gCount = polygon.GetGeometryCount();
 			for (int i = 0; i < gCount; i++)
 			{
 				var g = polygon.GetGeometryRef(i);
-				var gType2 = g.GetGeometryType();
-				if (gType2 is not OSGeo.OGR.wkbGeometryType.wkbLineString)
+				var gType = g.GetGeometryType();
+				if (gType is not OSGeo.OGR.wkbGeometryType.wkbLineString)
 					throw new ArgumentException($"Expected geometry type of wkbLinearRing, got {gType}");
 				var pCount = g.GetPointCount();
 
-				string[] points = new string[pCount];
+				var points = new JsonArray();
+				arrayOfRings.Add(points);
 				double[] point = new double[2];
 				for (int k = 0; k < pCount; k++)
 				{
 					g.GetPoint_2D(k, point);
-					points[k] = FormattableString.Invariant($"%5B{point[0]},{point[1]}%5D");
+					//We only need meter precision for the query, so we can round to int 
+					points.Add(new JsonArray((int)point[0], (int)point[1]));
 				}
-
-				rings.Add("%5B" + string.Join("%2C", points) + "%5D");
 			}
 		}
-		return "%5B" + string.Join("%2C", rings) + "%5D";
+		return new EsriQuery
+		{
+			OutFields = [ "OBJECTID", "SRC_DATE2" ],
+			SpatialRel = EsrieSriSpatialRel.Intersects,
+			GeometryType = EsriGeometryType.Polygon,
+			InSR = new JsonObject { ["wkid"] = WebMercator.EpsgNumber },
+			Geometry = new JsonObject { ["rings"] = arrayOfRings },
+		};
 	}
-	public string GetPointQueryUrl(EsriTile tile)
-	{
-		var center = tile.Center;
 
-		var metadataUrl
-			= GetMetadataUrl(tile.Level, returnGeometry: false, "SRC_DATE2")
-			+ "&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&geometry="
-			+ $"%7B%22spatialReference%22%3A%7B%22wkid%22%3A{WebMercator.EpsgNumber}%7D%2C%22x%22%3A{center.X}%2C%22y%22%3A{center.Y}%7D";
-		return metadataUrl;
-	}
+	public static EsriQuery GetPointQuery(WebMercator center) => new EsriQuery
+	{
+		OutFields = ["SRC_DATE2"],
+		SpatialRel = EsrieSriSpatialRel.Within,
+		GeometryType = EsriGeometryType.Point,
+		InSR = new JsonObject { ["wkid"] = WebMercator.EpsgNumber },
+		Geometry = new JsonObject { ["x"] = center.X, ["y"] = center.Y },
+	};
 
 	public string GetTileMapUrl(EsriTile tile)
 	{

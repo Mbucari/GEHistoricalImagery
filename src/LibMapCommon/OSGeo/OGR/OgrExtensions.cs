@@ -123,5 +123,5 @@ public static class OgrExtensions
 	}
 
 	public static void SetField(this Feature? feature, string fieldName, DateOnly date)
-		=> feature?.SetField(fieldName, date.Year, date.Month, date.Day, 0, 0, 0, 0);
+		=> feature?.SetField(fieldName, date.Year, date.Month, date.Day, 0, 0, 0, 100);
 }

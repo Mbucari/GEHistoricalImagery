@@ -13,6 +13,14 @@ public class BoolMap
 		Height = height;
 		_bitArray = new BitArray(width * height);
 	}
+	public BoolMap(int width, int height, bool[] array)
+	{
+		if (array.Length != width * height)
+			throw new ArgumentException("Array length must match width * height.");
+		Width = width;
+		Height = height;
+		_bitArray = new BitArray(array);
+	}
 	private BoolMap(int width, int height, BitArray bitArray)
 	{
 		Width = width;

@@ -7,5 +7,6 @@ public interface IDatedRegion : IDisposable
 	int ZoomLevel { get; }
 	BoolMap HasDataMap { get; }
 	TileStats Stats { get; }
-	public OSGeo.OGR.Geometry GetMultiPolygon();
+	OSGeo.OGR.Geometry GetMultiPolygon();
+	OSGeo.OSR.SpatialReference GetSpatialReference();
 }

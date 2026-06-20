@@ -49,7 +49,7 @@ internal partial class AvailabilityCommand : AoiVerb
 	private void SaveDatedRegions(string savePath, IDatedRegion[] regions)
 	{
 		string savefile = savePath is "-" ? "/vsistdout/out.json" : savePath.ReplaceUnixHomeDir();
-		regions.SaveAvailabilityData(savefile, Provider);
+		regions.SaveAvailabilityData(savefile, Provider, "GeoJSON");
 	}
 
 	private static void PresentRegions(IConsoleOption[] options)

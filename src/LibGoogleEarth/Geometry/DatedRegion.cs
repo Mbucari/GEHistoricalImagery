@@ -26,6 +26,7 @@ public class DatedRegion : IDatedRegion
 		HasDataMap = new BoolMap(stats.NumColumns, stats.NumRows);
 		Stats = stats;
 	}
+	public SpatialReference GetSpatialReference() => MultiPolygon.GetSpatialReference();
 	public OSGeo.OGR.Geometry GetMultiPolygon() => MultiPolygon.Clone();
 	private readonly Lock locker = new();
 	internal void AddTile(KeyholeTile tile)

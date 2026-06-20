@@ -41,7 +41,7 @@ public class DatedRegion : IDatedRegion
 		}
 		lazyHasData = new Lazy<BoolMap>(BuildBoolMap);
 	}
-
+	public OSGeo.OSR.SpatialReference GetSpatialReference() => MultiPolygon.GetSpatialReference();
 	public OSGeo.OGR.Geometry GetMultiPolygon() => MultiPolygon.Clone();
 
 	private BoolMap BuildBoolMap()

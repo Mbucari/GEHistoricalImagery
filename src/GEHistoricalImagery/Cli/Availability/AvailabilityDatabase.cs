@@ -8,7 +8,7 @@ namespace GEHistoricalImagery.Cli.Availability;
 internal static class AvailabilityDatabase
 {
 
-	const string LayerName = "GEHI_Info";
+	const string LayerName = "GEHI_Availability";
 	const string ProviderField = "provider";
 	const string ZoomLevelField = "zoom_level";
 	const string ImageryDateField = "image_date";
@@ -41,7 +41,7 @@ internal static class AvailabilityDatabase
 
 		ProgressWriter.Instance.BeginProgress($"Saving availability data to {driverName}");
 		using var layerDef = infoDataLayer.GetLayerDefn();
-		using var layerSr = infoDataLayer.GetSpatialRef();
+		using var layerSr = infoDataLayer.GetSpatialRef() ?? srcSr;
 
 		infoDataLayer.EnsureSharedFields(layerDef);
 		infoDataLayer.EnsureWaybackFields(layerDef);
@@ -74,7 +74,8 @@ internal static class AvailabilityDatabase
 
 	private static Layer GetOrCreateLayer(this DataSource database, SpatialReference sr)
 		=> database.GetLayerByName(LayerName) is { } layer ? layer
-		 : layer = database.CreateLayer(LayerName, sr, wkbGeometryType.wkbMultiPolygon, null);
+		: database.GetLayerByIndex(0) is { } firstLayer ? firstLayer
+		: database.CreateLayer(LayerName, sr, wkbGeometryType.wkbMultiPolygon, null);
 
 	private static void EnsureSharedFields(this Layer layer, FeatureDefn layerDef)
 	{

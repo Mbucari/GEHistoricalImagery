@@ -89,7 +89,7 @@ internal partial class AvailabilityCommand
 			ProgressWriter.Instance.ReportProgress(c / datesOnLayers.Length);
 		});
 		ProgressWriter.Instance.EndProgress();
-		return datedRegions.OfType<DatedRegion>().ToArray();
+		return datedRegions.OfType<DatedRegion>().OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).ToArray();
 	}
 
 	public async Task<DateOnLayer[]> GetAllEsriLayerDatesAsync(WayBack wayBack, GeoRegion<WebMercator> mercAoi)

@@ -119,14 +119,25 @@ public class WayBack
 		var query = Layer.GetPolygonQuery(region);
 		var stats = region.GetRectangularRegionStats<EsriTile>(zoom);
 
+		const int retryCount = 0;
+		JsonNode? esriJson = await GetFeaturesAsync(queryUrl, query);
+		for (int i = 0; i < retryCount && esriJson is null; i++)
+		{
+			Console.Error.WriteLine($"Error querying {layer.Title}. Retrying {i + 1}/{retryCount}");
+			esriJson = await GetFeaturesAsync(queryUrl, query);
+		}
+
+		if (esriJson is null)
+		{
+			Console.Error.WriteLine($"Failed to query {layer.Title}. Try again later.");
+			return Array.Empty<DateOnLayer>();
+		}
+
 		string memFile = $"/vsimem/{layer.Title}/zoom-{zoom}.json";
 
 		try
 		{
-			if (await GetFeaturesAsync(queryUrl, query) is not { } node)
-				return Array.Empty<DateOnLayer>();
-
-			Gdal.FileFromMemBuffer(memFile, Encoding.UTF8.GetBytes(node.ToJsonString()));
+			Gdal.FileFromMemBuffer(memFile, Encoding.UTF8.GetBytes(esriJson.ToJsonString()));
 			using var driver = Ogr.GetDriverByName("ESRIJSON");
 			using var ds = driver.Open(memFile, 0);
 			Debug.Assert(ds.GetLayerCount() == 1);
@@ -164,11 +175,15 @@ public class WayBack
 	private async Task<JsonNode?> GetFeaturesAsync(string queryUrl, EsriQuery query)
 	{
 		var content = query.ToFormContent();
-		var bytes = await HttpClient.PostByteArrayAsync(queryUrl, content);
-		var value = Encoding.UTF8.GetString(bytes);
 		try
 		{
-			if (JsonNode.Parse(value) is not { } node || node["features"] is not JsonArray features)
+			var bytes = await HttpClient.PostByteArrayAsync(queryUrl, content);
+			if (JsonNode.Parse(bytes) is not { } node || node["error"] is not null)
+			{
+				await HttpClient.DeleteCachedPageAsync(queryUrl, content);
+				return null;
+			}
+			if (node["features"] is not JsonArray features)
 				return null;
 
 			int count = features.Count;
@@ -177,10 +192,14 @@ public class WayBack
 				query.ResultOffset = count;
 				content = query.ToFormContent();
 				bytes = await HttpClient.PostByteArrayAsync(queryUrl, content);
-				value = Encoding.UTF8.GetString(bytes);
 
-				if (JsonNode.Parse(value) is not { } newNode || newNode["features"] is not JsonArray newFeatures)
-					break;
+				if (JsonNode.Parse(bytes) is not { } newNode || newNode["error"] is not null)
+				{
+					await HttpClient.DeleteCachedPageAsync(queryUrl, content);
+					return null;
+				}
+				if (newNode["features"] is not JsonArray newFeatures)
+					return null;
 
 				foreach (var jsonNode in newFeatures.ToArray())
 				{
@@ -192,9 +211,8 @@ public class WayBack
 			}
 			return node;
 		}
-		catch (System.Text.Json.JsonException)
+		catch
 		{
-			Console.Error.WriteLine("Error parsing ESRIJSON: " + value);
 			await HttpClient.DeleteCachedPageAsync(queryUrl, content);
 			return null;
 		}

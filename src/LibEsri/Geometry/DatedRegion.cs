@@ -41,6 +41,34 @@ public class DatedRegion : IDatedRegion
 		}
 		lazyHasData = new Lazy<BoolMap>(BuildBoolMap);
 	}
+
+	public void Add(DatedRegion other)
+	{
+		if (other.MultiPolygon.GetGeometryType() != wkbGeometryType.wkbMultiPolygon)
+			throw new InvalidOperationException();
+
+		for (int i = other.MultiPolygon.GetGeometryCount() - 1; i >= 0; i--)
+		{
+			var part = other.MultiPolygon.GetGeometryRef(i);
+			MultiPolygon.AddGeometry(part);
+		}
+	}
+
+	public void Flatten()
+	{
+		var toReturn = MultiPolygon.UnionCascaded();
+		if (toReturn.GetGeometryType() == wkbGeometryType.wkbPolygon)
+		{
+			var multiPoly = new OSGeo.OGR.Geometry(wkbGeometryType.wkbMultiPolygon);
+			multiPoly.AddGeometryDirectly(toReturn);
+			using var sr = toReturn.GetSpatialReference();
+			multiPoly.AssignSpatialReference(sr);
+			toReturn.Dispose();
+			toReturn = multiPoly;
+		}
+		Interlocked.Exchange(ref m_MultiPolygon, toReturn)?.Dispose();
+	}
+
 	public OSGeo.OSR.SpatialReference GetSpatialReference() => MultiPolygon.GetSpatialReference();
 	public OSGeo.OGR.Geometry GetMultiPolygon() => MultiPolygon.Clone();
 

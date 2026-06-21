@@ -89,7 +89,36 @@ internal partial class AvailabilityCommand
 			ProgressWriter.Instance.ReportProgress(c / datesOnLayers.Length);
 		});
 		ProgressWriter.Instance.EndProgress();
-		return datedRegions.OfType<DatedRegion>().OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).ToArray();
+
+		ProgressWriter.Instance.BeginProgress("Combining geometries with same dates: ");
+		count = 0;
+		var layerGroups = datedRegions.OfType<DatedRegion>().OrderBy(d => d.Layer.Date).GroupBy(d => d.Layer).ToArray();
+		DatedRegion[][] combinedByLayer = new DatedRegion[layerGroups.Length][];
+		Parallel.For(0, layerGroups.Length, (i, _) =>
+		{
+			var dict = new Dictionary<DateOnly, DatedRegion>();
+			foreach (var region in layerGroups[i])
+			{
+				if (dict.TryGetValue(region.Date, out var existingRegion))
+				{
+					//If there are multiple regions for the same date and layer, combine them into a single region.
+					existingRegion.Add(region);
+				}
+				else
+				{
+					dict.Add(region.Date, region);
+				}
+			}
+			combinedByLayer[i] = dict.Values.ToArray();
+			foreach (var region in combinedByLayer[i])
+			{
+				region.Flatten();
+			}
+			ProgressWriter.Instance.ReportProgress(Interlocked.Add(ref count, 1) / (double)layerGroups.Length);
+		});
+
+		ProgressWriter.Instance.EndProgress();
+		return combinedByLayer.SelectMany(x => x).OrderBy(d => d.Layer.Date).ThenBy(d => d.Date).ToArray();
 	}
 
 	public async Task<DateOnLayer[]> GetAllEsriLayerDatesAsync(WayBack wayBack, GeoRegion<WebMercator> mercAoi)

@@ -6,6 +6,11 @@ Tiles that are available from a specific date are shaded, unavailable tiles are 
 
 To learn about defining a region of interest, please refer to the [Regions of Interest article](./regions.md).
 
+## Notes on Wayback Availability
+
+The availability command queries the Wayback metadata servers for dated regions inside the region of interest. These queries will often initially fail, but will then succeed if tried again in ~1-2 minutes. My assumption is thatmuch of the data is in cold storage and is loaded on demand.
+This is where the cache is useful. Only successful requests are cached. If you run the command but get failures on one or more layers, you can re-run the command, and it will only try to re-query layers which previously failed.
+
 ## Options
 
 ### `--zoom <N>` (`-z <N>`)

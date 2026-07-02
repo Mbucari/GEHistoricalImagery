@@ -48,6 +48,8 @@ internal partial class AvailabilityCommand : AoiVerb
 
 	private void SaveDatedRegions(string savePath, IDatedRegion[] regions)
 	{
+		if (regions.Length == 0)
+			return;
 		string savefile = savePath is "-" ? "/vsistdout/out.json" : savePath.ReplaceUnixHomeDir();
 		regions.SaveAvailabilityData(savefile, Provider, "GeoJSON");
 	}

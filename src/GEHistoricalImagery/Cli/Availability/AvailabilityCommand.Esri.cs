@@ -16,7 +16,17 @@ internal partial class AvailabilityCommand
 		var regionTiles = GetTiles(mercAoi);
 		var stats = mercAoi.GetRectangularRegionStats<EsriTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var datesOnLayers = await GetAllEsriLayerDatesAsync(wayBack, mercAoi);
+		if (datesOnLayers.Length == 0)
+		{
+			Console.Error.WriteLine($"No dated imagery available within specified constraints");
+			return;
+		}
 		var datedRegions = await GetAllEsriDatedRegionsAsync(wayBack, mercAoi, datesOnLayers);
+		if (datedRegions.Length == 0)
+		{
+			Console.Error.WriteLine($"No dated imagery available within specified constraints");
+			return;
+		}
 
 		if (SavePath is not null)
 		{

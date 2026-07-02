@@ -13,6 +13,11 @@ internal partial class AvailabilityCommand
 		var regionTiles = GetTiles(Region);
 		var stats = Region.GetRectangularRegionStats<KeyholeTile>(ZoomLevel) with { TileCount = regionTiles.Length };
 		var datedRegions = await GetAllKeyholeDatedRegionsAsync(root, stats, regionTiles);
+		if (datedRegions.Length == 0)
+		{
+			Console.Error.WriteLine($"No dated imagery available within specified constraints");
+			return;
+		}
 
 		if (SavePath is not null)
 		{

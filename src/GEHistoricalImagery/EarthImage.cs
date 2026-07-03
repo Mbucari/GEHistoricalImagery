@@ -150,6 +150,18 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 			saved.SetGeoTransform(geoTransform);
 			saved.FlushCache();
 			geoTransform.WriteWorldFile(path);
+
+			var dxfFilename = Path.ChangeExtension(path, ".dxf");
+			var dxfWriter = new DxfRaster();
+			try
+			{
+				dxfWriter.SetRaster(path, saved.RasterXSize, saved.RasterYSize, geoTransform);
+				dxfWriter.Save(dxfFilename);
+			}
+			catch
+			{
+				Console.Error.WriteLine("Failed to save DXF file: " + dxfFilename);
+			}
 		}
 	}
 

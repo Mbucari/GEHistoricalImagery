@@ -26,7 +26,7 @@ internal partial class AvailabilityCommand
 			Parallel.For(0, datedRegions.Length, i =>
 			{
 				datedRegions[i].Flatten();
-				ProgressWriter.Instance.ReportProgress(Interlocked.Add(ref count, 1) / (double)datedRegions.Length);
+				ProgressWriter.Instance.ReportProgress(Interlocked.Increment(ref count) / (double)datedRegions.Length);
 			});
 			ProgressWriter.Instance.EndProgress();
 			SaveDatedRegions(SavePath, datedRegions);

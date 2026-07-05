@@ -109,7 +109,7 @@ public abstract class DbRoot
 				dr.AddTile(dt.Tile);
 			}
 
-			double c = Interlocked.Add(ref count, 1);
+			double c = Interlocked.Increment(ref count);
 			progress.Report(c / regionTiles.Length);
 		});
 		return dateTileMap.Values.OrderByDescending(v => v.Date).ToArray();

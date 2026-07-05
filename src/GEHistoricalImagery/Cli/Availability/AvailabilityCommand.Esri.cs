@@ -95,7 +95,7 @@ internal partial class AvailabilityCommand
 		{
 			var datesOnLayer = datesOnLayers[i];
 			datedRegions[i] = await wayBack.GetDatedRegionAsync(datesOnLayer, mercAoi);
-			double c = Interlocked.Add(ref count, 1);
+			double c = Interlocked.Increment(ref count);
 			ProgressWriter.Instance.ReportProgress(c / datesOnLayers.Length);
 		});
 		ProgressWriter.Instance.EndProgress();
@@ -124,7 +124,7 @@ internal partial class AvailabilityCommand
 			{
 				region.Flatten();
 			}
-			ProgressWriter.Instance.ReportProgress(Interlocked.Add(ref count, 1) / (double)layerGroups.Length);
+			ProgressWriter.Instance.ReportProgress(Interlocked.Increment(ref count) / (double)layerGroups.Length);
 		});
 
 		ProgressWriter.Instance.EndProgress();
@@ -167,7 +167,7 @@ internal partial class AvailabilityCommand
 			{
 				allRegions.Add(layersWithDateMatches[0]);
 			}
-			ProgressWriter.Instance.ReportProgress(Interlocked.Add(ref count, 1) / (double)layers.Length);
+			ProgressWriter.Instance.ReportProgress(Interlocked.Increment(ref count) / (double)layers.Length);
 		}
 		ProgressWriter.Instance.EndProgress();
 		return allRegions.ToArray();

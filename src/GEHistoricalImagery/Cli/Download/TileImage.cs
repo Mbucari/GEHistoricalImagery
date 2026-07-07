@@ -5,18 +5,14 @@ namespace GEHistoricalImagery.Cli.Download;
 
 internal class TileImage : IDisposable
 {
-	private int BandCount { get; }
-	private int RasterX { get; }
-	private int RasterY { get; }
+	public int BandCount { get; }
+	public int RasterX { get; }
+	public int RasterY { get; }
 	private byte[]? ImageBytes;
 	private byte[]? MaskBand;
 	public TileImage(Dataset tile)
+		: this(tile?.RasterXSize ?? throw new ArgumentNullException(nameof(tile)), tile.RasterYSize, tile.RasterCount)
 	{
-		ArgumentNullException.ThrowIfNull(tile, nameof(tile));
-		BandCount = tile.RasterCount;
-		RasterX = tile.RasterXSize;
-		RasterY = tile.RasterYSize;		
-		ImageBytes = ArrayPool<byte>.Shared.Rent(RasterX * RasterY * BandCount);
 		tile.ReadRaster(0, 0, RasterX, RasterY, ImageBytes, RasterX, RasterY, BandCount, null, BandCount, RasterX * BandCount, 1);
 	}
 
@@ -33,6 +29,7 @@ internal class TileImage : IDisposable
 
 	public Dataset ToDataset()
 	{
+		ObjectDisposedException.ThrowIf(ImageBytes is null, this);
 		using var tifDriver = Gdal.GetDriverByName("MEM");
 		var memDataset = tifDriver.Create("", RasterX, RasterY, BandCount, DataType.GDT_Byte, null);
 		memDataset.WriteRaster(0, 0, RasterX, RasterY, ImageBytes, RasterX, RasterY, BandCount, null, BandCount, RasterX * BandCount, 1);

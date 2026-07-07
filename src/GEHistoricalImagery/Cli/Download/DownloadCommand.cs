@@ -146,7 +146,7 @@ internal partial class DownloadCommand : FileDownloadVerb
 	private static Dataset OpenDataset(byte[] jpgBytes)
 	{
 		const GDAL_OF openOptions = GDAL_OF.RASTER | GDAL_OF.INTERNAL | GDAL_OF.READONLY;
-		string memFile = $"/vsimem/{Guid.NewGuid()}.jpeg";
+		string memFile = $"/vsimem/{Guid.NewGuid():n}.jpeg";
 
 		try
 		{
@@ -195,7 +195,6 @@ internal partial class DownloadCommand : FileDownloadVerb
 	}
 
 	private const int TILE_SIZE = 256;
-	private const int NUM_BANDS = 3;
 	private static Dataset ResizeTile(ITile gotTile, Dataset gotDataset, ITile tile)
 	{
 		var dimScale = 1 << (tile.Level - gotTile.Level);
@@ -210,7 +209,7 @@ internal partial class DownloadCommand : FileDownloadVerb
 			(ystart, yend) = (TILE_SIZE - yend, TILE_SIZE - ystart);
 
 		using var image = new TileImage(gotDataset);
-		using var enlarged = new TileImage(TILE_SIZE, TILE_SIZE, NUM_BANDS);
+		using var enlarged = new TileImage(TILE_SIZE, TILE_SIZE, image.BandCount);
 
 		for (int xr = xstart, xw = 0; xr < xend; xr++, xw += dimScale)
 		{

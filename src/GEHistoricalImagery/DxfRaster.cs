@@ -124,7 +124,7 @@ internal class DxfRaster
 					break;
 			}
 		}
-		DxfField GetNext() => new() { Code = int.Parse(Lines[index++]), Value = ref Lines[index++] };
+		DxfField GetNext() => new DxfField(int.Parse(Lines[index++]), ref Lines[index++]);
 	}
 
 	private static string UnicodeToEscapedAscii(string input)
@@ -132,7 +132,7 @@ internal class DxfRaster
 		var sb = new StringBuilder();
 		foreach (var c in input)
 		{
-			if (c <= 127)
+			if (c <= sbyte.MaxValue)
 			{
 				sb.Append(c);
 			}
@@ -160,13 +160,13 @@ internal class DxfRaster
 		return center + (-0.5 * (v + h)) + width * h;
 	}
 
-	private ref struct DxfField
+	private readonly ref struct DxfField(int code, ref string value)
 	{
-		public int Code;
-		public ref string Value;
+		public readonly int Code = code;
+		public readonly ref string Value = ref value;
 	}
 
-	private record struct Vector2(double X, double Y)
+	private readonly record struct Vector2(double X, double Y)
 	{
 		public static Vector2 operator +(Vector2 a, Vector2 b) => new Vector2(a.X + b.X, a.Y + b.Y);
 		public static Vector2 operator *(double s, Vector2 a) => new Vector2(a.X * s, a.Y * s);

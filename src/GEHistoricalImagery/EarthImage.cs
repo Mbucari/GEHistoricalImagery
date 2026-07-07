@@ -155,7 +155,7 @@ internal class EarthImage<TSource> : IDisposable where TSource : IGeoCoordinate<
 			var dxfWriter = new DxfRaster();
 			try
 			{
-				dxfWriter.SetRaster(path, saved.RasterXSize, saved.RasterYSize, geoTransform);
+				dxfWriter.SetRaster(Path.GetFileName(path), saved.RasterXSize, saved.RasterYSize, geoTransform);
 				dxfWriter.Save(dxfFilename);
 			}
 			catch

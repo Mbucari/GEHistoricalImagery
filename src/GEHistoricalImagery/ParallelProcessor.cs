@@ -4,7 +4,7 @@ namespace GEHistoricalImagery;
 
 internal class ParallelProcessor<TResult>
 {
-	private int _parallelism;
+	private volatile int _parallelism;
 	public int Parallelism
 	{
 		get => _parallelism;
@@ -28,43 +28,22 @@ internal class ParallelProcessor<TResult>
 
 	public async IAsyncEnumerable<TResult> EnumerateResults(IEnumerable<Task<TResult>> generator, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		Task<TResult>?[] tasks = new Task<TResult>[Parallelism];
-		int taskCount = 0;
-
+		HashSet<Task<TResult>> tasks = new(Parallelism);
 		foreach (var t in generator)
 		{
-			int newParallelism;
-
-			while (taskCount >= (newParallelism = Parallelism) && !cancellationToken.IsCancellationRequested)
+			tasks.Add(t);
+			while (tasks.Count >= Parallelism)
 				yield return await popOne();
-
-			if (cancellationToken.IsCancellationRequested)
-				yield break;
-
-			if (tasks.Length != newParallelism)
-			{
-				var newTasks = new Task<TResult>[newParallelism];
-				Array.Copy(tasks, 0, newTasks, 0, taskCount);
-				tasks = newTasks;
-			}
-
-			if (taskCount < tasks.Length)
-				pushOne(t);
 		}
 
-		while (taskCount > 0 && !cancellationToken.IsCancellationRequested)
+		while (tasks.Count > 0)
 			yield return await popOne();
-
-		void pushOne(Task<TResult> task)
-			=> tasks[taskCount++] = task;
 
 		async Task<TResult> popOne()
 		{
-			var completedTask = await Task.WhenAny(tasks.OfType<Task<TResult>>());
-			var completedIndex = Array.IndexOf(tasks, completedTask);
-			tasks[completedIndex] = null;
-			taskCount--;
-			(tasks[completedIndex], tasks[taskCount]) = (tasks[taskCount], tasks[completedIndex]);
+			cancellationToken.ThrowIfCancellationRequested();
+			Task<TResult> completedTask = await Task.WhenAny(tasks);
+			tasks.Remove(completedTask);
 			return completedTask.Result;
 		}
 	}
